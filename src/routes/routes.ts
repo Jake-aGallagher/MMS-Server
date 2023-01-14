@@ -1,19 +1,22 @@
-import express from'express';
+import express from 'express';
 const router = express.Router();
 
-
 import * as usersController from '../controllers/users';
-import * as jobsController from '../controllers/jobs'
+import * as propertiesController from '../controllers/properties';
+import * as jobsController from '../controllers/jobs';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 //Auth
-router.get('/check-auth', checkAuth)
+router.get('/check-auth', checkAuth);
 
 //Users
-router.get('/all-users', usersController.getAllUsers)
-router.post('/users/login', usersController.login)
+router.get('/all-users', usersController.getAllUsers);
+router.post('/users/login', usersController.login);
+
+//Properties
+router.get('/properties/all-properties', authorised, propertiesController.getAllProperties);
 
 //Jobs
-router.get('/jobs/all-jobs',authorised, jobsController.getAllJobs)
+router.get('/jobs/all-jobs', authorised, jobsController.getAllJobs);
 
 export default router;
