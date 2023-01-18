@@ -60,3 +60,26 @@ export async function findById(id: number) {
     return data[0];
 }
 
+export async function postUser(body: { username: string; first: string; last: string }, hashedPassword: string, authLevel: number) {
+    const username = body.username;
+    const first = body.first;
+    const last = body.last;
+    const password = hashedPassword;
+    const auth = authLevel;
+
+    const response = await db.execute(
+        `INSERT INTO
+          users
+          (
+              username,
+              first_name,
+              last_name,
+              password,
+              authority
+          )
+      VALUES
+          (?,?,?,?,?);`,
+        [username, first, last, password, auth]
+    );
+    return response[0];
+}

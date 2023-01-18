@@ -14,6 +14,7 @@ export function authorised(req: Request, res: Response, next: NextFunction) {
             req.userId = decoded.userId;
         }
     } catch (err) {
+        console.log(err)
         res.status(401).json({ message: 'Authorisation failed' });
     }
     if (!decoded) {
@@ -47,6 +48,7 @@ export async function checkAuth(req: Request, res: Response, next: NextFunction)
             res.status(401).json({ message: 'Authorisation failed' });
         }
     } catch (err) {
+        console.log(err)
         res.status(401).json({ message: 'Authorisation failed' });
     }
 }

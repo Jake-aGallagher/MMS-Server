@@ -19,12 +19,43 @@ export async function login(req: Request, res: Response) {
             const match = await bcrypt.compare(password, user[0].password);
             if (match) {
                 const token = jwt.sign({ userId: user[0].id }, process.env.SECRET!, { expiresIn: '1h' });
-                res.status(200).json({ response: { passedValidation: true, user: user[0], token: token} });
+                res.status(200).json({ response: { passedValidation: true, user: user[0], token: token } });
             } else {
                 res.status(401).json({ response: { passedValidation: false } });
             }
         } catch (err) {
+            console.log(err)
             res.status(401).json({ response: { passedValidation: false } });
         }
+    }
+}
+
+export async function postUser(req: Request, res: Response) {
+    let authLevel = 1;
+    switch (req.body.auth) {
+        case 'Admin':
+            authLevel = 4;
+            break;
+        case 'Manager':
+            authLevel = 3;
+            break;
+        case 'Engineer':
+            authLevel = 2;
+            break;
+        default:
+            authLevel = 1;
+    }
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 12);
+        const response = await Users.postUser(req.body, hashedPassword, authLevel);
+        // @ts-ignore
+        if (response.affectedRows === 1) {
+            res.status(201).json({created: true});
+        } else {
+            res.status(500).json({created: false})
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({created: false});
     }
 }
