@@ -19,9 +19,11 @@ router.get('/properties/all-properties', authorised, propertiesController.getAll
 router.get('/properties/:propertyid', authorised, propertiesController.getPropertyDetails);
 router.get('/properties/:propertyid/assigned-users', authorised, propertiesController.getAssignedUsers);
 router.get('/properties/:propertyid/users-for-assigning', authorised, propertiesController.getUsersForAssign);
+router.get('/properties/last-property/:userid', propertiesController.getLastProperty);
 router.post('/properties', authorised, propertiesController.postProperty);
 router.put('/properties', authorised, propertiesController.editProperty);
 router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
+router.put('/properties/Last-property', propertiesController.setLastProperty);
 
 //Jobs
 router.get('/jobs/all-jobs', authorised, jobsController.getAllJobs);

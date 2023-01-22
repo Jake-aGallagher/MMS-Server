@@ -1,8 +1,21 @@
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket, FieldPacket } from 'mysql2';
 import db from '../database/database';
 
+interface PropertyBasics extends RowDataPacket {
+    id: number;
+    name: string;
+}
+
+interface Property extends PropertyBasics {
+    type: string;
+    address: string;
+    city: string;
+    county: string;
+    postcode: string;
+}
+
 export async function getAllProperties() {
-    const response = await db.execute(
+    const response: [Property[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              name,
@@ -17,6 +30,38 @@ export async function getAllProperties() {
             name;`
     );
     return response[0];
+}
+
+export async function getAllPropertiesForUser(userId: number) {
+    const data: [PropertyBasics[], FieldPacket[]] = await db.execute(
+        `SELECT 
+            properties.id,
+            properties.name
+        FROM 
+            properties
+        INNER JOIN
+            property_users ON
+            (
+                properties.id = property_users.property_id
+            )
+        WHERE
+            property_users.user_id = ?;`,
+        [userId]
+    );
+    return data[0];
+}
+
+export async function getLastPropertyForUser(userId: number) {
+    const data: [PropertyBasics[], FieldPacket[]] = await db.execute(
+        `SELECT 
+            property_id
+        FROM 
+            last_property
+        WHERE
+            user_id = ?;`,
+        [userId]
+    );
+    return data[0];
 }
 
 export async function getPropertyDetails(propertyId: number) {
@@ -47,7 +92,7 @@ interface Assigned extends AssignedBasic {
     first_name: string;
     last_name: string;
     authority: number;
-  }
+}
 
 export async function getAssignedUsers(propertyId: number) {
     const data = await db.execute<Assigned[]>(
@@ -101,7 +146,7 @@ export async function getAssignedUserIds(propertyId: number) {
     return data[0];
 }
 
-export async function postProperty(body: { name: string; type: string; address: string, city: string, county: string, postcode: string }) {
+export async function postProperty(body: { name: string; type: string; address: string; city: string; county: string; postcode: string }) {
     const name = body.name;
     const type = body.type;
     const address = body.address;
@@ -127,7 +172,7 @@ export async function postProperty(body: { name: string; type: string; address: 
     return response[0];
 }
 
-export async function editProperty(body: {id: string, name: string; type: string; address: string, city: string, county: string, postcode: string}) {
+export async function editProperty(body: { id: string; name: string; type: string; address: string; city: string; county: string; postcode: string }) {
     const id = parseInt(body.id);
     const name = body.name;
     const type = body.type;
@@ -192,4 +237,23 @@ export async function setAssignedUsers(propertyNo: number, userIds: UsersList[])
         const response = await db.execute(sql);
         return response[0];
     }
+}
+
+export async function postLastProperty(body: {userId: string, propertyId: string}) {
+    const userId = body.userId;
+    const propertyId = body.propertyId;
+    const response = await db.execute(
+        `INSERT INTO
+            last_property
+            (
+                user_id,
+                property_id
+            )
+        VALUES
+            (?,?)
+        ON DUPLICATE KEY UPDATE
+            property_id = ?;`,
+        [userId, propertyId, propertyId]
+    );
+    return response[0];
 }

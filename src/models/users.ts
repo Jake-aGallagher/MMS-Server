@@ -83,3 +83,16 @@ export async function postUser(body: { username: string; first: string; last: st
     );
     return response[0];
 }
+
+export async function getUserLevel(userId: number) {
+    const response: [User[], FieldPacket[]]  = await db.execute(
+        `SELECT
+            authority
+        FROM
+            users
+        WHERE
+            id = ?;`,
+        [userId]
+    );
+    return response[0][0].authority;
+}
