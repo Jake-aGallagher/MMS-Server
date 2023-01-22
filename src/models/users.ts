@@ -11,7 +11,7 @@ interface User extends RowDataPacket {
 }
 
 export async function getAllUsers() {
-    const data = await db.execute(
+    const data = await db.execute<User[]>(
         `SELECT
              id,
              username,

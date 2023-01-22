@@ -4,8 +4,13 @@ import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
 export async function getAllUsers(req: Request, res: Response) {
-    const allUsers = await Users.getAllUsers();
-    res.status(200).json(allUsers);
+    try {
+        const allUsers = await Users.getAllUsers();
+        res.status(200).json(allUsers);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
 }
 
 export async function login(req: Request, res: Response) {
@@ -24,7 +29,7 @@ export async function login(req: Request, res: Response) {
                 res.status(401).json({ response: { passedValidation: false } });
             }
         } catch (err) {
-            console.log(err)
+            console.log(err);
             res.status(401).json({ response: { passedValidation: false } });
         }
     }
@@ -50,12 +55,12 @@ export async function postUser(req: Request, res: Response) {
         const response = await Users.postUser(req.body, hashedPassword, authLevel);
         // @ts-ignore
         if (response.affectedRows === 1) {
-            res.status(201).json({created: true});
+            res.status(201).json({ created: true });
         } else {
-            res.status(500).json({created: false})
+            res.status(500).json({ created: false });
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({created: false});
+        console.log(err);
+        res.status(500).json({ created: false });
     }
 }

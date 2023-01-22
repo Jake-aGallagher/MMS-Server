@@ -17,8 +17,11 @@ router.post('/users', authorised, usersController.postUser);
 //Properties
 router.get('/properties/all-properties', authorised, propertiesController.getAllProperties);
 router.get('/properties/:propertyid', authorised, propertiesController.getPropertyDetails);
+router.get('/properties/:propertyid/assigned-users', authorised, propertiesController.getAssignedUsers);
+router.get('/properties/:propertyid/users-for-assigning', authorised, propertiesController.getUsersForAssign);
 router.post('/properties', authorised, propertiesController.postProperty);
 router.put('/properties', authorised, propertiesController.editProperty);
+router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
 
 //Jobs
 router.get('/jobs/all-jobs', authorised, jobsController.getAllJobs);
