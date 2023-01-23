@@ -4,6 +4,7 @@ const router = express.Router();
 import * as usersController from '../controllers/users';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
+import * as assetsController from '../controllers/assets';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 //Auth
@@ -23,10 +24,13 @@ router.get('/properties/last-property/:userid', propertiesController.getLastProp
 router.post('/properties', authorised, propertiesController.postProperty);
 router.put('/properties', authorised, propertiesController.editProperty);
 router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
-router.put('/properties/Last-property', propertiesController.setLastProperty);
+router.put('/properties/Last-property', authorised, propertiesController.setLastProperty);
 
 //Jobs
 router.get('/jobs/all-jobs', authorised, jobsController.getAllJobs);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
+
+// Assets
+router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
 
 export default router;
