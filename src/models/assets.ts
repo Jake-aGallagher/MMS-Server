@@ -50,3 +50,46 @@ export async function getAssetTree(propertyId: number, rootId: number) {
     );
     return data[0];
 }
+
+export async function insertAsset(parentId: number, propertyId: number, name: string) {
+    const data = await db.execute(
+        `INSERT INTO
+            assets
+            (
+                parent_id,
+                property_id,
+                name
+            )
+        VALUES
+            (
+                ?,
+                ?,
+                ?
+            );`,
+        [parentId, propertyId, name]
+    );
+    return data[0];
+}
+
+export async function renameAsset(id: number, name: string) {
+    const data = await db.execute(
+        `UPDATE
+            assets
+        SET
+            name = ?
+        WHERE
+            id = ?;`,
+        [name, id]
+    );
+    return data[0];
+}
+
+export async function deleteAsset(assetIds: number[]) {
+    const data = await db.execute(
+        `DELETE FROM
+            assets
+        WHERE
+            id IN (${assetIds});`
+    );
+    return data[0];
+}

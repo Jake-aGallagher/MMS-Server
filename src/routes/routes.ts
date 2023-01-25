@@ -32,5 +32,8 @@ router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
+router.post('/asset', authorised, assetsController.insertAsset);
+router.put('/asset', authorised, assetsController.renameAsset);
+router.delete('/asset', authorised,  assetsController.deleteAsset);
 
 export default router;

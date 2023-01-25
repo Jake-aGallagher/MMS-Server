@@ -86,3 +86,13 @@ export async function getJobDetails(id: number) {
     );
     return data[0];
 } */
+
+export async function deleteJobs(idsForDelete: number[]) {
+    const response = await db.execute(
+        `DELETE FROM
+            jobs
+        WHERE
+            asset IN (${idsForDelete});`
+    )
+    return response[0]
+}
