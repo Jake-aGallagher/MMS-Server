@@ -87,6 +87,30 @@ export async function getJobDetails(id: number) {
     return data[0];
 } */
 
+export async function getRecentJobs(idsForAssets: number[]) {
+    const data = await db.execute(
+        `SELECT
+            jobs.id,
+            IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
+            jobs.type,
+            jobs.title,
+            DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
+            jobs.completed
+        FROM
+            jobs
+        LEFT JOIN assets ON
+            assets.id = jobs.asset
+        WHERE
+            asset IN (${idsForAssets})
+        ORDER BY
+            jobs.created
+        DESC
+        LIMIT
+            5;`
+    )
+    return data[0]
+}
+
 export async function deleteJobs(idsForDelete: number[]) {
     const response = await db.execute(
         `DELETE FROM

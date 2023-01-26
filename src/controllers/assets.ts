@@ -50,6 +50,58 @@ export async function getAssetTree(req: Request, res: Response) {
     }
 }
 
+export async function getAsset(req: Request, res: Response) {
+    const assetId = parseInt(req.params.assetid);
+
+    try {
+        const assetDetails = await Assets.getAssetById(assetId);
+        if (assetDetails.length > 0) {
+            const propertyId = assetDetails[0].property_id;
+
+            const idsForRecents = <number[]>[];
+            const getChildren = await AssetRelations.getChildren(assetId);
+            getChildren.forEach((i) => {
+                idsForRecents.push(i.descendant_id);
+            });
+
+            const recentJobs = await Jobs.getRecentJobs(idsForRecents);
+            const children = await Assets.getAssetTree(propertyId, assetId);
+
+            function makeTree(list: Asset[]) {
+                var map: { [key: number]: number } = {},
+                    roots = [],
+                    asset,
+                    i;
+
+                for (i = 0; i < list.length; i += 1) {
+                    map[list[i].id] = i;
+                }
+
+                for (i = 0; i < list.length; i += 1) {
+                    asset = list[i];
+                    if (asset.parentId != assetId) {
+                        if (list[map[asset.parentId]].children === null) {
+                            list[map[asset.parentId]].children = [];
+                        } // @ts-ignore
+                        list[map[asset.parentId]].children.push(asset);
+                    } else {
+                        asset.children = [];
+                        roots.push(asset);
+                    }
+                }
+                return roots;
+            }
+            const tree = makeTree(children);
+            res.status(200).json({ assetDetails, recentJobs, tree });
+        } else {
+            res.status(500).json({ message: 'Request failed' });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
 export async function insertAsset(req: Request, res: Response) {
     const parentId = parseInt(req.body.parentId);
     const propertyId = parseInt(req.body.propertyId);
