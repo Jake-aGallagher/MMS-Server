@@ -27,7 +27,7 @@ router.put('/properties/assign-users', authorised, propertiesController.setAssig
 router.put('/properties/Last-property', authorised, propertiesController.setLastProperty);
 
 //Jobs
-router.get('/jobs/all-jobs', authorised, jobsController.getAllJobs);
+router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
 
 // Assets
