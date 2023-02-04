@@ -11,7 +11,7 @@ interface User extends RowDataPacket {
 }
 
 export async function getAllUsers() {
-    const data = await db.execute<User[]>(
+    const data: [User[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              username,
@@ -47,7 +47,6 @@ export async function findById(id: number) {
         `SELECT
              id,
              username,
-             password,
              first_name AS first,
              last_name AS last,
              authority
@@ -56,6 +55,22 @@ export async function findById(id: number) {
         WHERE
             id = ?;`,
         [id]
+    );
+    return data[0];
+}
+
+export async function getUsersByIds(userIds: number[]) {
+    const data: [User[], FieldPacket[]] = await db.execute(
+        `SELECT
+             id,
+             username,
+             first_name AS first,
+             last_name AS last,
+             authority
+        FROM
+            users
+        WHERE
+            id IN (${userIds});`
     );
     return data[0];
 }

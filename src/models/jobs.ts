@@ -1,4 +1,5 @@
 import db from '../database/database';
+import { FieldPacket, RowDataPacket } from 'mysql2/typings/mysql';
 
 export async function getAllJobs(propertyId: number) {
     const data = await db.execute(
@@ -26,7 +27,7 @@ export async function getAllJobs(propertyId: number) {
             ORDER BY
                 jobs.id
             DESC;`,
-            [propertyId]
+        [propertyId]
     );
     return data[0];
 }
@@ -84,8 +85,162 @@ export async function getRecentJobs(idsForAssets: number[]) {
         DESC
         LIMIT
             5;`
-    )
-    return data[0]
+    );
+    return data[0];
+}
+
+interface TimeDetails extends RowDataPacket {
+    id: number;
+    time: number;
+}
+
+export async function getLoggedTimeDetails(jobId: number) {
+    const data: [TimeDetails[], FieldPacket[]]  = await db.execute(
+        `SELECT
+            user_id AS id,
+            time
+        FROM
+            logged_time
+        WHERE
+            job_id = ?;`,
+        [jobId]
+    );
+    return data[0];
+}
+
+interface PostJob {
+    propertyNumber: string;
+    assetNumber: string;
+    type: string;
+    title: string;
+    description: string;
+    urgency: string;
+    reporter: string;
+}
+
+interface UrgObj {
+    number: string;
+    duration: string;
+}
+
+export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
+    const property_id = body.propertyNumber;
+    const asset = body.assetNumber;
+    const type = body.type;
+    const title = body.title;
+    const description = body.description;
+    const urgency = body.urgency;
+    const reporter = body.reporter;
+    const numOfUrg = parseInt(urgencyObj[0].number);
+    const lengthOfUrg = urgencyObj[0].duration;
+
+    const response = await db.execute(
+        `INSERT INTO
+            jobs
+            (
+                property_id,
+                asset,
+                type,
+                title,
+                description,
+                created,
+                urgency,
+                required_comp_date,
+                reporter
+            )
+        VALUES
+            (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?);`,
+        [property_id, asset, type, title, description, urgency, reporter]
+    );
+    return response[0];
+}
+
+interface UpdateAndComplete {
+    id: number;
+    status: string;
+    description: string;
+    notes: string;
+    logged_time: number;
+    complete: boolean;
+}
+
+export async function updateAndComplete(body: UpdateAndComplete) {
+    const id = body.id;
+    const status = body.status;
+    const description = body.description;
+    const notes = body.notes;
+    const logged_time = body.logged_time;
+    const completed = body.complete ? 1 : 0;
+
+    const response = await db.execute(
+        `UPDATE
+            jobs
+        SET
+            status = ?,
+            description = ?,
+            notes = ?,
+            logged_time = ?,
+            completed = ?,
+            comp_date = ${body.complete ? 'NOW()' : "'0000-00-00 00:00:00'"}
+        WHERE
+            id = ?;`,
+        [status, description, notes, logged_time, completed, id]
+    );
+    return response[0];
+}
+
+export async function setTimeDetails(details: [{ id: number; time: number }], jobId: number) {
+    console.log('details', details);
+    const res = await db.execute(
+        `DELETE FROM
+            logged_time
+        WHERE
+            job_id = ?;`,
+        [jobId]
+    );
+    if (res) {
+        let sql = `
+            INSERT INTO
+                logged_time
+                (
+                    user_id,
+                    job_id,
+                    time
+                )
+            VALUES`;
+
+        for (let i = 0; i < details.length; i++) {
+            if (i == details.length - 1) {
+                sql += `(${details[i].id}, ${jobId}, ${details[i].time})`;
+            } else {
+                sql += `(${details[i].id}, ${jobId}, ${details[i].time}),`;
+            }
+        }
+        sql += `;`;
+
+        const response = await db.execute(sql);
+        return response[0];
+    }
+}
+
+interface UpdateNotes {
+    id: number;
+    notes: string;
+}
+export async function updateNotes(body: UpdateNotes) {
+    const id = body.id;
+    const notes = body.notes;
+
+    const response = await db.execute(
+        `UPDATE
+            jobs
+        SET
+            notes = ?
+        WHERE
+            id = ?;`,
+        [notes, id]
+    );
+    return response[0];
 }
 
 export async function deleteJobs(idsForDelete: number[]) {
@@ -94,6 +249,6 @@ export async function deleteJobs(idsForDelete: number[]) {
             jobs
         WHERE
             asset IN (${idsForDelete});`
-    )
-    return response[0]
+    );
+    return response[0];
 }

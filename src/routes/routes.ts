@@ -5,6 +5,8 @@ import * as usersController from '../controllers/users';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
 import * as assetsController from '../controllers/assets';
+import * as sparesController from '../controllers/spares';
+import * as enumsController from '../controllers/enums';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 //Auth
@@ -29,12 +31,23 @@ router.put('/properties/Last-property', authorised, propertiesController.setLast
 //Jobs
 router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
+router.get('/jobs/:propertyid/:jobid/update', authorised, jobsController.getJobUpdate);
+router.post('/jobs', authorised, jobsController.postJob);
+router.put('/jobs/update', authorised, jobsController.updateAndComplete);
+router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
 router.post('/asset', authorised, assetsController.insertAsset);
 router.put('/asset', authorised, assetsController.renameAsset);
-router.delete('/asset', authorised,  assetsController.deleteAsset);
+router.delete('/asset', authorised, assetsController.deleteAsset);
+
+// Spares
+router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
+router.get('/spares/:spareid', authorised, sparesController.getSpare);
+
+// Enums
+router.get('/enums/create-job', enumsController.getEnumsForCreateJob);
 
 export default router;

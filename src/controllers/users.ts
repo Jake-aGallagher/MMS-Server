@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as Users from '../models/users';
+import * as Properties from '../models/properties';
 import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
@@ -36,6 +37,7 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function postUser(req: Request, res: Response) {
+    console.log(req.body.auth)
     let authLevel = 1;
     switch (req.body.auth) {
         case 'Admin':
@@ -53,6 +55,11 @@ export async function postUser(req: Request, res: Response) {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 12);
         const response = await Users.postUser(req.body, hashedPassword, authLevel);
+        if (authLevel === 4) {
+            const propertyIds = await Properties.getAllPropertyIds()
+            // @ts-ignore
+            const AdminPropAssign = Properties.postAdminAssignments(response.insertId, propertyIds)
+        }
         // @ts-ignore
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });

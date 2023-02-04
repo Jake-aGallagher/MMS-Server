@@ -1,8 +1,11 @@
 import { RowDataPacket, FieldPacket } from 'mysql2';
 import db from '../database/database';
 
-interface PropertyBasics extends RowDataPacket {
+interface PropertyId extends RowDataPacket {
     id: number;
+}
+
+interface PropertyBasics extends PropertyId {
     name: string;
 }
 
@@ -12,6 +15,16 @@ interface Property extends PropertyBasics {
     city: string;
     county: string;
     postcode: string;
+}
+
+export async function getAllPropertyIds() {
+    const data: [PropertyId[], FieldPacket[]] = await db.execute(
+        `SELECT
+             id
+        FROM
+            properties;`
+    );
+    return data[0];
 }
 
 export async function getAllProperties() {
@@ -210,10 +223,17 @@ interface UsersList {
 export async function setAssignedUsers(propertyNo: number, userIds: UsersList[]) {
     const res = await db.execute(
         `DELETE
+            property_users
         FROM
             property_users
+        INNER JOIN users ON
+            (
+                property_users.user_id = users.id
+            )
         WHERE
-            Property_id = ?;`,
+            Property_id = ?
+        AND
+            users.authority IN (1, 2, 3);`,
         [propertyNo]
     );
     if (res) {
@@ -255,5 +275,27 @@ export async function postLastProperty(body: {userId: string, propertyId: string
             property_id = ?;`,
         [userId, propertyId, propertyId]
     );
+    return response[0];
+}
+
+export async function postAdminAssignments(userId: number, propertyIds: {id: number}[]) {
+    let sql = 
+        `INSERT INTO
+            property_users
+            (
+                property_id,
+                user_id
+            )
+        VALUES`;
+    
+    for (let i = 0; i < propertyIds.length; i++) {
+        if (i < (propertyIds.length - 1)) {
+            sql += `('${propertyIds[i].id}', '${userId}'),`;
+        } else {
+            sql += `('${propertyIds[i].id}', '${userId}');`;
+        }
+    } 
+
+    const response = await db.execute(sql);
     return response[0];
 }
