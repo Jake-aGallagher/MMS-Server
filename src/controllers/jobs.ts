@@ -76,7 +76,6 @@ export async function postJob(req: Request, res: Response) {
         const urgencyReq = req.body.urgency;
         const urgency = await Enums.getUrgencyPayload(urgencyReq);
         const response = await Jobs.postJob(req.body, urgency);
-        console.log(response)
         // @ts-ignore
         if (response.affectedRows == '1') {
             // @ts-ignore

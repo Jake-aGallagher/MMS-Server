@@ -31,6 +31,28 @@ export async function insertChild(assetId: number, propertyId: number, assetPare
     return data[0];
 }
 
+export async function insertRoot(assetId: number, propertyId: number) {
+    const data = await db.execute(
+        `INSERT INTO
+            assets_relations
+            (
+                ancestor_id,
+                descendant_id,
+                depth,
+                property_id
+            )
+        VALUES
+            (
+                '0',
+                ?,
+                '1',
+                ?
+            );`,
+        [assetId, propertyId]
+    );
+    return data[0];
+}
+
 export async function insertSelf(assetId: number, propertyId: number) {
     const data = await db.execute(
         `INSERT INTO
