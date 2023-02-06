@@ -27,6 +27,24 @@ export async function getAllSpares(propertyId: number) {
     return data[0];
 }
 
+export async function getAllSparesBasic(propertyId: number) {
+    const data = await db.execute(
+        `SELECT 
+            id,
+            part_no,
+            name
+        FROM 
+            spares
+        WHERE
+            property_id = ?
+        ORDER BY
+            part_no
+        DESC;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
 export async function getSpares(id: number) {
     const data = await db.execute(
         `SELECT 
@@ -50,6 +68,26 @@ export async function getSpares(id: number) {
         WHERE
             id = ?;`,
         [id]
+    );
+    return data[0];
+}
+
+export async function getUsedSpares(jobId: number) {
+    const data = await db.execute(
+        `SELECT 
+            spares.id,
+            spares_used.spare_id AS part_no,
+            spares.name,
+            spares_used.num_used
+        FROM 
+            spares_used
+        INNER JOIN spares ON
+            (
+                spares_used.spare_id = spares.id
+            )
+        WHERE
+            job_id = ?;`,
+        [jobId]
     );
     return data[0];
 }

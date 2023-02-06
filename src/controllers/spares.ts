@@ -22,3 +22,16 @@ export async function getSpare(req: Request, res: Response) {
         res.status(500).json({ message: 'Request failed' });
     }
 }
+
+export async function getSparesForUse(req: Request, res: Response) {
+    try {
+        const propertyId = parseInt(req.params.propertyId);
+        const jobId = parseInt(req.params.jobId);
+        const spares = await Spares.getAllSparesBasic(propertyId);
+        const usedSpares = await Spares.getUsedSpares(jobId)
+        res.status(200).json({spares, usedSpares});
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
