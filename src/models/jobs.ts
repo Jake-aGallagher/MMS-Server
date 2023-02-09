@@ -190,7 +190,6 @@ export async function updateAndComplete(body: UpdateAndComplete) {
 }
 
 export async function setTimeDetails(details: [{ id: number; time: number }], jobId: number) {
-    console.log('details', details);
     const res = await db.execute(
         `DELETE FROM
             logged_time
