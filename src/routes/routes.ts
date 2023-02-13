@@ -46,7 +46,11 @@ router.delete('/asset', authorised, assetsController.deleteAsset);
 // Spares
 router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
 router.get('/spares/:spareid', authorised, sparesController.getSpare);
-router.get('/spares-for-use/:propertyId/:jobId', authorised, sparesController.getSparesForUse);
+router.get('/spares-for-use/:propertyid/:jobId', authorised, sparesController.getSparesForUse);
+router.get('/spares/:propertyid/notes', authorised, sparesController.getSparesNotes);
+router.get('/spares/note/:noteid', authorised, sparesController.getNote);
+router.post('/spares/notes', authorised, sparesController.postNote);
+router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums
 router.get('/enums/create-job', enumsController.getEnumsForCreateJob);

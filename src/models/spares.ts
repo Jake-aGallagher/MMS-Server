@@ -121,6 +121,40 @@ export async function getUsedSpares(jobId: number) {
     return data[0];
 }
 
+export async function getSparesNotes(propertyId: number) {
+    const data = await db.execute(
+        `SELECT
+            id,
+            title,
+            content,
+            DATE_FORMAT(created, "%d/%m/%y") AS 'created_date'
+        FROM
+            spares_notes
+        WHERE
+            property_id = ?
+        ORDER BY
+            created
+        DESC;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
+export async function getNote(noteId: number) {
+    const data = await db.execute(
+        `SELECT
+            id,
+            title,
+            content
+        FROM
+            spares_notes
+        WHERE
+            id = ?;`,
+        [noteId]
+    );
+    return data[0];
+}
+
 interface NewSpares {
     id: number;
     part_no: string;
@@ -202,4 +236,48 @@ export async function updateStock(stockArray: { id: number; property_id: number;
         }
     });
     return errors;
+}
+
+export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
+    let response
+    if (body.noteId === 0) {
+        response = await db.execute(
+            `INSERT INTO
+                spares_notes
+                (
+                    property_id,
+                    title,
+                    content,
+                    created
+                )
+            VALUES
+                (?,?,?,NOW());`,
+            [body.propertyId, body.title, body.note]
+        );
+    } else {
+        response = await db.execute(
+            `UPDATE
+                spares_notes
+            SET
+                title = ?,
+                content = ?,
+                created = NOW()
+            WHERE
+                id = ?;`,
+            [body.title, body.note, body.noteId]
+        );
+    }
+
+    return response[0];
+}
+
+export async function deleteNote(body: { id: string }) {
+    const response = await db.execute(
+        `DELETE FROM
+            spares_notes
+        WHERE
+            id = ?;`,
+        [body.id]
+    );
+    return response[0];
 }
