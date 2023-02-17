@@ -121,6 +121,52 @@ export async function getUsedSpares(jobId: number) {
     return data[0];
 }
 
+interface recentlyUsed extends RowDataPacket {
+    spare_id: number;
+    total_used: number;
+}
+
+export async function getUsedRecently(propertyId: number, monthsOfData: number) {
+    const data: [recentlyUsed[], FieldPacket[]] = await db.execute(
+        `SELECT
+            spare_id,
+            SUM(num_used) AS total_used
+        FROM
+            spares_used
+        WHERE
+            property_id = ?
+        AND
+            date_used > DATE_SUB(NOW(), INTERVAL ? MONTH)
+        GROUP BY
+            spare_id`,
+        [propertyId, monthsOfData]
+    );
+    return data[0];
+}
+
+interface ExtendedStock extends CurrentStock {
+    part_no: string;
+    name: string;
+    supplier: string;
+}
+
+export async function getSparesRemaining(propertyId: number) {
+    const data: [ExtendedStock[], FieldPacket[]] = await db.execute(
+        `SELECT
+            id,
+            part_no,
+            name,
+            supplier,
+            quant_remain
+        FROM
+            spares
+        WHERE
+            property_id = ?;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
 export async function getSparesNotes(propertyId: number) {
     const data = await db.execute(
         `SELECT
@@ -162,7 +208,7 @@ interface NewSpares {
     num_used: number;
 }
 
-export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number) {
+export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
     let sql = `
     INSERT INTO
         spares_used
@@ -170,15 +216,16 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number) {
             spare_id,
             job_id,
             num_used,
-            date_used
+            date_used,
+            property_id
         )
     VALUES`;
 
     for (let i = 0; i < sparesUsed.length; i++) {
         if (i == sparesUsed.length - 1) {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW())`;
+            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id})`;
         } else {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW()),`;
+            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id}),`;
         }
     }
     sql += `;`;
@@ -187,7 +234,7 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number) {
     return response[0];
 }
 
-export async function updateUsedSpares(sparesUsed: NewSpares[], jobId: number) {
+export async function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
     let sql = `
     INSERT INTO
         spares_used
@@ -195,15 +242,16 @@ export async function updateUsedSpares(sparesUsed: NewSpares[], jobId: number) {
             spare_id,
             job_id,
             num_used,
-            date_used
+            date_used,
+            property_id
         )
     VALUES`;
 
     for (let i = 0; i < sparesUsed.length; i++) {
         if (i == sparesUsed.length - 1) {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW())`;
+            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id})`;
         } else {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW()),`;
+            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id}),`;
         }
     }
 
@@ -239,7 +287,7 @@ export async function updateStock(stockArray: { id: number; property_id: number;
 }
 
 export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
-    let response
+    let response;
     if (body.noteId === 0) {
         response = await db.execute(
             `INSERT INTO

@@ -106,20 +106,20 @@ interface NewStock {
 
 export async function updateAndComplete(req: Request, res: Response) {
     try {
-        const jobId = req.body.id;
-        const propertyId = req.body.propertyId;
+        const jobId = parseInt(req.body.id);
+        const propertyId = parseInt(req.body.propertyId);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         const response = await Jobs.updateAndComplete(req.body);
         
         if (newSpares.length > 0) {
-            const prevSpares = await Spares.getUsedSpares(parseInt(jobId));
+            const prevSpares = await Spares.getUsedSpares(jobId);
             const stockArray = <{ id: number; used: number }[]>[];
             if (prevSpares.length === 0) {
                 newSpares.forEach((spare) => {
                     stockArray.push({id: spare.id, used: spare.num_used})
                 })
                 if (newSpares.length > 0) {
-                    await Spares.insertUsedSpares(newSpares, parseInt(jobId));
+                    await Spares.insertUsedSpares(newSpares, jobId, propertyId);
                 }
             } else {
                 // compare difference
@@ -140,7 +140,7 @@ export async function updateAndComplete(req: Request, res: Response) {
                 });
                 // insert the diff array (Update replace)
                 if (diffArray.length > 0) {
-                    await Spares.updateUsedSpares(diffArray ,jobId)
+                    await Spares.updateUsedSpares(diffArray ,jobId, propertyId)
                 }
             }
             // insert stock array changes
@@ -163,7 +163,7 @@ export async function updateAndComplete(req: Request, res: Response) {
 
         if (req.body.logged_time_details.length > 0) {
             // @ts-ignore
-            const timeDetails = await Jobs.setTimeDetails(req.body.logged_time_details, parseInt(req.body.id));
+            const timeDetails = await Jobs.setTimeDetails(req.body.logged_time_details, jobId);
         }
 
         // @ts-ignore
