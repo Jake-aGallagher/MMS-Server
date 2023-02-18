@@ -190,6 +190,19 @@ export async function getSuppliers(propertyId: number) {
     return data[0];
 }
 
+export async function getSupplierInfo(supplierId: number) {
+    const data = await db.execute(
+        `SELECT
+            *
+        FROM
+            suppliers
+        WHERE
+            id = ?;`,
+        [supplierId]
+    );
+    return data[0];
+}
+
 export async function getSparesNotes(propertyId: number) {
     const data = await db.execute(
         `SELECT
@@ -309,6 +322,55 @@ export async function updateStock(stockArray: { id: number; property_id: number;
     return errors;
 }
 
+interface AddEditSupplier {
+    propertyId: number;
+    id: number;
+    name: string;
+    website: string;
+    phone: string;
+    primContact: string;
+    primContactPhone: string;
+    address: string;
+    city: string;
+    county: string;
+    postcode: string;
+    supplies: string;
+}
+
+export async function addSupplier(s: AddEditSupplier) {
+    const response = await db.execute(
+        `INSERT INTO
+            suppliers
+            (name, website, phone, prim_contact, prim_contact_phone, address, city, county, postcode, supplies, property_id)
+        VALUES
+            (?,?,?,?,?,?,?,?,?,?,?);`,
+        [s.name, s.website, s.phone, s.primContact, s.primContactPhone, s.address, s.city, s.county, s.postcode, s.supplies, s.propertyId]
+    );
+    return response[0];
+}
+
+export async function editSupplier(s: AddEditSupplier) {
+    const response = await db.execute(
+        `UPDATE
+            suppliers
+        SET
+            name = ?,
+            website = ?,
+            phone = ?,
+            prim_contact = ?,
+            prim_contact_phone = ?,
+            address = ?,
+            city = ?,
+            county = ?,
+            postcode = ?,
+            supplies = ?
+        WHERE
+            id = ?;`,
+        [s.name, s.website, s.phone, s.primContact, s.primContactPhone, s.address, s.city, s.county, s.postcode, s.supplies, s.id]
+    );
+    return response[0];
+}
+
 export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
     let response;
     if (body.noteId === 0) {
@@ -339,6 +401,17 @@ export async function postSparesNote(body: { propertyId: string; title: string; 
         );
     }
 
+    return response[0];
+}
+
+export async function deleteSupplier(body: { id: string}) {
+    const response = await db.execute(
+        `DELETE FROM
+            suppliers
+        WHERE
+            id = ?;`,
+        [body.id]
+    );
     return response[0];
 }
 

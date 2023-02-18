@@ -121,6 +121,38 @@ export async function getSuppliers(req: Request, res: Response) {
     }
 }
 
+export async function getSuplierInfo(req: Request, res: Response) {
+    try {
+        const supplierId = parseInt(req.params.supplierid);
+        const supplierDetails = await Spares.getSupplierInfo(supplierId);
+        res.status(200).json(supplierDetails);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function addEditSupplier(req: Request, res: Response) {
+    try {
+        const supplierId = parseInt(req.body.id);
+        let response;
+        if (supplierId === 0) {
+            response = await Spares.addSupplier(req.body)
+        } else {
+            response = await Spares.editSupplier(req.body)
+        }
+        // @ts-ignore
+        if (response.affectedRows == '1') {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ created: false });
+    }
+}
+
 export async function postNote(req: Request, res: Response) {
     try {
         const response = await Spares.postSparesNote(req.body);
@@ -133,6 +165,21 @@ export async function postNote(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ created: false });
+    }
+}
+
+export async function deleteSupplier(req: Request, res: Response) {
+    try {
+        const deleted = await Spares.deleteSupplier(req.body);
+        // @ts-ignore
+        if (deleted.affectedRows > 0) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
     }
 }
 

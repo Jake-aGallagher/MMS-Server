@@ -51,7 +51,10 @@ router.get('/spares/:propertyid/notes', authorised, sparesController.getSparesNo
 router.get('/spares/note/:noteid', authorised, sparesController.getNote);
 router.get('/spares/:propertyid/warnings', authorised, sparesController.getSparesWarnings);
 router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
+router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
 router.post('/spares/notes', authorised, sparesController.postNote);
+router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
+router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums
