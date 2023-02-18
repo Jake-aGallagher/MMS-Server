@@ -49,7 +49,8 @@ router.get('/spares/:spareid', authorised, sparesController.getSpare);
 router.get('/spares-for-use/:propertyid/:jobId', authorised, sparesController.getSparesForUse);
 router.get('/spares/:propertyid/notes', authorised, sparesController.getSparesNotes);
 router.get('/spares/note/:noteid', authorised, sparesController.getNote);
-router.get('/spares/:propertyid/warnings', authorised, sparesController.getSparesWarnings)
+router.get('/spares/:propertyid/warnings', authorised, sparesController.getSparesWarnings);
+router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
 router.post('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
 

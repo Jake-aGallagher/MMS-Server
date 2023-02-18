@@ -85,27 +85,36 @@ export async function getSparesWarnings(req: Request, res: Response) {
                     name: item.name,
                     supplier: item.supplier,
                     quant_remain: item.quant_remain,
-                    monthly_usage: data?.total_used ? Math.round(((data.total_used / monthsOfData) + Number.EPSILON) * 100) / 100 : 'Unknown',
+                    monthly_usage: data?.total_used ? Math.round((data.total_used / monthsOfData + Number.EPSILON) * 100) / 100 : 'Unknown',
                 });
-
             } else {
                 if (data) {
-                    if ((item.quant_remain / (data.total_used / monthsOfData)) <= 1) {
+                    if (item.quant_remain / (data.total_used / monthsOfData) <= 1) {
                         warningsArray.push({
                             id: item.id,
                             part_no: item.part_no,
                             name: item.name,
                             supplier: item.supplier,
                             quant_remain: item.quant_remain,
-                            monthly_usage: Math.round(((data.total_used / monthsOfData) + Number.EPSILON) * 100) / 100,
+                            monthly_usage: Math.round((data.total_used / monthsOfData + Number.EPSILON) * 100) / 100,
                         });
-
                     }
                 }
             }
         });
 
         res.status(200).json({ outArray, warningsArray });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getSuppliers(req: Request, res: Response) {
+    try {
+        const propertyId = parseInt(req.params.propertyid);
+        const suppliers = await Spares.getSuppliers(propertyId);
+        res.status(200).json(suppliers);
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

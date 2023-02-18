@@ -167,6 +167,29 @@ export async function getSparesRemaining(propertyId: number) {
     return data[0];
 }
 
+export async function getSuppliers(propertyId: number) {
+    const data = await db.execute(
+        `SELECT
+            id,
+            name,
+            website,
+            phone,
+            prim_contact,
+            prim_contact_phone,
+            address,
+            city,
+            county,
+            postcode,
+            supplies
+        FROM
+            suppliers
+        WHERE
+            property_id = ?;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
 export async function getSparesNotes(propertyId: number) {
     const data = await db.execute(
         `SELECT
