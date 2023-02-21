@@ -53,6 +53,7 @@ router.get('/spares/:propertyid/warnings', authorised, sparesController.getSpare
 router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
 router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
 router.post('/spares/notes', authorised, sparesController.postNote);
+router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
 router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
 router.delete('/spares/note', authorised, sparesController.deleteNote);

@@ -371,6 +371,56 @@ export async function editSupplier(s: AddEditSupplier) {
     return response[0];
 }
 
+interface AddEditSpare {
+    partNo: string;
+    manPartNo: string;
+    name: string;
+    manName: string;
+    description: string;
+    notes: string;
+    location: string;
+    quantRemaining: number;
+    supplier: string;
+    cost: number;
+    propertyId: number;
+    id: number;
+}
+
+export async function addSpare(s: AddEditSpare) {
+    const response = await db.execute(
+        `INSERT INTO
+            spares
+            (part_no, man_part_no, name, man_name, description, notes, location, quant_remain, supplier, cost, property_id)
+        VALUES
+            (?,?,?,?,?,?,?,?,?,?,?);`,
+        [s.partNo, s.manPartNo, s.name, s.manName, s.description, s.notes, s.location, s.quantRemaining, s.supplier, s.cost, s.propertyId]
+    );
+    return response[0];
+}
+
+export async function editSpare(s: AddEditSpare) {
+    const response = await db.execute(
+        `UPDATE
+            spares
+        SET
+            part_no = ?,
+            man_part_no = ?,
+            name = ?,
+            man_name = ?,
+            description = ?,
+            notes = ?,
+            location = ?,
+            quant_remain = ?,
+            supplier = ?,
+            cost = ?,
+            property_id = ?
+        WHERE
+            id = ?;`,
+        [s.partNo, s.manPartNo, s.name, s.manName, s.description, s.notes, s.location, s.quantRemaining, s.supplier, s.cost, s.propertyId, s.id]
+    );
+    return response[0];
+}
+
 export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
     let response;
     if (body.noteId === 0) {

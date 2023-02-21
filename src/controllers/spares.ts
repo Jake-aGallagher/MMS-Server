@@ -153,6 +153,27 @@ export async function addEditSupplier(req: Request, res: Response) {
     }
 }
 
+export async function addEditSpare(req: Request, res: Response) {
+    try {
+        const spareId = parseInt(req.body.id);
+        let response;
+        if (spareId === 0) {
+            response = await Spares.addSpare(req.body)
+        } else {
+            response = await Spares.editSpare(req.body)
+        }
+        // @ts-ignore
+        if (response.affectedRows == '1') {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ created: false });
+    }
+}
+
 export async function postNote(req: Request, res: Response) {
     try {
         const response = await Spares.postSparesNote(req.body);
