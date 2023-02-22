@@ -174,6 +174,23 @@ export async function addEditSpare(req: Request, res: Response) {
     }
 }
 
+export async function adjustSpareStock(req: Request, res: Response) {
+    try {
+        const spareId = parseInt(req.body.id);
+        const newStockLevel = parseInt(req.body.newStock)
+        const response = await Spares.adjustSpareStock(spareId, newStockLevel)
+        // @ts-ignore
+        if (response.affectedRows == '1') {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ created: false });
+    }
+}
+
 export async function postNote(req: Request, res: Response) {
     try {
         const response = await Spares.postSparesNote(req.body);
@@ -192,6 +209,22 @@ export async function postNote(req: Request, res: Response) {
 export async function deleteSupplier(req: Request, res: Response) {
     try {
         const deleted = await Spares.deleteSupplier(req.body);
+        // @ts-ignore
+        if (deleted.affectedRows > 0) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
+    }
+}
+
+export async function deleteSparesItem(req: Request, res: Response) {
+    try {
+        const deleted = await Spares.deleteSparesItem(req.body);
+        Spares.deleteSparesUsed(req.body);
         // @ts-ignore
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });

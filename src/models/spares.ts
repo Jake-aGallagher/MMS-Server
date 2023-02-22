@@ -421,6 +421,19 @@ export async function editSpare(s: AddEditSpare) {
     return response[0];
 }
 
+export async function adjustSpareStock(id: number, newStockLevel: number) {
+    const response = await db.execute(
+        `UPDATE
+            spares
+        SET
+            quant_remain = ?
+        WHERE
+            id = ?;`,
+        [newStockLevel, id]
+    );
+    return response[0];
+}
+
 export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
     let response;
     if (body.noteId === 0) {
@@ -463,6 +476,28 @@ export async function deleteSupplier(body: { id: string}) {
         [body.id]
     );
     return response[0];
+}
+
+export async function deleteSparesItem(body: { id: string}) {
+    const response = await db.execute(
+        `DELETE FROM
+            spares
+        WHERE
+            id = ?;`,
+        [body.id]
+    );
+    return response[0];
+}
+
+export async function deleteSparesUsed(body: { id: string}) {
+    db.execute(
+        `DELETE FROM
+            spares_used
+        WHERE
+            spare_id = ?;`,
+        [body.id]
+    );
+    return;
 }
 
 export async function deleteNote(body: { id: string }) {
