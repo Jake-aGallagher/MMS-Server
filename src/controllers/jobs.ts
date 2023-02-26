@@ -110,14 +110,14 @@ export async function updateAndComplete(req: Request, res: Response) {
         const propertyId = parseInt(req.body.propertyId);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         const response = await Jobs.updateAndComplete(req.body);
-        
+
         if (newSpares.length > 0) {
             const prevSpares = await Spares.getUsedSpares(jobId);
             const stockArray = <{ id: number; used: number }[]>[];
             if (prevSpares.length === 0) {
                 newSpares.forEach((spare) => {
-                    stockArray.push({id: spare.id, used: spare.num_used})
-                })
+                    stockArray.push({ id: spare.id, used: spare.num_used });
+                });
                 if (newSpares.length > 0) {
                     await Spares.insertUsedSpares(newSpares, jobId, propertyId);
                 }
@@ -140,24 +140,26 @@ export async function updateAndComplete(req: Request, res: Response) {
                 });
                 // insert the diff array (Update replace)
                 if (diffArray.length > 0) {
-                    await Spares.updateUsedSpares(diffArray ,jobId, propertyId)
+                    await Spares.updateUsedSpares(diffArray, jobId, propertyId);
                 }
             }
             // insert stock array changes
-            const stockChangeIds = <number[]>[]
+            const stockChangeIds = <number[]>[];
             stockArray.forEach((item) => {
-                stockChangeIds.push(item.id)
-            })
-            const currStock = await Spares.getCurrentSpecificStock(stockChangeIds, propertyId)
-            const newStock = <NewStock[]>[]
-            stockArray.forEach( (item) => {
-                const data = currStock.find((x) => x.id === item.id);
-                if (data) {
-                    newStock.push({id: item.id, property_id: propertyId, quant_remain: data.quant_remain - item.used})
+                stockChangeIds.push(item.id);
+            });
+            if (stockChangeIds.length > 0) {
+                const currStock = await Spares.getCurrentSpecificStock(stockChangeIds, propertyId);
+                const newStock = <NewStock[]>[];
+                stockArray.forEach((item) => {
+                    const data = currStock.find((x) => x.id === item.id);
+                    if (data) {
+                        newStock.push({ id: item.id, property_id: propertyId, quant_remain: data.quant_remain - item.used });
+                    }
+                });
+                if (newStock.length > 0) {
+                    await Spares.updateStock(newStock);
                 }
-            })
-            if (newStock.length > 0) {
-                await Spares.updateStock(newStock)
             }
         }
 
