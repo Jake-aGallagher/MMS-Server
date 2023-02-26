@@ -22,8 +22,8 @@ router.get('/properties/all-properties', authorised, propertiesController.getAll
 router.get('/properties/:propertyid', authorised, propertiesController.getPropertyDetails);
 router.put('/properties', authorised, propertiesController.addEditProperty);
 //// Property Users
-router.get('/properties/:propertyid/assigned-users', authorised, propertiesController.getAssignedUsers);
-router.get('/properties/:propertyid/users-for-assigning', authorised, propertiesController.getUsersForAssign);
+router.get('/properties/assigned-users/:propertyid', authorised, propertiesController.getAssignedUsers);
+router.get('/properties/users-for-assigning/:propertyid', authorised, propertiesController.getUsersForAssign);
 router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
 //// Last Property
 router.get('/properties/last-property/:userid', propertiesController.getLastProperty);
@@ -32,7 +32,7 @@ router.put('/properties/Last-property', authorised, propertiesController.setLast
 // Jobs
 router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
-router.get('/jobs/:propertyid/:jobid/update', authorised, jobsController.getJobUpdate);
+router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobUpdate);
 router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
@@ -58,9 +58,9 @@ router.get('/spares/supplier/:supplierid', authorised, sparesController.getSupli
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
 router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
 //// Spares Warnings
-router.get('/spares/:propertyid/warnings', authorised, sparesController.getSparesWarnings);
+router.get('/spares/warnings/:propertyid', authorised, sparesController.getSparesWarnings);
 //// Spares Notes
-router.get('/spares/:propertyid/notes', authorised, sparesController.getSparesNotes);
+router.get('/spares/notes/:propertyid', authorised, sparesController.getSparesNotes);
 router.get('/spares/note/:noteid', authorised, sparesController.getNote);
 router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
