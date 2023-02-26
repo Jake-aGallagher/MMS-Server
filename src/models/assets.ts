@@ -116,6 +116,19 @@ export async function renameAsset(id: number, name: string) {
     return data[0];
 }
 
+export async function editAssetNote(id: number, note: string) {
+    const data = await db.execute(
+        `UPDATE
+            assets
+        SET
+            notes = ?
+        WHERE
+            id = ?;`,
+        [note, id]
+    );
+    return data[0];
+}
+
 export async function deleteAsset(assetIds: number[]) {
     const data = await db.execute(
         `DELETE FROM

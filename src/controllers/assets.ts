@@ -162,6 +162,22 @@ export async function renameAsset(req: Request, res: Response) {
     }
 }
 
+export async function EditAssetNote(req: Request, res: Response) {
+    try {
+        const assetId = parseInt(req.body.id);
+        const response = await Assets.editAssetNote(assetId, req.body.note)
+        // @ts-ignore
+        if (response.affectedRows == '1') {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ created: false });
+    }
+}
+
 export async function deleteAsset(req: Request, res: Response) {
     const id = parseInt(req.body.id);
     const deleteType = req.body.deleteType;
