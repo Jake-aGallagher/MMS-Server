@@ -9,26 +9,27 @@ import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
 import { authorised, checkAuth } from '../middleware/authentication';
 
-//Auth
+// Auth
 router.get('/check-auth', checkAuth);
 
-//Users
+// Users
 router.get('/all-users', usersController.getAllUsers);
 router.post('/users/login', usersController.login);
 router.post('/users', authorised, usersController.postUser);
 
-//Properties
+// Properties
 router.get('/properties/all-properties', authorised, propertiesController.getAllProperties);
 router.get('/properties/:propertyid', authorised, propertiesController.getPropertyDetails);
+router.put('/properties', authorised, propertiesController.addEditProperty);
+//// Property Users
 router.get('/properties/:propertyid/assigned-users', authorised, propertiesController.getAssignedUsers);
 router.get('/properties/:propertyid/users-for-assigning', authorised, propertiesController.getUsersForAssign);
-router.get('/properties/last-property/:userid', propertiesController.getLastProperty);
-router.post('/properties', authorised, propertiesController.postProperty);
-router.put('/properties', authorised, propertiesController.editProperty);
 router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
+//// Last Property
+router.get('/properties/last-property/:userid', propertiesController.getLastProperty);
 router.put('/properties/Last-property', authorised, propertiesController.setLastProperty);
 
-//Jobs
+// Jobs
 router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
 router.get('/jobs/:propertyid/:jobid/update', authorised, jobsController.getJobUpdate);
@@ -47,17 +48,20 @@ router.delete('/asset', authorised, assetsController.deleteAsset);
 router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
 router.get('/spares/:spareid', authorised, sparesController.getSpare);
 router.get('/spares-for-use/:propertyid/:jobId', authorised, sparesController.getSparesForUse);
-router.get('/spares/:propertyid/notes', authorised, sparesController.getSparesNotes);
-router.get('/spares/note/:noteid', authorised, sparesController.getNote);
-router.get('/spares/:propertyid/warnings', authorised, sparesController.getSparesWarnings);
-router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
-router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
-router.post('/spares/notes', authorised, sparesController.postNote);
 router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/adjust-stock', authorised, sparesController.adjustSpareStock);
+router.delete('/spares/spares-item', authorised, sparesController.deleteSparesItem);
+//// Spares Suppliers
+router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
+router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
 router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
-router.delete('/spares/spares-item', authorised, sparesController.deleteSparesItem);
+//// Spares Warnings
+router.get('/spares/:propertyid/warnings', authorised, sparesController.getSparesWarnings);
+//// Spares Notes
+router.get('/spares/:propertyid/notes', authorised, sparesController.getSparesNotes);
+router.get('/spares/note/:noteid', authorised, sparesController.getNote);
+router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums

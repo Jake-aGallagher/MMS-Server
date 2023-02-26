@@ -163,7 +163,7 @@ export async function postProperty(body: { name: string; type: string; address: 
     const name = body.name;
     const type = body.type;
     const address = body.address;
-    const city = body.address;
+    const city = body.city;
     const county = body.county;
     const postcode = body.postcode;
 

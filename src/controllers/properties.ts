@@ -112,30 +112,20 @@ export async function getLastProperty(req: Request, res: Response) {
     }
 }
 
-export async function postProperty(req: Request, res: Response) {
+export async function addEditProperty(req: Request, res: Response) {
     try {
-        const response = await Properties.postProperty(req.body);
-        // @ts-ignore
-        const asset = await Assets.insertAsset(0, response.insertId, req.body.name)
-        // @ts-ignore
-        const root = await AssetRelations.insertRoot(asset.insertId, response.insertId,)
-        // @ts-ignore
-        const self = await AssetRelations.insertSelf(asset.insertId, response.insertId)
-        // @ts-ignore
-        if (response.affectedRows === 1) {
-            res.status(201).json({ created: true });
+        let response;
+        if (req.body.id > 0) {
+            response = await Properties.editProperty(req.body);
         } else {
-            res.status(500).json({ created: false });
+            response = await Properties.postProperty(req.body);
+            // @ts-ignore
+            const asset = await Assets.insertAsset(0, response.insertId, req.body.name);
+            // @ts-ignore
+            const root = await AssetRelations.insertRoot(asset.insertId, response.insertId);
+            // @ts-ignore
+            const self = await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ created: false });
-    }
-}
-
-export async function editProperty(req: Request, res: Response) {
-    try {
-        const response = await Properties.editProperty(req.body);
         // @ts-ignore
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -166,7 +156,7 @@ export async function setAssignedUsers(req: Request, res: Response) {
 export async function setLastProperty(req: Request, res: Response) {
     try {
         const response = await Properties.postLastProperty(req.body);
-         // @ts-ignore
+        // @ts-ignore
         if (response.affectedRows > 0) {
             res.status(201).json({ created: true });
         } else {
