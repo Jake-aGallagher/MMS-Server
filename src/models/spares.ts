@@ -371,6 +371,131 @@ export async function editSupplier(s: AddEditSupplier) {
     return response[0];
 }
 
+interface Delivery extends RowDataPacket {
+    name: string;
+    supplier: string;
+    courier: string;
+    placed: string;
+    due: string;
+    id: number;
+}
+
+export async function getDeliveries(propertyId: number) {
+    const data: [Delivery[], FieldPacket[]] = await db.execute(
+        `SELECT
+            deliveries.id,
+            deliveries.name,
+            suppliers.name AS supplier,
+            deliveries.courier,
+            DATE_FORMAT(deliveries.placed, "%d/%m/%y") AS placed,
+            DATE_FORMAT(deliveries.due, "%d/%m/%y") AS due
+        FROM
+            deliveries
+        INNER JOIN suppliers ON
+        (
+            suppliers.id = deliveries.supplier
+        )
+        WHERE
+            deliveries.property_id = ?;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
+interface DeliveryItem extends RowDataPacket {
+    delivery_id: number;
+    spare_id: number;
+    quantity: number;
+    part_no: string;
+    name: string;
+}
+
+export async function getDeliveryItems(deliveryIds: number[]) {
+    const data: [DeliveryItem[], FieldPacket[]] = await db.execute(
+        `SELECT
+            delivery_items.delivery_id,
+            delivery_items.spare_id,
+            delivery_items.quantity,
+            spares.part_no,
+            spares.name
+        FROM
+            delivery_items
+        INNER JOIN spares ON
+        (
+            spares.id = delivery_items.spare_id
+        )
+        WHERE
+            delivery_id IN (${deliveryIds});`,
+        [deliveryIds]
+    );
+    return data[0];
+}
+
+export async function addDelivery(d: Delivery) {
+    const response = await db.execute(
+        `INSERT INTO
+            deliveries
+            (name, supplier, courier, placed, due, property_id)
+        VALUES
+            (?, ?, ?, ?, ?, ?);`,
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId]
+    );
+    return response[0];
+}
+
+interface DeliveryItems {
+    id: number;
+    part_no: string;
+    name: string;
+    num_used: number;
+}
+
+export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[]) {
+    let sql = `
+    INSERT INTO
+        delivery_items
+        (
+            delivery_id,
+            spare_id,
+            quantity
+        )
+    VALUES`;
+
+    for (let i = 0; i < items.length; i++) {
+        sql += `(${deliveryId}, ${items[i].id}, ${items[i].num_used})`;
+        if (i !== items.length - 1) {
+            sql += ','
+        }
+    }
+
+    sql += `;`;
+
+    const response = await db.execute(sql);
+    return response[0];
+}
+
+export async function editDelivery(d: Delivery) {
+    const response = await db.execute(
+        `UPDATE
+            suppliers
+        SET
+            name = ?,
+            website = ?,
+            phone = ?,
+            prim_contact = ?,
+            prim_contact_phone = ?,
+            address = ?,
+            city = ?,
+            county = ?,
+            postcode = ?,
+            supplies = ?
+        WHERE
+            id = ?;`,
+        []
+    );
+    return response[0];
+}
+
 interface AddEditSpare {
     partNo: string;
     manPartNo: string;
@@ -467,7 +592,7 @@ export async function postSparesNote(body: { propertyId: string; title: string; 
     return response[0];
 }
 
-export async function deleteSupplier(body: { id: string}) {
+export async function deleteSupplier(body: { id: string }) {
     const response = await db.execute(
         `DELETE FROM
             suppliers
@@ -478,7 +603,7 @@ export async function deleteSupplier(body: { id: string}) {
     return response[0];
 }
 
-export async function deleteSparesItem(body: { id: string}) {
+export async function deleteSparesItem(body: { id: string }) {
     const response = await db.execute(
         `DELETE FROM
             spares
@@ -489,7 +614,7 @@ export async function deleteSparesItem(body: { id: string}) {
     return response[0];
 }
 
-export async function deleteSparesUsed(body: { id: string}) {
+export async function deleteSparesUsed(body: { id: string }) {
     db.execute(
         `DELETE FROM
             spares_used
