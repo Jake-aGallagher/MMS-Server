@@ -17,6 +17,8 @@
   },
   "exclude": [
     "dist",
-    "./prettier.config.js"
+    "./prettier.config.js",
+    "./vitest.config.ts",
+    "vitest"
   ]
 }
