@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-//import { AuthType } from '../requestTypings';
+//import { AuthType } from '../types/requestTypings';
 import * as jwt from 'jsonwebtoken';
 import * as Users from '../models/users';
 
-//Checks Authorrization for routes, don't think this is necessary ones check auth is implimented
+//Checks Authorisation for routing
 export function authorised(req: Request, res: Response, next: NextFunction) {
     const token = req.get('authorisation')!.split(' ')[1];
     let decoded: any;
@@ -12,15 +12,13 @@ export function authorised(req: Request, res: Response, next: NextFunction) {
         if (decoded) {
             // @ts-ignore
             req.userId = decoded.userId;
+            next();
+        } else {
+            res.status(401).json({ message: 'Authorisation failed' });
         }
     } catch (err) {
         console.log(err)
         res.status(401).json({ message: 'Authorisation failed' });
-    }
-    if (!decoded) {
-        res.status(401).json({ message: 'Authorisation failed' });
-    } else {
-        next();
     }
 }
 
