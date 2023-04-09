@@ -4,6 +4,10 @@ import * as Enums from '../models/enums';
 import * as Properties from '../models/properties';
 import * as Users from '../models/users';
 import * as Spares from '../models/spares';
+import makeIdList from '../helpers/makeIdList';
+import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
+import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
+import { NewSpares } from '../types/spares';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {
@@ -16,33 +20,15 @@ export async function getAllJobs(req: Request, res: Response) {
     }
 }
 
-interface TimeDetailsFull {
-    id: number;
-    time: number;
-    first: string;
-    last: string;
-}
-
 export async function getJobDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const jobDetails = await Jobs.getJobDetails(id);
         const timeDetails = await Jobs.getLoggedTimeDetails(id);
-        let userIds = <number[]>[];
         if (timeDetails.length > 0) {
-            timeDetails.forEach((pair) => {
-                userIds.push(pair.id);
-            });
+            const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(userIds);
-            let timeDetailsFull = <TimeDetailsFull[]>[];
-            timeDetails.map((pair) => {
-                const i = users.findIndex((j) => j.id === pair.id);
-                if (i > -1) {
-                    timeDetailsFull.push({ id: pair.id, time: pair.time, first: users[i].first, last: users[i].last });
-                } else {
-                    timeDetailsFull.push({ id: pair.id, time: pair.time, first: 'Unknown', last: 'Unknown' });
-                }
-            });
+            const timeDetailsFull = timeDetailsArray(timeDetails, users)
             res.status(200).json({ jobDetails, timeDetails: timeDetailsFull });
         } else {
             res.status(200).json({ jobDetails });
@@ -91,83 +77,18 @@ export async function postJob(req: Request, res: Response) {
     }
 }
 
-interface NewSpares {
-    id: number;
-    part_no: string;
-    name: string;
-    num_used: number;
-}
-
-interface NewStock {
-    id: number;
-    property_id: number;
-    quant_remain: number;
-}
-
 export async function updateAndComplete(req: Request, res: Response) {
     try {
         const jobId = parseInt(req.body.id);
         const propertyId = parseInt(req.body.propertyId);
-        const newSpares = <NewSpares[]>req.body.sparesUsed;
         const response = await Jobs.updateAndComplete(req.body);
-
+        const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            const prevSpares = await Spares.getUsedSpares(jobId);
-            const stockArray = <{ id: number; used: number }[]>[];
-            if (prevSpares.length === 0) {
-                newSpares.forEach((spare) => {
-                    stockArray.push({ id: spare.id, used: spare.num_used });
-                });
-                if (newSpares.length > 0) {
-                    await Spares.insertUsedSpares(newSpares, jobId, propertyId);
-                }
-            } else {
-                // compare difference
-                const diffArray = <NewSpares[]>[];
-                newSpares.forEach((newSpare) => {
-                    const data = prevSpares.find((x) => x.id === newSpare.id);
-                    if (data) {
-                        const difference = newSpare.num_used - data.num_used;
-                        if (difference != 0) {
-                            diffArray.push({ id: newSpare.id, part_no: newSpare.part_no, name: newSpare.name, num_used: newSpare.num_used });
-                            stockArray.push({ id: newSpare.id, used: difference });
-                        }
-                    } else {
-                        // add straight to diff array as it doesn't previously exist
-                        diffArray.push({ id: newSpare.id, part_no: newSpare.part_no, name: newSpare.name, num_used: newSpare.num_used });
-                        stockArray.push({ id: newSpare.id, used: newSpare.num_used });
-                    }
-                });
-                // insert the diff array (Update replace)
-                if (diffArray.length > 0) {
-                    await Spares.updateUsedSpares(diffArray, jobId, propertyId);
-                }
-            }
-            // insert stock array changes
-            const stockChangeIds = <number[]>[];
-            stockArray.forEach((item) => {
-                stockChangeIds.push(item.id);
-            });
-            if (stockChangeIds.length > 0) {
-                const currStock = await Spares.getCurrentSpecificStock(stockChangeIds, propertyId);
-                const newStock = <NewStock[]>[];
-                stockArray.forEach((item) => {
-                    const data = currStock.find((x) => x.id === item.id);
-                    if (data) {
-                        newStock.push({ id: item.id, property_id: propertyId, quant_remain: data.quant_remain - item.used });
-                    }
-                });
-                if (newStock.length > 0) {
-                    await Spares.updateStock(newStock);
-                }
-            }
+            updateSparesForJob(jobId, propertyId, newSpares)
         }
-
         if (req.body.logged_time_details.length > 0) {
-            // @ts-ignore
-            const timeDetails = await Jobs.setTimeDetails(req.body.logged_time_details, jobId);
+            Jobs.setTimeDetails(req.body.logged_time_details, jobId);
         }
-
         // @ts-ignore
         if (response.affectedRows == '1') {
             res.status(201).json({ created: true });
