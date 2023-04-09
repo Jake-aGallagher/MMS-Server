@@ -1,4 +1,5 @@
-import { RowDataPacket, FieldPacket } from 'mysql2';
+import { FieldPacket } from 'mysql2';
+import { PayloadBasics } from '../types/enums';
 import db from '../database/database';
 
 export async function getUrgencyOptions() {
@@ -31,11 +32,6 @@ export async function getTypeOptions() {
             enums.list_priority;`
     );
     return data[0];
-}
-
-interface PayloadBasics extends RowDataPacket {
-    number: string;
-    duration: string;
 }
 
 export async function getUrgencyPayload(value: string) {
