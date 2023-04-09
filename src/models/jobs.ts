@@ -1,5 +1,7 @@
 import db from '../database/database';
-import { FieldPacket, RowDataPacket } from 'mysql2/typings/mysql';
+import { FieldPacket } from 'mysql2/typings/mysql';
+import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob } from '../types/jobs';
+import { UrgObj } from '../types/enums';
 
 export async function getAllJobs(propertyId: number) {
     const data = await db.execute(
@@ -89,11 +91,6 @@ export async function getRecentJobs(idsForAssets: number[]) {
     return data[0];
 }
 
-interface TimeDetails extends RowDataPacket {
-    id: number;
-    time: number;
-}
-
 export async function getLoggedTimeDetails(jobId: number) {
     const data: [TimeDetails[], FieldPacket[]]  = await db.execute(
         `SELECT
@@ -106,21 +103,6 @@ export async function getLoggedTimeDetails(jobId: number) {
         [jobId]
     );
     return data[0];
-}
-
-interface PostJob {
-    propertyNumber: string;
-    assetNumber: string;
-    type: string;
-    title: string;
-    description: string;
-    urgency: string;
-    reporter: string;
-}
-
-interface UrgObj {
-    number: string;
-    duration: string;
 }
 
 export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
@@ -153,15 +135,6 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
         [property_id, asset, type, title, description, urgency, reporter]
     );
     return response[0];
-}
-
-interface UpdateAndComplete {
-    id: number;
-    status: string;
-    description: string;
-    notes: string;
-    logged_time: number;
-    complete: boolean;
 }
 
 export async function updateAndComplete(body: UpdateAndComplete) {
@@ -222,10 +195,6 @@ export async function setTimeDetails(details: [{ id: number; time: number }], jo
     }
 }
 
-interface UpdateNotes {
-    id: number;
-    notes: string;
-}
 export async function updateNotes(body: UpdateNotes) {
     const id = body.id;
     const notes = body.notes;
