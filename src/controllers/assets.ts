@@ -1,48 +1,15 @@
-import { RowDataPacket } from 'mysql2';
 import { Request, Response } from 'express';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
 import * as Jobs from '../models/jobs';
-
-interface Asset extends RowDataPacket {
-    id: number;
-    parentId: number;
-    name: string;
-    breadcrumbs: number[];
-    children: null | [];
-}
+import makeAssetTree from '../helpers/assets/makeAssetTree';
+import makeIdList from '../helpers/makeIdList';
 
 export async function getAssetTree(req: Request, res: Response) {
     try {
         const propertyId = req.params.propertyid;
         const getAssetTree = await Assets.getAssetTree(parseInt(propertyId), 0);
-
-        function makeTree(list: Asset[]) {
-            var map: { [key: number]: number } = {},
-                roots = [],
-                asset,
-                i;
-
-            for (i = 0; i < list.length; i += 1) {
-                map[list[i].id] = i;
-            }
-
-            for (i = 0; i < list.length; i += 1) {
-                asset = list[i];
-                if (asset.parentId !== 0) {
-                    if (list[map[asset.parentId]].children === null) {
-                        list[map[asset.parentId]].children = [];
-                    } // @ts-ignore
-                    list[map[asset.parentId]].children.push(asset);
-                } else {
-                    asset.children = [];
-                    roots.push(asset);
-                }
-            }
-            return roots;
-        }
-
-        const tree = makeTree(getAssetTree);
+        const tree = makeAssetTree(getAssetTree)
         res.status(200).json(tree);
     } catch (err) {
         console.log(err);
@@ -57,41 +24,11 @@ export async function getAsset(req: Request, res: Response) {
         const assetDetails = await Assets.getAssetById(assetId);
         if (assetDetails.length > 0) {
             const propertyId = assetDetails[0].property_id;
-
-            const idsForRecents = <number[]>[];
             const getChildren = await AssetRelations.getChildren(assetId);
-            getChildren.forEach((i) => {
-                idsForRecents.push(i.descendant_id);
-            });
-
+            const idsForRecents = makeIdList(getChildren, 'descendant_id');
             const recentJobs = await Jobs.getRecentJobs(idsForRecents);
             const children = await Assets.getAssetTree(propertyId, assetId);
-
-            function makeTree(list: Asset[]) {
-                var map: { [key: number]: number } = {},
-                    roots = [],
-                    asset,
-                    i;
-
-                for (i = 0; i < list.length; i += 1) {
-                    map[list[i].id] = i;
-                }
-
-                for (i = 0; i < list.length; i += 1) {
-                    asset = list[i];
-                    if (asset.parentId != assetId) {
-                        if (list[map[asset.parentId]].children === null) {
-                            list[map[asset.parentId]].children = [];
-                        } // @ts-ignore
-                        list[map[asset.parentId]].children.push(asset);
-                    } else {
-                        asset.children = [];
-                        roots.push(asset);
-                    }
-                }
-                return roots;
-            }
-            const tree = makeTree(children);
+            const tree = makeAssetTree(children, assetId)
             res.status(200).json({ assetDetails, recentJobs, tree });
         } else {
             res.status(500).json({ message: 'Request failed' });
@@ -184,11 +121,8 @@ export async function deleteAsset(req: Request, res: Response) {
 
     try {
         // get all relations for the id to be deleted to find children
-        const idsForDelete = <number[]>[];
         const getChildren = await AssetRelations.getChildren(id);
-        getChildren.forEach((i) => {
-            idsForDelete.push(i.descendant_id);
-        });
+        const idsForDelete = makeIdList(getChildren, 'descendant_id');
 
         // delete all relations
         const deletedRelations = await AssetRelations.deleteAssetRelations(idsForDelete);
