@@ -1,21 +1,7 @@
-import { RowDataPacket, FieldPacket } from 'mysql2';
+import { FieldPacket } from 'mysql2';
+import { UserIdOnly } from '../types/users';
+import { PropertyId, PropertyBasics, Property, AssignedBasic, Assigned } from '../types/properties';
 import db from '../database/database';
-
-interface PropertyId extends RowDataPacket {
-    id: number;
-}
-
-interface PropertyBasics extends PropertyId {
-    name: string;
-}
-
-interface Property extends PropertyBasics {
-    type: string;
-    address: string;
-    city: string;
-    county: string;
-    postcode: string;
-}
 
 export async function getAllPropertyIds() {
     const data: [PropertyId[], FieldPacket[]] = await db.execute(
@@ -94,17 +80,6 @@ export async function getPropertyDetails(propertyId: number) {
         [propertyId]
     );
     return data[0];
-}
-
-interface AssignedBasic extends RowDataPacket {
-    id: number;
-}
-
-interface Assigned extends AssignedBasic {
-    username: string;
-    first_name: string;
-    last_name: string;
-    authority: number;
 }
 
 export async function getAssignedUsers(propertyId: number) {
@@ -211,16 +186,7 @@ export async function editProperty(body: { id: string; name: string; type: strin
     return response[0];
 }
 
-interface UsersList {
-    id: number;
-    username: string;
-    first_name: string;
-    last_name: string;
-    authority: number;
-    assigned: boolean;
-}
-
-export async function setAssignedUsers(propertyNo: number, userIds: UsersList[]) {
+export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]) {
     const res = await db.execute(
         `DELETE
             property_users
