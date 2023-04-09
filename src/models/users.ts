@@ -1,17 +1,9 @@
 import db from '../database/database';
-import { FieldPacket, RowDataPacket } from 'mysql2/typings/mysql';
-
-interface User extends RowDataPacket {
-    id: number;
-    username: string;
-    password: string;
-    first_name: string;
-    last_name: string;
-    authority: number;
-}
+import { FieldPacket } from 'mysql2/typings/mysql';
+import { AuthOnly, UserLongName, UserShortName, UserPassword } from '../types/users';
 
 export async function getAllUsers() {
-    const data: [User[], FieldPacket[]] = await db.execute(
+    const data: [UserLongName[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              username,
@@ -25,7 +17,7 @@ export async function getAllUsers() {
 }
 
 export async function findByUsername(username: string) {
-    const data: [User[], FieldPacket[]] = await db.execute(
+    const data: [UserPassword[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              username,
@@ -43,7 +35,7 @@ export async function findByUsername(username: string) {
 }
 
 export async function findById(id: number) {
-    const data: [User[], FieldPacket[]] = await db.execute(
+    const data: [UserShortName[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              username,
@@ -60,7 +52,7 @@ export async function findById(id: number) {
 }
 
 export async function getUsersByIds(userIds: number[]) {
-    const data: [User[], FieldPacket[]] = await db.execute(
+    const data: [UserShortName[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              username,
@@ -100,7 +92,7 @@ export async function postUser(body: { username: string; first: string; last: st
 }
 
 export async function getUserLevel(userId: number) {
-    const response: [User[], FieldPacket[]]  = await db.execute(
+    const response: [AuthOnly[], FieldPacket[]]  = await db.execute(
         `SELECT
             authority
         FROM
