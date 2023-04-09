@@ -1,13 +1,6 @@
-import { RowDataPacket, FieldPacket } from 'mysql2';
+import { FieldPacket } from 'mysql2';
+import { AssetById, Asset } from '../types/assets';
 import db from '../database/database';
-
-interface Asset extends RowDataPacket {
-    id: number;
-    parentId: number;
-    name: string;
-    breadcrumbs: number[];
-    children: null;
-}
 
 export async function getAssetTree(propertyId: number, rootId: number) {
     const data: [Asset[], FieldPacket[]] = await db.execute(
@@ -48,16 +41,6 @@ export async function getAssetTree(propertyId: number, rootId: number) {
         [propertyId, propertyId, propertyId, rootId, propertyId]
     );
     return data[0];
-}
-
-interface AssetById extends RowDataPacket {
-    id: number;
-    parent_id: number;
-    property_id: number;
-    name: string;
-    notes: string;
-    grand_parent_id: number;
-    parent_name: string;
 }
 
 export async function getAssetById(id: number) {

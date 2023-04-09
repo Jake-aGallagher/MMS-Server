@@ -1,9 +1,6 @@
-import { RowDataPacket, FieldPacket } from 'mysql2';
+import {  FieldPacket } from 'mysql2';
+import { AssetRelationBasic } from '../types/assets';
 import db from '../database/database';
-
-interface AssetRelationBasic extends RowDataPacket {
-    descendant_id: number;
-}
 
 export async function insertChild(assetId: number, propertyId: number, assetParentId: number) {
     const data = await db.execute(
