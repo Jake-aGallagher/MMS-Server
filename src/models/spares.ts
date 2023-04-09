@@ -1,4 +1,16 @@
-import { RowDataPacket, FieldPacket } from 'mysql2';
+import { FieldPacket } from 'mysql2';
+import {
+    CurrentStock,
+    UsedSpares,
+    recentlyUsed,
+    ExtendedStock,
+    NewSpares,
+    AddEditSupplier,
+    Delivery,
+    DeliveryItem,
+    DeliveryItems,
+    AddEditSpare,
+} from '../types/spares';
 import db from '../database/database';
 
 export async function getAllSpares(propertyId: number) {
@@ -73,11 +85,6 @@ export async function getSpares(id: number) {
     return data[0];
 }
 
-interface CurrentStock extends RowDataPacket {
-    id: number;
-    quant_remain: number;
-}
-
 export async function getCurrentSpecificStock(stockChangeIds: number[], propertyId: number) {
     const data: [CurrentStock[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -92,13 +99,6 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
         [propertyId]
     );
     return data[0];
-}
-
-interface UsedSpares extends RowDataPacket {
-    id: number;
-    part_no: string;
-    name: string;
-    num_used: number;
 }
 
 export async function getUsedSpares(jobId: number) {
@@ -121,11 +121,6 @@ export async function getUsedSpares(jobId: number) {
     return data[0];
 }
 
-interface recentlyUsed extends RowDataPacket {
-    spare_id: number;
-    total_used: number;
-}
-
 export async function getUsedRecently(propertyId: number, monthsOfData: number) {
     const data: [recentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -142,12 +137,6 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
         [propertyId, monthsOfData]
     );
     return data[0];
-}
-
-interface ExtendedStock extends CurrentStock {
-    part_no: string;
-    name: string;
-    supplier: string;
 }
 
 export async function getSparesRemaining(propertyId: number) {
@@ -237,13 +226,6 @@ export async function getNote(noteId: number) {
     return data[0];
 }
 
-interface NewSpares {
-    id: number;
-    part_no: string;
-    name: string;
-    num_used: number;
-}
-
 export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
     let sql = `
     INSERT INTO
@@ -322,21 +304,6 @@ export async function updateStock(stockArray: { id: number; property_id: number;
     return errors;
 }
 
-interface AddEditSupplier {
-    propertyId: number;
-    id: number;
-    name: string;
-    website: string;
-    phone: string;
-    primContact: string;
-    primContactPhone: string;
-    address: string;
-    city: string;
-    county: string;
-    postcode: string;
-    supplies: string;
-}
-
 export async function addSupplier(s: AddEditSupplier) {
     const response = await db.execute(
         `INSERT INTO
@@ -371,15 +338,6 @@ export async function editSupplier(s: AddEditSupplier) {
     return response[0];
 }
 
-interface Delivery extends RowDataPacket {
-    name: string;
-    supplier: string;
-    courier: string;
-    placed: string;
-    due: string;
-    id: number;
-}
-
 export async function getDeliveries(propertyId: number) {
     const data: [Delivery[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -400,14 +358,6 @@ export async function getDeliveries(propertyId: number) {
         [propertyId]
     );
     return data[0];
-}
-
-interface DeliveryItem extends RowDataPacket {
-    delivery_id: number;
-    spare_id: number;
-    quantity: number;
-    part_no: string;
-    name: string;
 }
 
 export async function getDeliveryItems(deliveryIds: number[]) {
@@ -443,13 +393,6 @@ export async function addDelivery(d: Delivery) {
     return response[0];
 }
 
-interface DeliveryItems {
-    id: number;
-    part_no: string;
-    name: string;
-    num_used: number;
-}
-
 export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[]) {
     let sql = `
     INSERT INTO
@@ -464,7 +407,7 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
     for (let i = 0; i < items.length; i++) {
         sql += `(${deliveryId}, ${items[i].id}, ${items[i].num_used})`;
         if (i !== items.length - 1) {
-            sql += ','
+            sql += ',';
         }
     }
 
@@ -494,21 +437,6 @@ export async function editDelivery(d: Delivery) {
         []
     );
     return response[0];
-}
-
-interface AddEditSpare {
-    partNo: string;
-    manPartNo: string;
-    name: string;
-    manName: string;
-    description: string;
-    notes: string;
-    location: string;
-    quantRemaining: number;
-    supplier: string;
-    cost: number;
-    propertyId: number;
-    id: number;
 }
 
 export async function addSpare(s: AddEditSpare) {
