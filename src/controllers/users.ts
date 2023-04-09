@@ -3,6 +3,7 @@ import * as Users from '../models/users';
 import * as Properties from '../models/properties';
 import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
+import authSwitchCase from '../helpers/users/authSwitchCase';
 
 export async function getAllUsers(req: Request, res: Response) {
     try {
@@ -37,21 +38,7 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function postUser(req: Request, res: Response) {
-    console.log(req.body.auth)
-    let authLevel = 1;
-    switch (req.body.auth) {
-        case 'Admin':
-            authLevel = 4;
-            break;
-        case 'Manager':
-            authLevel = 3;
-            break;
-        case 'Engineer':
-            authLevel = 2;
-            break;
-        default:
-            authLevel = 1;
-    }
+    let authLevel = authSwitchCase(req.body.auth)
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 12);
         const response = await Users.postUser(req.body, hashedPassword, authLevel);
