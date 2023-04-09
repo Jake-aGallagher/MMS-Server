@@ -3,6 +3,10 @@ import * as Properties from '../models/properties';
 import * as Users from '../models/users';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
+import assignedUsersList from '../helpers/properties/assignedUsersList';
+import propertyUsersList from '../helpers/properties/propertyUsersList';
+import lastPropMapping from '../helpers/properties/lastPropMapping';
+import makeIdList from '../helpers/makeIdList';
 
 export async function getAllProperties(req: Request, res: Response) {
     try {
@@ -36,35 +40,13 @@ export async function getAssignedUsers(req: Request, res: Response) {
     }
 }
 
-interface UsersList {
-    id: number;
-    username: string;
-    password: string;
-    first_name: string;
-    last_name: string;
-    authority: number;
-    assigned: boolean;
-}
-
 export async function getUsersForAssign(req: Request, res: Response) {
     try {
         const propertyId = req.params.propertyid;
-        const assignedlist = <number[]>[];
-        const usersList = <UsersList[]>[];
-
         const assignedUsers = await Properties.getAssignedUserIds(parseInt(propertyId));
-        assignedUsers.forEach((user) => {
-            assignedlist.push(user.id);
-        });
-
+        const assignedlist = assignedUsersList(assignedUsers)
         const allUsers = await Users.getAllUsers();
-        allUsers.forEach((user) => {
-            if (assignedlist.includes(user.id) && user.authority != 4) {
-                usersList.push({ ...user, assigned: true });
-            } else if (user.authority != 4) {
-                usersList.push({ ...user, assigned: false });
-            }
-        });
+        const usersList = propertyUsersList(allUsers, assignedlist)
         res.status(200).json(usersList);
     } catch (err) {
         console.log(err);
@@ -80,27 +62,16 @@ export async function getLastProperty(req: Request, res: Response) {
         let propIds = <number[]>[];
         if (auth == 4) {
             allProps = await Properties.getAllProperties();
-            allProps.forEach((property) => {
-                propIds.push(property.id);
-            });
         } else {
             allProps = await Properties.getAllPropertiesForUser(parseInt(userId));
-            allProps.forEach((property) => {
-                propIds.push(property.id);
-            });
         }
+        propIds = makeIdList(allProps, 'id')
         const lastProp = await Properties.getLastPropertyForUser(parseInt(userId));
         if (lastProp[0] === undefined) {
             res.status(200).json(allProps);
         } else {
             if (propIds.includes(lastProp[0].property_id)) {
-                const propertiesMapped = allProps.map((property) => {
-                    if (property.id === lastProp[0].property_id) {
-                        return { ...property, lastProperty: true };
-                    } else {
-                        return { ...property };
-                    }
-                });
+                const propertiesMapped = lastPropMapping(allProps, lastProp[0].property_id)
                 res.status(200).json(propertiesMapped);
             } else {
                 res.status(200).json(allProps);
