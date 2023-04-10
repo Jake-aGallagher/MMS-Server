@@ -88,6 +88,7 @@ export async function addEditProperty(req: Request, res: Response) {
         let response;
         if (req.body.id > 0) {
             response = await Properties.editProperty(req.body);
+            Assets.renameRootAsset(req.body.name, req.body.id)
         } else {
             response = await Properties.postProperty(req.body);
             // @ts-ignore

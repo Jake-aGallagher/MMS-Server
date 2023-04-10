@@ -99,6 +99,21 @@ export async function renameAsset(id: number, name: string) {
     return data[0];
 }
 
+export async function renameRootAsset(name: string, propertyId: number) {
+    const data = await db.execute(
+        `UPDATE
+            assets
+        SET
+            name = ?
+        WHERE
+            property_id = ?
+        AND
+            parent_id = 0;`,
+        [name, propertyId]
+    );
+    return data[0];
+}
+
 export async function editAssetNote(id: number, note: string) {
     const data = await db.execute(
         `UPDATE
