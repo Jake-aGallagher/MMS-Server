@@ -58,7 +58,7 @@ router.get('/spares/supplier/:supplierid', authorised, sparesController.getSupli
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
 router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
 //// Spares Deliveries
-router.get('/spares/deliveries/:propertyid', authorised, sparesController.getDeliveries)
+router.get('/spares/deliveries/:propertyid/:deliveryid', authorised, sparesController.getDeliveries)
 router.put('/spares/delivery/add-edit', authorised, sparesController.addEditDelivery)
 //// Spares Warnings
 router.get('/spares/warnings/:propertyid', authorised, sparesController.getSparesWarnings);

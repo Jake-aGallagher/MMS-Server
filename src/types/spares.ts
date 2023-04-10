@@ -65,7 +65,7 @@ export interface WarningArrays {
 
 export interface Delivery extends RowDataPacket {
     name: string;
-    supplier: string;
+    supplier: string | number;
     courier: string;
     placed: string;
     due: string;

@@ -119,7 +119,13 @@ export async function addEditSupplier(req: Request, res: Response) {
 export async function getDeliveries(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
-        const deliveries = await Spares.getDeliveries(propertyId);
+        const deliveryToFind = parseInt(req.params.deliveryid);
+        let deliveries
+        if (deliveryToFind > 0) {
+            deliveries = await Spares.getDeliveryById(deliveryToFind);
+        } else {
+            deliveries = await Spares.getDeliveries(propertyId);
+        }
         if (deliveries.length === 0) {
             res.status(200).json({});
         } else {
@@ -129,7 +135,12 @@ export async function getDeliveries(req: Request, res: Response) {
             const deliveriesWithContentsArr = data.deliveries
             const deliveryItems = await Spares.getDeliveryItems(deliveryIds);
             const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap)
-            res.status(200).json(deliverywithContents);
+            if (deliveryToFind > 0) {
+                const suppliers = await Spares.getSuppliers(propertyId);
+                res.status(200).json({deliverywithContents, suppliers});
+            } else {
+                res.status(200).json(deliverywithContents);
+            }
         }
     } catch (err) {
         console.log(err);

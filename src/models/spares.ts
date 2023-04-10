@@ -360,6 +360,24 @@ export async function getDeliveries(propertyId: number) {
     return data[0];
 }
 
+export async function getDeliveryById(deliveryId: number) {
+    const data: [Delivery[], FieldPacket[]] = await db.execute(
+        `SELECT
+            deliveries.id,
+            deliveries.name,
+            deliveries.supplier,
+            deliveries.courier,
+            deliveries.placed,
+            deliveries.due
+        FROM
+            deliveries
+        WHERE
+            deliveries.id = ?;`,
+        [deliveryId]
+    );
+    return data[0];
+}
+
 export async function getDeliveryItems(deliveryIds: number[]) {
     const data: [DeliveryItem[], FieldPacket[]] = await db.execute(
         `SELECT
