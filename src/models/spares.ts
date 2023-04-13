@@ -10,11 +10,12 @@ import {
     DeliveryItem,
     DeliveryItems,
     AddEditSpare,
+    SparesDetails,
 } from '../types/spares';
 import db from '../database/database';
 
 export async function getAllSpares(propertyId: number) {
-    const data = await db.execute(
+    const data: [SparesDetails[], FieldPacket[]] = await db.execute(
         `SELECT 
             id,
             part_no,
@@ -28,8 +29,6 @@ export async function getAllSpares(propertyId: number) {
             supplier,
             reorder_freq,
             reorder_num,
-            running_low,
-            avg_usage,
             cost
         FROM 
             spares
@@ -152,6 +151,24 @@ export async function getSparesRemaining(propertyId: number) {
         WHERE
             property_id = ?;`,
         [propertyId]
+    );
+    return data[0];
+}
+
+export async function getSparesRemainingToBeDelivered(deliveryId: number) {
+    const data: [CurrentStock[], FieldPacket[]] = await db.execute(
+        `SELECT
+            spares.id,
+            spares.quant_remain
+        FROM
+            spares
+        INNER JOIN delivery_items ON
+        (
+            delivery_items.spare_id = spares.id
+        ) 
+        WHERE
+            delivery_items.delivery_id = ?;`,
+        [deliveryId]
     );
     return data[0];
 }
@@ -346,7 +363,8 @@ export async function getDeliveries(propertyId: number) {
             suppliers.name AS supplier,
             deliveries.courier,
             DATE_FORMAT(deliveries.placed, "%d/%m/%y") AS placed,
-            DATE_FORMAT(deliveries.due, "%d/%m/%y") AS due
+            DATE_FORMAT(deliveries.due, "%d/%m/%y") AS due,
+            deliveries.arrived
         FROM
             deliveries
         INNER JOIN suppliers ON
@@ -368,7 +386,8 @@ export async function getDeliveryById(deliveryId: number) {
             deliveries.supplier,
             deliveries.courier,
             deliveries.placed,
-            deliveries.due
+            deliveries.due,
+            deliveries.arrived
         FROM
             deliveries
         WHERE
@@ -403,10 +422,10 @@ export async function addDelivery(d: Delivery) {
     const response = await db.execute(
         `INSERT INTO
             deliveries
-            (name, supplier, courier, placed, due, property_id)
+            (name, supplier, courier, placed, due, property_id, arrived)
         VALUES
-            (?, ?, ?, ?, ?, ?);`,
-        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId]
+            (?, ?, ?, ?, ?, ?, ?);`,
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, (d.arrived? 1 : 0)]
     );
     return response[0];
 }
@@ -438,21 +457,18 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
 export async function editDelivery(d: Delivery) {
     const response = await db.execute(
         `UPDATE
-            suppliers
+            deliveries
         SET
             name = ?,
-            website = ?,
-            phone = ?,
-            prim_contact = ?,
-            prim_contact_phone = ?,
-            address = ?,
-            city = ?,
-            county = ?,
-            postcode = ?,
-            supplies = ?
+            supplier = ?,
+            courier = ?,
+            placed = ?,
+            due = ?,
+            property_id = ?,
+            arrived = ?
         WHERE
             id = ?;`,
-        []
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, (d.arrived? 1 : 0), d.id]
     );
     return response[0];
 }
@@ -569,6 +585,28 @@ export async function deleteSparesUsed(body: { id: string }) {
         [body.id]
     );
     return;
+}
+
+export async function deleteDelivery(deliveryId: number) {
+    const response = await db.execute(
+        `DELETE FROM
+            deliveries
+        WHERE
+            id = ?;`,
+        [deliveryId]
+    );
+    return response[0];
+}
+
+export async function deleteDeliveryContents(deliveryId: number) {
+    const response = await db.execute(
+        `DELETE FROM
+            delivery_items
+        WHERE
+            delivery_id = ?;`,
+        [deliveryId]
+    );
+    return response[0];
 }
 
 export async function deleteNote(body: { id: string }) {

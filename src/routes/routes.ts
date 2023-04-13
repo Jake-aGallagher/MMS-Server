@@ -42,7 +42,7 @@ router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree)
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
 router.post('/asset', authorised, assetsController.insertAsset);
 router.put('/asset', authorised, assetsController.renameAsset);
-router.put('/asset/notes', authorised, assetsController.EditAssetNote)
+router.put('/asset/notes', authorised, assetsController.EditAssetNote);
 router.delete('/asset', authorised, assetsController.deleteAsset);
 
 // Spares
@@ -58,8 +58,9 @@ router.get('/spares/supplier/:supplierid', authorised, sparesController.getSupli
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
 router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
 //// Spares Deliveries
-router.get('/spares/deliveries/:propertyid/:deliveryid', authorised, sparesController.getDeliveries)
-router.put('/spares/delivery/add-edit', authorised, sparesController.addEditDelivery)
+router.get('/spares/deliveries/:propertyid/:deliveryid', authorised, sparesController.getDeliveries);
+router.put('/spares/delivery/add-edit', authorised, sparesController.addEditDelivery);
+router.delete('/spares/delivery', authorised, sparesController.deleteDelivery);
 //// Spares Warnings
 router.get('/spares/warnings/:propertyid', authorised, sparesController.getSparesWarnings);
 //// Spares Notes

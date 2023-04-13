@@ -1,7 +1,7 @@
 import { Asset } from "../../types/assets";
 
 export default function makeAssetTree(list: Asset[], parentAssetId = 0) {
-    var map: { [key: number]: number } = {},
+    let map: { [key: number]: number } = {},
         roots = [],
         asset,
         i;

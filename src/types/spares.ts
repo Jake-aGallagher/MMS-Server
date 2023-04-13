@@ -2,6 +2,23 @@ import { RowDataPacket } from "mysql2";
 
 // Spares //
 
+export interface SparesDetails extends RowDataPacket {
+    id: number;
+    part_no: string;
+    man_part_no: string;
+    name: string;
+    man_name: string;
+    description: string;
+    notes: string;
+    location: string;
+    quant_remain: number;
+    supplier: string;
+    reorder_freq: string;
+    reorder_num: number;
+    cost: number;
+    avg_usage: number | undefined;
+}
+
 export interface UsedSpares extends RowDataPacket {
     id: number;
     part_no: string;

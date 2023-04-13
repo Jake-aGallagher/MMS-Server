@@ -3,12 +3,17 @@ import sparesWarningArray from '../helpers/spares/sparesWarningArray';
 import deliveryMaps from '../helpers/spares/deliveryMaps';
 import deliveryContents from '../helpers/spares/deliveryContents';
 import * as Spares from '../models/spares';
+import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
+import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
 
 export async function getallSpares(req: Request, res: Response) {
     try {
-        const propertyId = req.params.propertyid;
-        const spares = await Spares.getAllSpares(parseInt(propertyId));
-        res.status(200).json(spares);
+        const propertyId = parseInt(req.params.propertyid);
+        const spares = await Spares.getAllSpares(propertyId);
+        const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
+        const sparesUsed = await Spares.getUsedRecently(propertyId, monthsOfData);
+        const sparesFullDetails = allSparesAddUsage(spares, sparesUsed, monthsOfData)
+        res.status(200).json(sparesFullDetails);
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -158,6 +163,18 @@ export async function addEditDelivery(req: Request, res: Response) {
             await Spares.addDeliveryItems(response.insertId, req.body.contents);
         } else {
             response = await Spares.editDelivery(req.body);
+            // update deliveryItems
+            const confirmDelete = await Spares.deleteDeliveryContents(deliveryId)
+            if (confirmDelete) {
+                await Spares.addDeliveryItems(deliveryId, req.body.contents)
+            }
+        }
+        if (req.body.arrived) {
+            // add the items to stock
+            const oldStockLevels = await Spares.getSparesRemainingToBeDelivered(deliveryId)// get delivery contents by using the delivery id
+            const justArrivedStock = await Spares.getDeliveryItems([deliveryId])
+            const updatedStock = deliveryArrivedUpdateStock(oldStockLevels, justArrivedStock)
+            updatedStock.forEach((item) => Spares.adjustSpareStock(item.id, item.quant_remain))
         }
         // @ts-ignore
         if (response.affectedRows == '1') {
@@ -243,6 +260,23 @@ export async function deleteSparesItem(req: Request, res: Response) {
     try {
         const deleted = await Spares.deleteSparesItem(req.body);
         Spares.deleteSparesUsed(req.body);
+        // @ts-ignore
+        if (deleted.affectedRows > 0) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
+    }
+}
+
+export async function deleteDelivery(req: Request, res: Response) {
+    try {
+        const deliveryId = parseInt(req.body.id);
+        const deleted = await Spares.deleteDelivery(deliveryId);
+        Spares.deleteDeliveryContents(deliveryId)
         // @ts-ignore
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
