@@ -44,10 +44,8 @@ export async function postUser(req: Request, res: Response) {
         const response = await Users.postUser(req.body, hashedPassword, authLevel);
         if (authLevel === 4) {
             const propertyIds = await Properties.getAllPropertyIds()
-            // @ts-ignore
-            const AdminPropAssign = Properties.postAdminAssignments(response.insertId, propertyIds)
+            await Properties.postAdminAssignments(response.insertId, propertyIds)
         }
-        // @ts-ignore
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
         } else {

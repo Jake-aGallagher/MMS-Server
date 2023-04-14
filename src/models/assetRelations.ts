@@ -1,9 +1,9 @@
-import {  FieldPacket } from 'mysql2';
+import {  FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetRelationBasic } from '../types/assets';
 import db from '../database/database';
 
 export async function insertChild(assetId: number, propertyId: number, assetParentId: number) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
             (
@@ -29,7 +29,7 @@ export async function insertChild(assetId: number, propertyId: number, assetPare
 }
 
 export async function insertRoot(assetId: number, propertyId: number) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
             (
@@ -51,7 +51,7 @@ export async function insertRoot(assetId: number, propertyId: number) {
 }
 
 export async function insertSelf(assetId: number, propertyId: number) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
             (
@@ -86,7 +86,7 @@ export async function getChildren(ancestor_id: number) {
 }
 
 export async function deleteAssetRelations(assetIds: number[]) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             assets_relations
         WHERE

@@ -91,14 +91,10 @@ export async function addEditProperty(req: Request, res: Response) {
             Assets.renameRootAsset(req.body.name, req.body.id)
         } else {
             response = await Properties.postProperty(req.body);
-            // @ts-ignore
             const asset = await Assets.insertAsset(0, response.insertId, req.body.name);
-            // @ts-ignore
-            const root = await AssetRelations.insertRoot(asset.insertId, response.insertId);
-            // @ts-ignore
-            const self = await AssetRelations.insertSelf(asset.insertId, response.insertId);
+            await AssetRelations.insertRoot(asset.insertId, response.insertId);
+            await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
-        // @ts-ignore
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
         } else {
@@ -113,8 +109,7 @@ export async function addEditProperty(req: Request, res: Response) {
 export async function setAssignedUsers(req: Request, res: Response) {
     try {
         const response = await Properties.setAssignedUsers(req.body.propertyNo, req.body.assignedUsers);
-        // @ts-ignore
-        if (response.affectedRows > 0) {
+        if (response && response.affectedRows > 0) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -128,8 +123,7 @@ export async function setAssignedUsers(req: Request, res: Response) {
 export async function setLastProperty(req: Request, res: Response) {
     try {
         const response = await Properties.postLastProperty(req.body);
-        // @ts-ignore
-        if (response.affectedRows > 0) {
+        if (response && response.affectedRows > 0) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });

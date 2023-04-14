@@ -1,4 +1,4 @@
-import { FieldPacket } from 'mysql2';
+import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { UserIdOnly } from '../types/users';
 import { PropertyId, PropertyBasics, Property, AssignedBasic, Assigned } from '../types/properties';
 import db from '../database/database';
@@ -142,7 +142,7 @@ export async function postProperty(body: { name: string; type: string; address: 
     const county = body.county;
     const postcode = body.postcode;
 
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
           properties
           (
@@ -169,7 +169,7 @@ export async function editProperty(body: { id: string; name: string; type: strin
     const county = body.county;
     const postcode = body.postcode;
 
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             properties
         SET
@@ -187,7 +187,7 @@ export async function editProperty(body: { id: string; name: string; type: strin
 }
 
 export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]) {
-    const res = await db.execute(
+    const res: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE
             property_users
         FROM
@@ -220,7 +220,7 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
             }
         }
         sql += `;`;
-        const response = await db.execute(sql);
+        const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
         return response[0];
     }
 }
@@ -228,7 +228,7 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
 export async function postLastProperty(body: {userId: string, propertyId: string}) {
     const userId = body.userId;
     const propertyId = body.propertyId;
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             last_property
             (
@@ -262,6 +262,6 @@ export async function postAdminAssignments(userId: number, propertyIds: {id: num
         }
     } 
 
-    const response = await db.execute(sql);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
 }

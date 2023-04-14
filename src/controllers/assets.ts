@@ -46,18 +46,14 @@ export async function insertAsset(req: Request, res: Response) {
 
     try {
         const asset = await Assets.insertAsset(parentId, propertyId, name);
-        // @ts-ignore
         if (asset.affectedRows == 1) {
-            // @ts-ignore
             const assetId = asset.insertId;
             if (parentId != 0) {
                 const assetRelations = await AssetRelations.insertChild(assetId, propertyId, parentId);
-                // @ts-ignore
                 if ((assetRelations.affectedRows = 0)) {
                     res.status(500).json({ created: false });
                 } else {
                     const response = await AssetRelations.insertSelf(assetId, propertyId);
-                    // @ts-ignore
                     if (response.affectedRows == 1) {
                         res.status(201).json({ created: true });
                     } else {
@@ -66,7 +62,6 @@ export async function insertAsset(req: Request, res: Response) {
                 }
             } else {
                 const response = await AssetRelations.insertSelf(assetId, propertyId);
-                // @ts-ignore
                 if (response.affectedRows == 1) {
                     res.status(201).json({ created: true });
                 } else {
@@ -87,7 +82,6 @@ export async function renameAsset(req: Request, res: Response) {
         const id = req.body.id;
         const name = req.body.name;
         const renamed = await Assets.renameAsset(parseInt(id), name);
-        // @ts-ignore
         if (renamed.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
@@ -103,8 +97,7 @@ export async function EditAssetNote(req: Request, res: Response) {
     try {
         const assetId = parseInt(req.body.id);
         const response = await Assets.editAssetNote(assetId, req.body.note)
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -129,7 +122,6 @@ export async function deleteAsset(req: Request, res: Response) {
 
         // delete all the assets that have had their relations deleted
         const deleted = await Assets.deleteAsset(idsForDelete);
-        // @ts-ignore
         if (deleted.affectedRows > 0 && deletedRelations.affectedRows > 0) {
             if (deleteType === 'assetAndJobs') {
                 Jobs.deleteJobs(idsForDelete);

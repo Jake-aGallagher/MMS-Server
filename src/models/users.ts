@@ -1,5 +1,5 @@
 import db from '../database/database';
-import { FieldPacket } from 'mysql2/typings/mysql';
+import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { AuthOnly, UserLongName, UserShortName, UserPassword } from '../types/users';
 
 export async function getAllUsers() {
@@ -74,7 +74,7 @@ export async function postUser(body: { username: string; first: string; last: st
     const password = hashedPassword;
     const auth = authLevel;
 
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
           users
           (

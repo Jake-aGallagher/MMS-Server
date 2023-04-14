@@ -1,4 +1,4 @@
-import { FieldPacket } from 'mysql2';
+import { FieldPacket, ResultSetHeader } from 'mysql2';
 import {
     CurrentStock,
     UsedSpares,
@@ -265,7 +265,7 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
     }
     sql += `;`;
 
-    const response = await db.execute(sql);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
 }
 
@@ -296,7 +296,7 @@ export async function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, p
         num_used = newSpare.num_used,
         date_used = NOW();`;
 
-    const response = await db.execute(sql);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
 }
 
@@ -304,7 +304,7 @@ export async function updateStock(stockArray: { id: number; property_id: number;
     let errors = false;
 
     stockArray.forEach(async (item) => {
-        const response = await db.execute(`
+        const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`
         UPDATE
             spares
         SET
@@ -313,7 +313,6 @@ export async function updateStock(stockArray: { id: number; property_id: number;
             id = ${item.id}
         AND
             property_id = ${item.property_id};`);
-        // @ts-ignore
         if (response[0].affectedRows != 1) {
             errors = true;
         }
@@ -322,7 +321,7 @@ export async function updateStock(stockArray: { id: number; property_id: number;
 }
 
 export async function addSupplier(s: AddEditSupplier) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             suppliers
             (name, website, phone, prim_contact, prim_contact_phone, address, city, county, postcode, supplies, property_id)
@@ -334,7 +333,7 @@ export async function addSupplier(s: AddEditSupplier) {
 }
 
 export async function editSupplier(s: AddEditSupplier) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             suppliers
         SET
@@ -419,7 +418,7 @@ export async function getDeliveryItems(deliveryIds: number[]) {
 }
 
 export async function addDelivery(d: Delivery) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             deliveries
             (name, supplier, courier, placed, due, property_id, arrived)
@@ -450,12 +449,12 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
 
     sql += `;`;
 
-    const response = await db.execute(sql);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
 }
 
 export async function editDelivery(d: Delivery) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             deliveries
         SET
@@ -474,7 +473,7 @@ export async function editDelivery(d: Delivery) {
 }
 
 export async function addSpare(s: AddEditSpare) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             spares
             (part_no, man_part_no, name, man_name, description, notes, location, quant_remain, supplier, cost, property_id)
@@ -486,7 +485,7 @@ export async function addSpare(s: AddEditSpare) {
 }
 
 export async function editSpare(s: AddEditSpare) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             spares
         SET
@@ -509,7 +508,7 @@ export async function editSpare(s: AddEditSpare) {
 }
 
 export async function adjustSpareStock(id: number, newStockLevel: number) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             spares
         SET
@@ -522,7 +521,7 @@ export async function adjustSpareStock(id: number, newStockLevel: number) {
 }
 
 export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
-    let response;
+    let response: [ResultSetHeader, FieldPacket[]];
     if (body.noteId === 0) {
         response = await db.execute(
             `INSERT INTO
@@ -555,7 +554,7 @@ export async function postSparesNote(body: { propertyId: string; title: string; 
 }
 
 export async function deleteSupplier(body: { id: string }) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             suppliers
         WHERE
@@ -566,7 +565,7 @@ export async function deleteSupplier(body: { id: string }) {
 }
 
 export async function deleteSparesItem(body: { id: string }) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             spares
         WHERE
@@ -588,7 +587,7 @@ export async function deleteSparesUsed(body: { id: string }) {
 }
 
 export async function deleteDelivery(deliveryId: number) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             deliveries
         WHERE
@@ -599,7 +598,7 @@ export async function deleteDelivery(deliveryId: number) {
 }
 
 export async function deleteDeliveryContents(deliveryId: number) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             delivery_items
         WHERE
@@ -610,7 +609,7 @@ export async function deleteDeliveryContents(deliveryId: number) {
 }
 
 export async function deleteNote(body: { id: string }) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             spares_notes
         WHERE

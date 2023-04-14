@@ -109,8 +109,7 @@ export async function addEditSupplier(req: Request, res: Response) {
         } else {
             response = await Spares.editSupplier(req.body);
         }
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -159,7 +158,6 @@ export async function addEditDelivery(req: Request, res: Response) {
         let response;
         if (deliveryId === 0) {
             response = await Spares.addDelivery(req.body);
-            /// @ts-ignore
             await Spares.addDeliveryItems(response.insertId, req.body.contents);
         } else {
             response = await Spares.editDelivery(req.body);
@@ -176,8 +174,7 @@ export async function addEditDelivery(req: Request, res: Response) {
             const updatedStock = deliveryArrivedUpdateStock(oldStockLevels, justArrivedStock)
             updatedStock.forEach((item) => Spares.adjustSpareStock(item.id, item.quant_remain))
         }
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -197,8 +194,7 @@ export async function addEditSpare(req: Request, res: Response) {
         } else {
             response = await Spares.editSpare(req.body);
         }
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -214,8 +210,7 @@ export async function adjustSpareStock(req: Request, res: Response) {
         const spareId = parseInt(req.body.id);
         const newStockLevel = parseInt(req.body.newStock);
         const response = await Spares.adjustSpareStock(spareId, newStockLevel);
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -229,8 +224,7 @@ export async function adjustSpareStock(req: Request, res: Response) {
 export async function postNote(req: Request, res: Response) {
     try {
         const response = await Spares.postSparesNote(req.body);
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -244,7 +238,6 @@ export async function postNote(req: Request, res: Response) {
 export async function deleteSupplier(req: Request, res: Response) {
     try {
         const deleted = await Spares.deleteSupplier(req.body);
-        // @ts-ignore
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -260,7 +253,6 @@ export async function deleteSparesItem(req: Request, res: Response) {
     try {
         const deleted = await Spares.deleteSparesItem(req.body);
         Spares.deleteSparesUsed(req.body);
-        // @ts-ignore
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -277,7 +269,6 @@ export async function deleteDelivery(req: Request, res: Response) {
         const deliveryId = parseInt(req.body.id);
         const deleted = await Spares.deleteDelivery(deliveryId);
         Spares.deleteDeliveryContents(deliveryId)
-        // @ts-ignore
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -292,7 +283,6 @@ export async function deleteDelivery(req: Request, res: Response) {
 export async function deleteNote(req: Request, res: Response) {
     try {
         const deleted = await Spares.deleteNote(req.body);
-        // @ts-ignore
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {

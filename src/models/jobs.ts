@@ -1,5 +1,5 @@
 import db from '../database/database';
-import { FieldPacket } from 'mysql2/typings/mysql';
+import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob } from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
@@ -116,7 +116,7 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     const numOfUrg = parseInt(urgencyObj[0].number);
     const lengthOfUrg = urgencyObj[0].duration;
 
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             jobs
             (
@@ -145,7 +145,7 @@ export async function updateAndComplete(body: UpdateAndComplete) {
     const logged_time = body.logged_time;
     const completed = body.complete ? 1 : 0;
 
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             jobs
         SET
@@ -163,7 +163,7 @@ export async function updateAndComplete(body: UpdateAndComplete) {
 }
 
 export async function setTimeDetails(details: [{ id: number; time: number }], jobId: number) {
-    const res = await db.execute(
+    const res: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             logged_time
         WHERE
@@ -190,7 +190,7 @@ export async function setTimeDetails(details: [{ id: number; time: number }], jo
         }
         sql += `;`;
 
-        const response = await db.execute(sql);
+        const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
         return response[0];
     }
 }
@@ -199,7 +199,7 @@ export async function updateNotes(body: UpdateNotes) {
     const id = body.id;
     const notes = body.notes;
 
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             jobs
         SET
@@ -212,7 +212,7 @@ export async function updateNotes(body: UpdateNotes) {
 }
 
 export async function deleteJobs(idsForDelete: number[]) {
-    const response = await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             jobs
         WHERE

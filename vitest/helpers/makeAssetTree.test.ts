@@ -1,3 +1,4 @@
+/// @ts-nocheck
 import { it, expect } from 'vitest'
 import makeAssetTree from '../../src/helpers/assets/makeAssetTree'
 
@@ -19,7 +20,6 @@ it('should transform the children key into an array', () => {
     const results = makeAssetTree(list)
 
     expect(results[0]).toHaveProperty('children')
-    /// @ts-ignore
     expect(Array.isArray(results[0].children)).toBeTruthy
 })
 
@@ -27,7 +27,6 @@ it('should create a tree structure from provided list', () => {
     const results = makeAssetTree(list)
 
     expect(results.length).toBe(1)
-    /// @ts-ignore
     expect(results[0].children[0].id).toBe(2)
 })
 
@@ -39,7 +38,6 @@ it('should create a tree structure from provided list if list does not start at 
     const results = makeAssetTree(list, 3)
 
     expect(results.length).toBe(1)
-    /// @ts-ignore
     expect(results[0].children[0].id).toBe(5)
 })
 

@@ -1,4 +1,4 @@
-import { FieldPacket } from 'mysql2';
+import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetById, Asset } from '../types/assets';
 import db from '../database/database';
 
@@ -67,7 +67,7 @@ export async function getAssetById(id: number) {
 }
 
 export async function insertAsset(parentId: number, propertyId: number, name: string) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets
             (
@@ -87,7 +87,7 @@ export async function insertAsset(parentId: number, propertyId: number, name: st
 }
 
 export async function renameAsset(id: number, name: string) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
         SET
@@ -100,7 +100,7 @@ export async function renameAsset(id: number, name: string) {
 }
 
 export async function renameRootAsset(name: string, propertyId: number) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
         SET
@@ -115,7 +115,7 @@ export async function renameRootAsset(name: string, propertyId: number) {
 }
 
 export async function editAssetNote(id: number, note: string) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
         SET
@@ -128,7 +128,7 @@ export async function editAssetNote(id: number, note: string) {
 }
 
 export async function deleteAsset(assetIds: number[]) {
-    const data = await db.execute(
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             assets
         WHERE

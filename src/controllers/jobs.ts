@@ -64,9 +64,7 @@ export async function postJob(req: Request, res: Response) {
         const urgencyReq = req.body.urgency;
         const urgency = await Enums.getUrgencyPayload(urgencyReq);
         const response = await Jobs.postJob(req.body, urgency);
-        // @ts-ignore
-        if (response.affectedRows == '1') {
-            // @ts-ignore
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true, jobId: response.insertId });
         } else {
             res.status(500).json({ created: false });
@@ -89,8 +87,7 @@ export async function updateAndComplete(req: Request, res: Response) {
         if (req.body.logged_time_details.length > 0) {
             Jobs.setTimeDetails(req.body.logged_time_details, jobId);
         }
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
@@ -104,8 +101,7 @@ export async function updateAndComplete(req: Request, res: Response) {
 export async function updateNotes(req: Request, res: Response) {
     try {
         const response = await Jobs.updateNotes(req.body);
-        // @ts-ignore
-        if (response.affectedRows == '1') {
+        if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });
