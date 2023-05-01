@@ -154,7 +154,7 @@ export async function updateAndComplete(body: UpdateAndComplete) {
             notes = ?,
             logged_time = ?,
             completed = ?,
-            comp_date = ${body.complete ? 'NOW()' : "'0000-00-00 00:00:00'"}
+            comp_date = ${body.complete ? 'NOW()' : null}
         WHERE
             id = ?;`,
         [status, description, notes, logged_time, completed, id]
