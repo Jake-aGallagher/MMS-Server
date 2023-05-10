@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 app.use(
     cors({
-        origin: process.env.FRONTEND,
+        origin: process.env.FRONTEND ? process.env.FRONTEND : 'https://happy-river-0f326cb03.3.azurestaticapps.net',
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
         credentials: true,
     })
