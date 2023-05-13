@@ -28,6 +28,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(routes);
 
-app.listen(3001, () => {
+app.listen(8080, () => {
     console.log('server is running');
 });

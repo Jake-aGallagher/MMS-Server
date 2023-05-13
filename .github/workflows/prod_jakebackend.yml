@@ -46,6 +46,9 @@ jobs:
         with:
           name: node-app
 
+      - name: Install nodemon
+        run: npm install -g nodemon
+
       - name: Install pm2
         run: npm install -g pm2
 
