@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "build:prod": "NODE_ENV=production tsc",
     "test": "vitest --run --reporter verbose",
     "test:watch": "vitest",
     "coverage": "vitest --run --coverage",
