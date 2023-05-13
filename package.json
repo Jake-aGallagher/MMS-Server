@@ -10,7 +10,7 @@
     "test:watch": "vitest",
     "coverage": "vitest --run --coverage",
     "dev": "nodemon src/index.ts",
-    "start": "nodemon dist/index.ts"
+    "start": "pm2 start dist/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -35,6 +35,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.3.3",
+    "pm2": "^5.3.0"
   }
 }
