@@ -12,13 +12,13 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(
+/* app.use(
     cors({
         origin: process.env.FRONTEND ? process.env.FRONTEND : 'https://happy-river-0f326cb03.3.azurestaticapps.net',
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
         credentials: true,
     })
-);
+); */
 console.log(process.env.FRONTEND)
 
 app.use((req: Request, res: Response, next: NextFunction) => {
