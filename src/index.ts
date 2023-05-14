@@ -17,7 +17,6 @@ app.use(
         credentials: true,
     })
 );
-console.log(process.env.FRONTEND);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorisation');
