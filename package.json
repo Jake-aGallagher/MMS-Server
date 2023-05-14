@@ -10,7 +10,7 @@
     "test:watch": "vitest",
     "coverage": "vitest --run --coverage",
     "dev": "nodemon src/index.ts",
-    "start": "pm2 start dist/index.js"
+    "start": "pm2 start dist/index.js --no-daemon"
   },
   "author": "",
   "license": "ISC",
