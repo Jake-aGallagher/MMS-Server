@@ -46,12 +46,6 @@ jobs:
         with:
           name: node-app
 
-      - name: Install nodemon
-        run: npm install -g nodemon
-
-      - name: Install pm2
-        run: npm install -g pm2
-
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
