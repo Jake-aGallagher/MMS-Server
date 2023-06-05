@@ -47,7 +47,7 @@ router.delete('/asset', authorised, assetsController.deleteAsset);
 
 // Spares
 router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
-router.get('/spares/:spareid', authorised, sparesController.getSpare);
+router.get('/spares/:spareid/:propertyid', authorised, sparesController.getSpare);
 router.get('/spares-for-use/:propertyid', authorised, sparesController.getSparesForUse);
 router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/adjust-stock', authorised, sparesController.adjustSpareStock);
