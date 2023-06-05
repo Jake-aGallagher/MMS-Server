@@ -31,6 +31,10 @@ export interface recentlyUsed extends RowDataPacket {
     total_used: number;
 }
 
+export interface jobsOfRecentlyUsed extends RowDataPacket {
+    job_id: number;
+}
+
 export interface NewSpares {
     id: number;
     part_no: string;

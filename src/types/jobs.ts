@@ -21,6 +21,15 @@ export interface UpdateAndComplete {
     complete: boolean;
 }
 
+export interface RecentJobs  extends RowDataPacket {
+    id: number;
+    asset_name: string;
+    type: string;
+    title: string;
+    created: string;
+    completed: boolean;
+}
+
 // Logged Time //
 
 export interface TimeDetails extends RowDataPacket {
