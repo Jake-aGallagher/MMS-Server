@@ -73,7 +73,6 @@ export async function getSpares(id: number) {
             reorder_freq,
             reorder_num,
             running_low,
-            avg_usage,
             cost
         FROM 
             spares
