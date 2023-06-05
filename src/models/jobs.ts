@@ -1,6 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob } from '../types/jobs';
+import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob, RecentJobs } from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
 export async function getAllJobs(propertyId: number) {
@@ -85,6 +85,29 @@ export async function getRecentJobs(idsForAssets: number[]) {
         ORDER BY
             jobs.created
         DESC
+        LIMIT
+            5;`
+    );
+    return data[0];
+}
+
+export async function getRecentJobsByIds(ids: number[]) {
+    const data: [RecentJobs[], FieldPacket[]]  = await db.execute(
+        `SELECT
+            jobs.id,
+            IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
+            jobs.type,
+            jobs.title,
+            DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
+            jobs.completed
+        FROM
+            jobs
+        LEFT JOIN assets ON
+            assets.id = jobs.asset
+        WHERE
+            jobs.id IN (${ids})
+        ORDER BY
+            jobs.created DESC
         LIMIT
             5;`
     );

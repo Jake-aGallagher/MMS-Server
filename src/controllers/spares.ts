@@ -3,8 +3,11 @@ import sparesWarningArray from '../helpers/spares/sparesWarningArray';
 import deliveryMaps from '../helpers/spares/deliveryMaps';
 import deliveryContents from '../helpers/spares/deliveryContents';
 import * as Spares from '../models/spares';
+import * as Jobs from '../models/jobs';
 import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
 import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
+import makeIdList from '../helpers/makeIdList';
+import { RowDataPacket } from 'mysql2';
 
 export async function getallSpares(req: Request, res: Response) {
     try {
@@ -22,9 +25,16 @@ export async function getallSpares(req: Request, res: Response) {
 
 export async function getSpare(req: Request, res: Response) {
     try {
-        const spareId = req.params.spareid;
-        const spares = await Spares.getSpares(parseInt(spareId));
-        res.status(200).json(spares);
+        const spareId = parseInt(req.params.spareid);
+        const propertyId = parseInt(req.params.propertyid);
+        const spares = await Spares.getSpares(spareId);
+        let recentJobs: RowDataPacket[] = []
+        const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
+        if (recentJobNumbers.length > 0) {
+            const jobIdList = makeIdList(recentJobNumbers, 'job_id');
+            recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
+        }
+        res.status(200).json({spares, recentJobs});
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

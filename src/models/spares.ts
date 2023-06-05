@@ -11,6 +11,7 @@ import {
     DeliveryItems,
     AddEditSpare,
     SparesDetails,
+    jobsOfRecentlyUsed,
 } from '../types/spares';
 import db from '../database/database';
 
@@ -133,6 +134,25 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
         GROUP BY
             spare_id`,
         [propertyId, monthsOfData]
+    );
+    return data[0];
+}
+
+export async function getRecentJobsForSpare(propertyId: number, spareId: number) {
+    const data: [jobsOfRecentlyUsed[], FieldPacket[]] = await db.execute(
+        `SELECT
+            job_id
+        FROM
+            spares_used
+        WHERE
+            property_id = ?
+        AND
+            spare_id = ?
+        ORDER BY 
+            date_used DESC    
+        LIMIT
+            5`,
+        [propertyId, spareId]
     );
     return data[0];
 }
