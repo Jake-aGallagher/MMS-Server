@@ -4,7 +4,8 @@ import db from '../database/database';
 
 export async function getUrgencyOptions() {
     const data = await db.execute(
-        `SELECT 
+        `SELECT
+            enums.id,
             enums.value
         FROM 
             enums
@@ -20,7 +21,8 @@ export async function getUrgencyOptions() {
 
 export async function getTypeOptions() {
     const data = await db.execute(
-        `SELECT 
+        `SELECT
+            enums.id,
             enums.value
         FROM 
             enums
@@ -34,7 +36,7 @@ export async function getTypeOptions() {
     return data[0];
 }
 
-export async function getUrgencyPayload(value: string) {
+export async function getUrgencyPayload(id: number) {
     const data: [PayloadBasics[], FieldPacket[]] = await db.execute(
         `SELECT
             payload AS number,
@@ -42,8 +44,8 @@ export async function getUrgencyPayload(value: string) {
         FROM
             enums
         WHERE
-            value = ?;`,
-        [value]
+            id = ?;`,
+        [id]
     )
     return data[0]
 }

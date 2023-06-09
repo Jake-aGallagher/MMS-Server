@@ -9,10 +9,10 @@ export async function getAllJobs(propertyId: number) {
                 jobs.id,
                 jobs.property_id,
                 IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-                jobs.type,
+                typeEnum.value AS type,
                 jobs.title,
                 DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
-                jobs.urgency,
+                urgencyEnum.value AS urgency,
                 DATE_FORMAT(jobs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
                 jobs.completed,
                 DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
@@ -24,6 +24,10 @@ export async function getAllJobs(propertyId: number) {
                 users.id = jobs.reporter
             LEFT JOIN assets ON
                 assets.id = jobs.asset
+            LEFT JOIN enums AS urgencyEnum ON
+                jobs.urgency = urgencyEnum.id
+            LEFT JOIN enums AS typeEnum ON
+                jobs.type = typeEnum.id
             WHERE
                 jobs.property_id = ?
             ORDER BY
@@ -40,11 +44,11 @@ export async function getJobDetails(id: number) {
             jobs.id,
             properties.name AS property_name,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            jobs.type,
+            typeEnum.value AS type,
             jobs.title,
             jobs.description,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
-            jobs.urgency,
+            urgencyEnum.value AS urgency,
             DATE_FORMAT(jobs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
             jobs.completed,
             DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
@@ -60,6 +64,10 @@ export async function getJobDetails(id: number) {
             properties.id = jobs.property_id
         LEFT JOIN assets ON
             assets.id = jobs.asset
+        LEFT JOIN enums AS urgencyEnum ON
+            jobs.urgency = urgencyEnum.id
+        LEFT JOIN enums AS typeEnum ON
+            jobs.type = typeEnum.id
         WHERE
             jobs.id = ?;`,
         [id]
@@ -72,7 +80,7 @@ export async function getRecentJobs(idsForAssets: number[]) {
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            jobs.type,
+            enums.value AS type,
             jobs.title,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
             jobs.completed
@@ -80,6 +88,8 @@ export async function getRecentJobs(idsForAssets: number[]) {
             jobs
         LEFT JOIN assets ON
             assets.id = jobs.asset
+        LEFT JOIN enums ON
+            jobs.type = enums.id
         WHERE
             asset IN (${idsForAssets})
         ORDER BY
