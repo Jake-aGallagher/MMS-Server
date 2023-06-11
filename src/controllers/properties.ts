@@ -95,8 +95,11 @@ export async function addEditProperty(req: Request, res: Response) {
             await AssetRelations.insertRoot(asset.insertId, response.insertId);
             await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
+        const propertyId = req.body.id ? req.body.id : response.insertId;
+        // @ts-ignore
+        Properties.postLastProperty({userId: req.userId, propertyId: propertyId})
         if (response.affectedRows === 1) {
-            res.status(201).json({ created: true });
+            res.status(201).json({ created: true, newPropId: propertyId });
         } else {
             res.status(500).json({ created: false });
         }
