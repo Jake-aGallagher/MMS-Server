@@ -24,14 +24,15 @@ export async function getJobDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const jobDetails = await Jobs.getJobDetails(id);
+        const usedSpares = await Spares.getUsedSpares(id);
         const timeDetails = await Jobs.getLoggedTimeDetails(id);
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(userIds);
             const timeDetailsFull = timeDetailsArray(timeDetails, users)
-            res.status(200).json({ jobDetails, timeDetails: timeDetailsFull });
+            res.status(200).json({ jobDetails, timeDetails: timeDetailsFull, usedSpares });
         } else {
-            res.status(200).json({ jobDetails });
+            res.status(200).json({ jobDetails, usedSpares });
         }
     } catch (err) {
         console.log(err);
