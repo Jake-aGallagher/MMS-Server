@@ -44,7 +44,7 @@ export async function getJobUpdate(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const propertyId = parseInt(req.params.propertyid);
-        const statusOptions = await Enums.getStatusOptions();
+        const statusOptions = await Enums.getEnumOptions('status');
         const jobDetails = await Jobs.getJobDetails(id);
         const users = await Properties.getAssignedUsers(propertyId);
         const timeDetails = await Jobs.getLoggedTimeDetails(id);
