@@ -20,6 +20,32 @@ export async function getEnumOptions(enumTypeString: string) {
     return data[0];
 }
 
+export async function getAllEnum() {
+    const data = await db.execute(
+        `SELECT
+            enums.*,
+            enum_types.type AS typeString
+        FROM 
+            enums
+        INNER JOIN enum_types ON
+            enum_types.id = enums.enum_type_id
+        ORDER BY
+            enums.list_priority;`
+    );
+    return data[0];
+}
+
+export async function getEnumTypes() {
+    const data = await db.execute(
+        `SELECT
+            id,
+            type
+        FROM
+            enum_types;`
+    );
+    return data[0];
+}
+
 export async function getUrgencyPayload(id: number) {
     const data: [PayloadBasics[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -30,6 +56,6 @@ export async function getUrgencyPayload(id: number) {
         WHERE
             id = ?;`,
         [id]
-    )
-    return data[0]
+    );
+    return data[0];
 }

@@ -11,3 +11,14 @@ export async function getEnumsForCreateJob(req: Request, res: Response) {
         res.status(500).json({ message: 'Request failed' });
     }
 }
+
+export async function getEnumsForSettings(req: Request, res: Response) {
+    try {
+        const enums = await Enums.getAllEnum();
+        const enumTypes = await Enums.getEnumTypes();
+        res.status(200).json({enums, enumTypes});
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: 'Request failed' });
+    }
+}

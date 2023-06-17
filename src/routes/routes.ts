@@ -71,5 +71,6 @@ router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums
 router.get('/enums/create-job', enumsController.getEnumsForCreateJob);
+router.get('/enums/typesvalues', enumsController.getEnumsForSettings);
 
 export default router;
