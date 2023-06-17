@@ -70,7 +70,10 @@ router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums
-router.get('/enums/create-job', enumsController.getEnumsForCreateJob);
-router.get('/enums/typesvalues', enumsController.getEnumsForSettings);
+router.get('/enums/create-job', authorised, enumsController.getEnumsForCreateJob);
+router.get('/enums/typesvalues', authorised, enumsController.getEnumsForSettings);
+router.get('/enums/types', authorised, enumsController.getEnumTypesForEdit);
+router.get('/enums/edit/:id', authorised, enumsController.getEnumForEdit);
+router.put('/enums', authorised, enumsController.addEditEnum);
 
 export default router;
