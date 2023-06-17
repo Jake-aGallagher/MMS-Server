@@ -64,3 +64,17 @@ export async function addEditEnum(req: Request, res: Response) {
         res.status(500).json({ message: 'Request failed' });
     }
 }
+
+export async function deleteEnum(req: Request, res: Response) {
+    try {
+        const deleted = await Enums.deleteEnum(req.body);
+        if (deleted.affectedRows > 0) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
+    }
+}

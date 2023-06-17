@@ -75,5 +75,6 @@ router.get('/enums/typesvalues', authorised, enumsController.getEnumsForSettings
 router.get('/enums/types', authorised, enumsController.getEnumTypesForEdit);
 router.get('/enums/edit/:id', authorised, enumsController.getEnumForEdit);
 router.put('/enums', authorised, enumsController.addEditEnum);
+router.delete('/enum', authorised, enumsController.deleteEnum);
 
 export default router;

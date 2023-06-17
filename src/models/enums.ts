@@ -122,3 +122,14 @@ export async function editEnum(body: { id: string; value: string; enumTypeId: nu
     );
     return response[0];
 }
+
+export async function deleteEnum(body: { id: string }) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `DELETE FROM
+            enums
+        WHERE
+            id = ?;`,
+        [body.id]
+    );
+    return response[0];
+}
