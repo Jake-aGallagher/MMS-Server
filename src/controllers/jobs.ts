@@ -8,6 +8,7 @@ import makeIdList from '../helpers/makeIdList';
 import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
 import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
 import { NewSpares } from '../types/spares';
+import { insertFiles } from '../helpers/files/insertFiles';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {
@@ -29,7 +30,7 @@ export async function getJobDetails(req: Request, res: Response) {
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(userIds);
-            const timeDetailsFull = timeDetailsArray(timeDetails, users)
+            const timeDetailsFull = timeDetailsArray(timeDetails, users);
             res.status(200).json({ jobDetails, timeDetails: timeDetailsFull, usedSpares });
         } else {
             res.status(200).json({ jobDetails, usedSpares });
@@ -78,15 +79,19 @@ export async function postJob(req: Request, res: Response) {
 
 export async function updateAndComplete(req: Request, res: Response) {
     try {
+        req.body = JSON.parse(req.body.data);
         const jobId = parseInt(req.body.id);
         const propertyId = parseInt(req.body.propertyId);
         const response = await Jobs.updateAndComplete(req.body);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(jobId, propertyId, newSpares)
+            updateSparesForJob(jobId, propertyId, newSpares);
         }
         if (req.body.logged_time_details.length > 0) {
             Jobs.setTimeDetails(req.body.logged_time_details, jobId);
+        }
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            insertFiles(req.files, 'job', jobId)
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });

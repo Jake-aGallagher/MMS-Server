@@ -1,5 +1,6 @@
 import express from 'express';
 const router = express.Router();
+import { fileUpload } from '../middleware/multer';
 
 import * as usersController from '../controllers/users';
 import * as propertiesController from '../controllers/properties';
@@ -34,7 +35,7 @@ router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
 router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobUpdate);
 router.post('/jobs', authorised, jobsController.postJob);
-router.put('/jobs/update', authorised, jobsController.updateAndComplete);
+router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
 // Assets
