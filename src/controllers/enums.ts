@@ -47,7 +47,7 @@ export async function getEnumForEdit(req: Request, res: Response) {
 
 export async function addEditEnum(req: Request, res: Response) {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.body.id);
         let response;
         if (id > 0) {
             response = await Enums.editEnum(req.body);
