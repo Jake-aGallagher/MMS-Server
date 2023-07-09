@@ -23,7 +23,6 @@ router.get('/properties/all-properties', authorised, propertiesController.getAll
 router.get('/properties/:propertyid', authorised, propertiesController.getPropertyDetails);
 router.put('/properties', authorised, propertiesController.addEditProperty);
 //// Property Users
-router.get('/properties/assigned-users/:propertyid', authorised, propertiesController.getAssignedUsers);
 router.get('/properties/users-for-assigning/:propertyid', authorised, propertiesController.getUsersForAssign);
 router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
 //// Last Property

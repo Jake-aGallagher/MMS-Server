@@ -22,18 +22,8 @@ export async function getPropertyDetails(req: Request, res: Response) {
     try {
         const propertyId = req.params.propertyid;
         const propDetails = await Properties.getPropertyDetails(parseInt(propertyId));
-        res.status(200).json(propDetails);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Request failed' });
-    }
-}
-
-export async function getAssignedUsers(req: Request, res: Response) {
-    try {
-        const propertyId = req.params.propertyid;
         const assignedUsers = await Properties.getAssignedUsers(parseInt(propertyId));
-        res.status(200).json(assignedUsers);
+        res.status(200).json({propDetails, assignedUsers});
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
