@@ -8,6 +8,7 @@ export async function getAssetTree(propertyId: number, rootId: number) {
             assets.id,
             assets.parent_id AS parentId,
             assets.name AS name,
+            assets.notes AS note,
             GROUP_CONCAT(crumbs.ancestor_id) AS breadcrumbs,
             NULL AS children
         FROM
@@ -66,35 +67,38 @@ export async function getAssetById(id: number) {
     return data[0];
 }
 
-export async function insertAsset(parentId: number, propertyId: number, name: string) {
+export async function insertAsset(parentId: number, propertyId: number, name: string, note: string) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets
             (
                 parent_id,
                 property_id,
-                name
+                name,
+                notes
             )
         VALUES
             (
                 ?,
                 ?,
+                ?,
                 ?
             );`,
-        [parentId, propertyId, name]
+        [parentId, propertyId, name, note]
     );
     return data[0];
 }
 
-export async function renameAsset(id: number, name: string) {
+export async function editAsset(id: number, name: string, note: string) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
         SET
-            name = ?
+            name = ?,
+            notes = ?
         WHERE
             id = ?;`,
-        [name, id]
+        [name, note, id]
     );
     return data[0];
 }
@@ -110,19 +114,6 @@ export async function renameRootAsset(name: string, propertyId: number) {
         AND
             parent_id = 0;`,
         [name, propertyId]
-    );
-    return data[0];
-}
-
-export async function editAssetNote(id: number, note: string) {
-    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `UPDATE
-            assets
-        SET
-            notes = ?
-        WHERE
-            id = ?;`,
-        [note, id]
     );
     return data[0];
 }

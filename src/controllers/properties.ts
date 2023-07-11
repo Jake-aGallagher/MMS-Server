@@ -81,7 +81,7 @@ export async function addEditProperty(req: Request, res: Response) {
             Assets.renameRootAsset(req.body.name, req.body.id)
         } else {
             response = await Properties.postProperty(req.body);
-            const asset = await Assets.insertAsset(0, response.insertId, req.body.name);
+            const asset = await Assets.insertAsset(0, response.insertId, req.body.name, '');
             await AssetRelations.insertRoot(asset.insertId, response.insertId);
             await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
