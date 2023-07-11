@@ -288,8 +288,8 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
     return response[0];
 }
 
-export async function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
-    let sql = `
+export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
+    let insertSql = `
     INSERT INTO
         spares_used
         (
@@ -301,22 +301,40 @@ export async function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, p
         )
     VALUES`;
 
+    let insertVals = [];
+    let deleteVals = [];
     for (let i = 0; i < sparesUsed.length; i++) {
-        if (i == sparesUsed.length - 1) {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id})`;
+        if (sparesUsed[i].num_used > 0) {
+            insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id})`);
         } else {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id}),`;
+            deleteVals.push(sparesUsed[i].id)
         }
     }
+    insertSql += insertVals.join(',');
 
-    sql += `
+    insertSql += `
     AS newSpare
     ON DUPLICATE KEY UPDATE
         num_used = newSpare.num_used,
         date_used = NOW();`;
 
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
-    return response[0];
+    if (insertVals.length > 0) {
+        db.execute(insertSql);
+    }
+    if (deleteVals.length > 0) {
+        db.execute(`
+            DELETE FROM
+                spares_used
+            WHERE
+                spare_id IN (?)
+            AND
+                job_id = ?
+            AND
+                property_id = ?;`,
+            [deleteVals.join(','), jobId, property_id]
+        );
+    }
+    return;
 }
 
 export async function updateStock(stockArray: { id: number; property_id: number; quant_remain: number }[]) {
@@ -443,7 +461,7 @@ export async function addDelivery(d: Delivery) {
             (name, supplier, courier, placed, due, property_id, arrived)
         VALUES
             (?, ?, ?, ?, ?, ?, ?);`,
-        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, (d.arrived? 1 : 0)]
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, d.arrived ? 1 : 0]
     );
     return response[0];
 }
@@ -486,7 +504,7 @@ export async function editDelivery(d: Delivery) {
             arrived = ?
         WHERE
             id = ?;`,
-        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, (d.arrived? 1 : 0), d.id]
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, d.arrived ? 1 : 0, d.id]
     );
     return response[0];
 }

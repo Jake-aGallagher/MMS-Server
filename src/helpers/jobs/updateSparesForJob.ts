@@ -22,7 +22,7 @@ export async function updateSparesForJob(jobId: number, propertyId: number, newS
 
         // insert the diff array (Update replace) table: spares_used
         if (diffArray.length > 0) {
-            await Spares.updateUsedSpares(diffArray, jobId, propertyId);
+            Spares.updateUsedSpares(diffArray, jobId, propertyId);
         }
     }
     
