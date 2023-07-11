@@ -41,7 +41,6 @@ router.put('/jobs/notes', authorised, jobsController.updateNotes);
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
 router.post('/asset', authorised, assetsController.insertAsset);
-router.put('/asset', authorised, assetsController.renameAsset);
 router.put('/asset/notes', authorised, assetsController.EditAssetNote);
 router.delete('/asset', authorised, assetsController.deleteAsset);
 

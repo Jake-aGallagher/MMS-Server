@@ -9,7 +9,7 @@ export async function getAssetTree(req: Request, res: Response) {
     try {
         const propertyId = req.params.propertyid;
         const getAssetTree = await Assets.getAssetTree(parseInt(propertyId), 0);
-        const tree = makeAssetTree(getAssetTree)
+        const tree = makeAssetTree(getAssetTree);
         res.status(200).json(tree);
     } catch (err) {
         console.log(err);
@@ -28,7 +28,7 @@ export async function getAsset(req: Request, res: Response) {
             const idsForRecents = makeIdList(getChildren, 'descendant_id');
             const recentJobs = await Jobs.getRecentJobs(idsForRecents);
             const children = await Assets.getAssetTree(propertyId, assetId);
-            const tree = makeAssetTree(children, assetId)
+            const tree = makeAssetTree(children, assetId);
             res.status(200).json({ assetDetails, recentJobs, tree });
         } else {
             res.status(500).json({ message: 'Request failed' });
@@ -40,18 +40,42 @@ export async function getAsset(req: Request, res: Response) {
 }
 
 export async function insertAsset(req: Request, res: Response) {
-    const parentId = parseInt(req.body.parentId);
-    const propertyId = parseInt(req.body.propertyId);
-    const name = req.body.name;
+    const type = req.body.type;
+    if (type == 'edit') {
+        try {
+            const id = req.body.id;
+            const name = req.body.name;
+            const renamed = await Assets.renameAsset(parseInt(id), name);
+            if (renamed.affectedRows == 1) {
+                res.status(201).json({ created: true });
+            } else {
+                res.status(500).json({ created: false });
+            }
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ created: false });
+        }
+    } else {
+        const parentId = parseInt(req.body.id);
+        const propertyId = parseInt(req.body.propertyId);
+        const name = req.body.name;
 
-    try {
-        const asset = await Assets.insertAsset(parentId, propertyId, name);
-        if (asset.affectedRows == 1) {
-            const assetId = asset.insertId;
-            if (parentId != 0) {
-                const assetRelations = await AssetRelations.insertChild(assetId, propertyId, parentId);
-                if ((assetRelations.affectedRows = 0)) {
-                    res.status(500).json({ created: false });
+        try {
+            const asset = await Assets.insertAsset(parentId, propertyId, name);
+            if (asset.affectedRows == 1) {
+                const assetId = asset.insertId;
+                if (parentId != 0) {
+                    const assetRelations = await AssetRelations.insertChild(assetId, propertyId, parentId);
+                    if ((assetRelations.affectedRows = 0)) {
+                        res.status(500).json({ created: false });
+                    } else {
+                        const response = await AssetRelations.insertSelf(assetId, propertyId);
+                        if (response.affectedRows == 1) {
+                            res.status(201).json({ created: true });
+                        } else {
+                            res.status(500).json({ created: false });
+                        }
+                    }
                 } else {
                     const response = await AssetRelations.insertSelf(assetId, propertyId);
                     if (response.affectedRows == 1) {
@@ -61,42 +85,19 @@ export async function insertAsset(req: Request, res: Response) {
                     }
                 }
             } else {
-                const response = await AssetRelations.insertSelf(assetId, propertyId);
-                if (response.affectedRows == 1) {
-                    res.status(201).json({ created: true });
-                } else {
-                    res.status(500).json({ created: false });
-                }
+                res.status(500).json({ created: false });
             }
-        } else {
+        } catch (err) {
+            console.log(err);
             res.status(500).json({ created: false });
         }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ created: false });
-    }
-}
-
-export async function renameAsset(req: Request, res: Response) {
-    try {
-        const id = req.body.id;
-        const name = req.body.name;
-        const renamed = await Assets.renameAsset(parseInt(id), name);
-        if (renamed.affectedRows == 1) {
-            res.status(201).json({ created: true });
-        } else {
-            res.status(500).json({ created: false });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ created: false });
     }
 }
 
 export async function EditAssetNote(req: Request, res: Response) {
     try {
         const assetId = parseInt(req.body.id);
-        const response = await Assets.editAssetNote(assetId, req.body.note)
+        const response = await Assets.editAssetNote(assetId, req.body.note);
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
