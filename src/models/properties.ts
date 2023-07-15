@@ -202,7 +202,7 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
             users.authority IN (1, 2, 3);`,
         [propertyNo]
     );
-    if (res) {
+    if (res && userIds.length > 0) {
         let sql = `
             INSERT INTO
                     property_users
@@ -222,10 +222,12 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
         sql += `;`;
         const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
         return response[0];
+    } else if (res) {
+        return res[0];
     }
 }
 
-export async function postLastProperty(body: {userId: string, propertyId: string}) {
+export async function postLastProperty(body: { userId: string; propertyId: string }) {
     const userId = body.userId;
     const propertyId = body.propertyId;
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
@@ -244,23 +246,22 @@ export async function postLastProperty(body: {userId: string, propertyId: string
     return response[0];
 }
 
-export async function postAdminAssignments(userId: number, propertyIds: {id: number}[]) {
-    let sql = 
-        `INSERT INTO
+export async function postAdminAssignments(userId: number, propertyIds: { id: number }[]) {
+    let sql = `INSERT INTO
             property_users
             (
                 property_id,
                 user_id
             )
         VALUES`;
-    
+
     for (let i = 0; i < propertyIds.length; i++) {
-        if (i < (propertyIds.length - 1)) {
+        if (i < propertyIds.length - 1) {
             sql += `('${propertyIds[i].id}', '${userId}'),`;
         } else {
             sql += `('${propertyIds[i].id}', '${userId}');`;
         }
-    } 
+    }
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
