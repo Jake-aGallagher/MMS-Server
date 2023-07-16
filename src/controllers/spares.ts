@@ -164,7 +164,7 @@ export async function getDeliveries(req: Request, res: Response) {
 
 export async function addEditDelivery(req: Request, res: Response) {
     try {
-        const deliveryId = parseInt(req.body.deliveryId);
+        const deliveryId = parseInt(req.body.id);
         let response;
         if (deliveryId === 0) {
             response = await Spares.addDelivery(req.body);
