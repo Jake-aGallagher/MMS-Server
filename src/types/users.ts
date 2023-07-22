@@ -1,7 +1,7 @@
 import { RowDataPacket } from "mysql2";
 
-export interface AuthOnly extends RowDataPacket{
-    authority: number
+export interface UserGroupOnly extends RowDataPacket{
+    user_group_id: number
 }
 
 export interface UserIdOnly extends RowDataPacket {
@@ -10,7 +10,7 @@ export interface UserIdOnly extends RowDataPacket {
 
 export interface UserBase extends UserIdOnly {
     username: string;
-    authority: number;
+    user_group_id: number;
 }
 
 export interface UserLongName extends UserBase {

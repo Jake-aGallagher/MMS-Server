@@ -89,7 +89,7 @@ export async function getAssignedUsers(propertyId: number) {
             users.username AS username,
             users.first_name AS first_name,
             users.last_name AS last_name,
-            users.authority AS authority
+            users.user_group_id AS user_group_id
         FROM 
             users
         LEFT JOIN property_users ON
@@ -99,11 +99,11 @@ export async function getAssignedUsers(propertyId: number) {
         WHERE
             property_id = ?
         OR
-            users.authority = '4'
+            users.user_group_id = '1'
         GROUP BY
             users.id
         ORDER BY
-            authority
+            user_group_id
         DESC;`,
         [propertyId]
     );
@@ -123,11 +123,11 @@ export async function getAssignedUserIds(propertyId: number) {
         WHERE
             property_id = ?
         OR
-            users.authority = '4'
+            users.user_group_id = '1'
         GROUP BY
             users.id
         ORDER BY
-            authority
+            user_group_id
         DESC;`,
         [propertyId]
     );
@@ -199,7 +199,7 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
         WHERE
             Property_id = ?
         AND
-            users.authority IN (1, 2, 3);`,
+            users.user_group_id != '1';`,
         [propertyNo]
     );
     if (res && userIds.length > 0) {
@@ -264,5 +264,16 @@ export async function postAdminAssignments(userId: number, propertyIds: { id: nu
     }
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
+    return response[0];
+}
+
+export async function deleteAssignments(userId: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `DELETE FROM
+            property_users
+        WHERE
+            user_id = ?;`,
+        [userId]
+    );
     return response[0];
 }

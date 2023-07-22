@@ -47,10 +47,10 @@ export async function getUsersForAssign(req: Request, res: Response) {
 export async function getLastProperty(req: Request, res: Response) {
     try {
         const userId = req.params.userid;
-        const auth = await Users.getUserLevel(parseInt(userId));
+        const user_group_id = await Users.getUserLevel(parseInt(userId));
         let allProps = [];
         let propIds = <number[]>[];
-        if (auth == 4) {
+        if (user_group_id == 1) {
             allProps = await Properties.getAllProperties();
         } else {
             allProps = await Properties.getAllPropertiesForUser(parseInt(userId));

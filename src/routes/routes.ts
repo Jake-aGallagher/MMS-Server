@@ -23,6 +23,7 @@ router.post('/users', authorised, usersController.postUser);
 
 // User Groups
 router.get('/usergroups/all', authorised, usersController.getAllUserGroups);
+router.put('/usergroups', authorised, usersController.addEditUserGroup);
 
 // Permissions
 router.get('/permissions/group/:groupid', authorised, permissionsController.getAllPermissionsForGroup)

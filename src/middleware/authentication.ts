@@ -39,7 +39,7 @@ export async function checkAuth(req: Request, res: Response, next: NextFunction)
                     username: user[0].username,
                     first_name: user[0].first,
                     last_name: user[0].last,
-                    authority: user[0].authority,
+                    user_group_id: user[0].user_group_id,
                 },
             });
         } else {

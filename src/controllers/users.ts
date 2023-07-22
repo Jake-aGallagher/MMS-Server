@@ -3,12 +3,44 @@ import * as Users from '../models/users';
 import * as Properties from '../models/properties';
 import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import authSwitchCase from '../helpers/users/authSwitchCase';
 
 export async function getAllUsers(req: Request, res: Response) {
     try {
         const allUsers = await Users.getAllUsers();
         res.status(200).json(allUsers);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getAllUsersForProperty(req: Request, res: Response) {
+    try {
+        const propertyId = parseInt(req.params.propertyid);
+        const users = await Properties.getAssignedUsers(propertyId);
+        res.status(200).json({ users });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getUserById(req: Request, res: Response) {
+    try {
+        const userId = parseInt(req.params.userid);
+        const users = await Users.findById(userId);
+        const userGroups = await Users.getAllUserGroups();
+        res.status(200).json({ users, userGroups});
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getAllUserGroups(req: Request, res: Response) {
+    try {
+        const allUserGroups = await Users.getAllUserGroups();
+        res.status(200).json({userGroups: allUserGroups});
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -38,13 +70,39 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function postUser(req: Request, res: Response) {
-    let authLevel = authSwitchCase(req.body.auth)
+    let userId = req.body.id;
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 12);
-        const response = await Users.postUser(req.body, hashedPassword, authLevel);
-        if (authLevel === 4) {
-            const propertyIds = await Properties.getAllPropertyIds()
-            await Properties.postAdminAssignments(response.insertId, propertyIds)
+        let response;
+        if (userId > 0) {
+            response = await Users.editUser(req.body);
+        } else {
+            const hashedPassword = await bcrypt.hash(req.body.password, 12);
+            response = await Users.postUser(req.body, hashedPassword);
+            userId = response.insertId;
+        }
+        if (req.body.user_group_id === 1) {
+            const propertyIds = await Properties.getAllPropertyIds();
+            await Properties.deleteAssignments(userId)
+            await Properties.postAdminAssignments(userId, propertyIds);
+        }
+        if (response.affectedRows === 1) {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ created: false });
+    }
+}
+
+export async function addEditUserGroup(req: Request, res: Response) {
+    try {
+        let response;
+        if (req.body.id > 0) {
+            response = await Users.editUserGroup(req.body);
+        } else {
+            response = await Users.postUserGroup(req.body);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });

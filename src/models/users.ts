@@ -1,6 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { AuthOnly, UserLongName, UserShortName, UserPassword } from '../types/users';
+import { UserGroupOnly, UserLongName, UserShortName, UserPassword } from '../types/users';
 
 export async function getAllUsers() {
     const data: [UserLongName[], FieldPacket[]] = await db.execute(
@@ -9,7 +9,7 @@ export async function getAllUsers() {
              username,
              first_name,
              last_name,
-             authority
+             user_group_id
         FROM
             users;`
     );
@@ -24,7 +24,7 @@ export async function findByUsername(username: string) {
              password,
              first_name AS first,
              last_name AS last,
-             authority
+             user_group_id
         FROM
             users
         WHERE
@@ -41,7 +41,7 @@ export async function findById(id: number) {
              username,
              first_name AS first,
              last_name AS last,
-             authority
+             user_group_id
         FROM
             users
         WHERE
@@ -58,7 +58,7 @@ export async function getUsersByIds(userIds: number[]) {
              username,
              first_name AS first,
              last_name AS last,
-             authority
+             user_group_id
         FROM
             users
         WHERE
@@ -67,12 +67,25 @@ export async function getUsersByIds(userIds: number[]) {
     return data[0];
 }
 
-export async function postUser(body: { username: string; first: string; last: string }, hashedPassword: string, authLevel: number) {
+export async function getAllUserGroups() {
+    const data: [UserLongName[], FieldPacket[]] = await db.execute(
+        `SELECT
+             id,
+             name
+        FROM
+            user_groups
+        WHERE
+            name != 'SuperAdmin';`
+    );
+    return data[0];
+}
+
+export async function postUser(body: { username: string; first: string; last: string; user_group_id: number }, hashedPassword: string) {
     const username = body.username;
     const first = body.first;
     const last = body.last;
     const password = hashedPassword;
-    const auth = authLevel;
+    const user_group_id = body.user_group_id;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
@@ -82,24 +95,81 @@ export async function postUser(body: { username: string; first: string; last: st
               first_name,
               last_name,
               password,
-              authority
+              user_group_id
           )
       VALUES
           (?,?,?,?,?);`,
-        [username, first, last, password, auth]
+        [username, first, last, password, user_group_id]
+    );
+    return response[0];
+}
+
+
+export async function editUser(body: { id: string; username: string; first: string; last: string; user_group_id: number }) {
+    const id = parseInt(body.id);
+    const username = body.username;
+    const first = body.first;
+    const last = body.last;
+    const user_group_id = body.user_group_id;
+
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            users
+        SET
+            username = ?,
+            first_name = ?,
+            last_name = ?,
+            user_group_id = ?
+        WHERE
+            id = ?;`,
+        [username, first, last, user_group_id, id]
+    );
+    return response[0];
+}
+
+
+
+export async function postUserGroup(body: { name: string }) {
+    const name = body.name;
+
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO
+          user_groups
+          (
+              name
+          )
+      VALUES
+          (?);`,
+        [name]
+    );
+    return response[0];
+}
+
+export async function editUserGroup(body: { id: string; name: string }) {
+    const id = parseInt(body.id);
+    const name = body.name;
+
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            properties
+        SET
+            name = ?
+        WHERE
+            id = ?;`,
+        [name, id]
     );
     return response[0];
 }
 
 export async function getUserLevel(userId: number) {
-    const response: [AuthOnly[], FieldPacket[]]  = await db.execute(
+    const response: [UserGroupOnly[], FieldPacket[]] = await db.execute(
         `SELECT
-            authority
+            user_group_id
         FROM
             users
         WHERE
             id = ?;`,
         [userId]
     );
-    return response[0][0].authority;
+    return response[0][0].user_group_id;
 }
