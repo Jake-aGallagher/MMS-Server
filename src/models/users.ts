@@ -15,7 +15,7 @@ export async function getAllUsers() {
             users
         INNER JOIN user_groups ON
         (
-            users.user_group_id = user_groups.is
+            users.user_group_id = user_groups.id
         );`
     );
     return data[0];
