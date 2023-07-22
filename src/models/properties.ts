@@ -89,12 +89,17 @@ export async function getAssignedUsers(propertyId: number) {
             users.username AS username,
             users.first_name AS first_name,
             users.last_name AS last_name,
-            users.user_group_id AS user_group_id
+            users.user_group_id AS user_group_id,
+            user_groups.name AS user_group_name
         FROM 
             users
         LEFT JOIN property_users ON
         (
             users.id = property_users.user_id
+        )
+        INNER JOIN user_groups ON
+        (
+            users.user_group_id = user_groups.id
         )
         WHERE
             property_id = ?

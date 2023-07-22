@@ -5,13 +5,18 @@ import { UserGroupOnly, UserLongName, UserShortName, UserPassword } from '../typ
 export async function getAllUsers() {
     const data: [UserLongName[], FieldPacket[]] = await db.execute(
         `SELECT
-             id,
-             username,
-             first_name,
-             last_name,
-             user_group_id
+            users.id,
+            users.username,
+            users.first_name,
+            users.last_name,
+            users.user_group_id,
+            user_groups.name AS user_group_name
         FROM
-            users;`
+            users
+        INNER JOIN user_groups ON
+        (
+            users.user_group_id = user_groups.is
+        );`
     );
     return data[0];
 }
