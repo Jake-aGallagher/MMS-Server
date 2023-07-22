@@ -8,6 +8,7 @@ import * as jobsController from '../controllers/jobs';
 import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
+import * as permissionsController from '../controllers/permissions';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -15,8 +16,17 @@ router.get('/check-auth', checkAuth);
 
 // Users
 router.get('/all-users', usersController.getAllUsers);
+router.get('/users/all/:propertyid', authorised, usersController.getAllUsersForProperty);
+router.get('/users/byuserid/:userid', authorised, usersController.getUserById);
 router.post('/users/login', usersController.login);
 router.post('/users', authorised, usersController.postUser);
+
+// User Groups
+router.get('/usergroups/all', authorised, usersController.getAllUserGroups);
+
+// Permissions
+router.get('/permissions/group/:groupid', authorised, permissionsController.getAllPermissionsForGroup)
+router.put('/permissions/group/:groupid', authorised, permissionsController.setPermissionsForGroup)
 
 // Properties
 router.get('/properties/all-properties', authorised, propertiesController.getAllProperties);

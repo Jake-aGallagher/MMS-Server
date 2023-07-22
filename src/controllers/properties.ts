@@ -3,7 +3,7 @@ import * as Properties from '../models/properties';
 import * as Users from '../models/users';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
-import assignedUsersList from '../helpers/properties/assignedUsersList';
+import assignedUsersList from '../helpers/assignedIdsList';
 import propertyUsersList from '../helpers/properties/propertyUsersList';
 import lastPropMapping from '../helpers/properties/lastPropMapping';
 import makeIdList from '../helpers/makeIdList';
