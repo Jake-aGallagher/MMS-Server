@@ -19,6 +19,7 @@
     "dist",
     "./prettier.config.js",
     "./vitest.config.ts",
-    "vitest"
+    "vitest",
+    "coverage"
   ]
 }
