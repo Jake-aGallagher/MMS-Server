@@ -106,7 +106,7 @@ export async function getUsedSpares(jobId: number) {
             spares.id,
             spares.part_no,
             spares.name,
-            spares_used.num_used
+            spares_used.quantity
         FROM 
             spares_used
         INNER JOIN spares ON
@@ -124,7 +124,7 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
     const data: [recentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
             spare_id,
-            SUM(num_used) AS total_used
+            SUM(quantity) AS total_used
         FROM
             spares_used
         WHERE
@@ -269,7 +269,7 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
         (
             spare_id,
             job_id,
-            num_used,
+            quantity,
             date_used,
             property_id
         )
@@ -277,9 +277,9 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
 
     for (let i = 0; i < sparesUsed.length; i++) {
         if (i == sparesUsed.length - 1) {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id})`;
+            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`;
         } else {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id}),`;
+            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id}),`;
         }
     }
     sql += `;`;
@@ -295,7 +295,7 @@ export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, propert
         (
             spare_id,
             job_id,
-            num_used,
+            quantity,
             date_used,
             property_id
         )
@@ -304,8 +304,8 @@ export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, propert
     let insertVals = [];
     let deleteVals = [];
     for (let i = 0; i < sparesUsed.length; i++) {
-        if (sparesUsed[i].num_used > 0) {
-            insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].num_used}, NOW(), ${property_id})`);
+        if (sparesUsed[i].quantity > 0) {
+            insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
         } else {
             deleteVals.push(sparesUsed[i].id)
         }
@@ -315,7 +315,7 @@ export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, propert
     insertSql += `
     AS newSpare
     ON DUPLICATE KEY UPDATE
-        num_used = newSpare.num_used,
+        quantity = newSpare.quantity,
         date_used = NOW();`;
 
     if (insertVals.length > 0) {
@@ -478,7 +478,7 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
     VALUES`;
 
     for (let i = 0; i < items.length; i++) {
-        sql += `(${deliveryId}, ${items[i].id}, ${items[i].num_used})`;
+        sql += `(${deliveryId}, ${items[i].id}, ${items[i].quantity})`;
         if (i !== items.length - 1) {
             sql += ',';
         }

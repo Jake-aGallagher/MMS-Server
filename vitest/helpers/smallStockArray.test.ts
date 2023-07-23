@@ -6,7 +6,7 @@ it('should create a new array containing all of the passed array with the correc
         id: 1,
         part_no: 'testA',
         name: 'TestA',
-        num_used: 5
+        quantity: 5
     }]
 
     const result = smallStockArray(newSpares)
@@ -20,7 +20,7 @@ it('should create a new array containing all of the passed array', () => {
         id: 1,
         part_no: 'testA',
         name: 'TestA',
-        num_used: 5
+        quantity: 5
     }]
 
     const result = smallStockArray(newSpares)

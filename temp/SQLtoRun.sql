@@ -51,6 +51,9 @@ CHANGE COLUMN `title` `title` VARCHAR(255) NOT NULL ;
 ALTER TABLE `mms`.`users` 
 CHANGE COLUMN `authority` `user_group_id` INT NOT NULL ;
 
+ALTER TABLE `mms`.`spares_used` 
+CHANGE COLUMN `num_used` `quantity` INT NOT NULL DEFAULT '0' ;
+
 INSERT INTO `mms`.`permissions` (`id`, `area`, `permission`, `full_string`) VALUES ('1', 'properties', 'view', 'properties.view');
 INSERT INTO `mms`.`permissions` (`id`, `area`, `permission`, `full_string`) VALUES ('2', 'properties', 'manage', 'properties.manage');
 INSERT INTO `mms`.`permissions` (`id`, `area`, `permission`, `full_string`) VALUES ('3', 'jobs', 'view', 'jobs.view');

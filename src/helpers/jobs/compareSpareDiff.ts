@@ -6,7 +6,7 @@ export default function compareSpareDiff(newSpares: NewSpares[], prevSpares: Use
     newSpares.forEach((newSpare) => {
         const data = prevSpares.find((x) => x.id === newSpare.id);
         if (data) {
-            const difference = newSpare.num_used - data.num_used;
+            const difference = newSpare.quantity - data.quantity;
             
             if (difference != 0) {
                 pushToArrays(newSpare, difference, diffArray, stockChangesArray)
@@ -20,6 +20,6 @@ export default function compareSpareDiff(newSpares: NewSpares[], prevSpares: Use
 }
 
 function pushToArrays(newSpare: NewSpares, difference: number, diffArray: NewSpares[], stockChangesArray: { id: number; used: number }[]) {
-    diffArray.push({ id: newSpare.id, part_no: newSpare.part_no, name: newSpare.name, num_used: newSpare.num_used });
-    stockChangesArray.push({ id: newSpare.id, used: (difference !== 0 ? difference : newSpare.num_used) });
+    diffArray.push({ id: newSpare.id, part_no: newSpare.part_no, name: newSpare.name, quantity: newSpare.quantity });
+    stockChangesArray.push({ id: newSpare.id, used: (difference !== 0 ? difference : newSpare.quantity) });
 }

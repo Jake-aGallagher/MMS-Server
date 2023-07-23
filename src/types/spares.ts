@@ -23,7 +23,7 @@ export interface UsedSpares extends RowDataPacket {
     id: number;
     part_no: string;
     name: string;
-    num_used: number;
+    quantity: number;
 }
 
 export interface recentlyUsed extends RowDataPacket {
@@ -39,7 +39,7 @@ export interface NewSpares {
     id: number;
     part_no: string;
     name: string;
-    num_used: number;
+    quantity: number;
 }
 
 export interface NewStock {
@@ -106,7 +106,7 @@ export interface DeliveryItems {
     id: number;
     part_no: string;
     name: string;
-    num_used: number;
+    quantity: number;
 }
 
 // Suppliers //
