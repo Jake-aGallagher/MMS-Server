@@ -41,18 +41,19 @@ export async function setPermissionsForGroup(userGroupId: number, permissions: s
     if (res && permissions.length > 0) {
         let sql = `
             INSERT INTO
-                    permission_mappings
-                    (
-                        permission_id,
-                        user_group_id
-                    )
-                VALUES`;
+                permission_mappings
+                (
+                    permission_id,
+                    user_group_id
+                )
+            VALUES`;
 
-        let inserts = [];
+        let values = [];
         for (let i = 0; i < permissions.length; i++) {
-            inserts.push(`(${permissions[i]}, ${userGroupId})`);
+            values.push(`(${permissions[i]}, ${userGroupId})`);
         }
-        sql += inserts.join(',') + `;`;
+        sql += values.join(',') + `;`;
+
         const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
         return response[0];
     } else if (res) {

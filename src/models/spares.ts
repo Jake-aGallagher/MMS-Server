@@ -275,14 +275,11 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
         )
     VALUES`;
 
+    let values = [];
     for (let i = 0; i < sparesUsed.length; i++) {
-        if (i == sparesUsed.length - 1) {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`;
-        } else {
-            sql += `(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id}),`;
-        }
+        values.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
     }
-    sql += `;`;
+    sql += values.join(',') + `;`;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
@@ -307,7 +304,7 @@ export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, propert
         if (sparesUsed[i].quantity > 0) {
             insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
         } else {
-            deleteVals.push(sparesUsed[i].id)
+            deleteVals.push(sparesUsed[i].id);
         }
     }
     insertSql += insertVals.join(',');
@@ -322,7 +319,8 @@ export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, propert
         db.execute(insertSql);
     }
     if (deleteVals.length > 0) {
-        db.execute(`
+        db.execute(
+            `
             DELETE FROM
                 spares_used
             WHERE
@@ -477,14 +475,11 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
         )
     VALUES`;
 
+    let values = [];
     for (let i = 0; i < items.length; i++) {
-        sql += `(${deliveryId}, ${items[i].id}, ${items[i].quantity})`;
-        if (i !== items.length - 1) {
-            sql += ',';
-        }
+        values.push(`(${deliveryId}, ${items[i].id}, ${items[i].quantity})`);
     }
-
-    sql += `;`;
+    sql += values.join(',') + `;`;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];

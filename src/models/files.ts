@@ -3,7 +3,6 @@ import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { FileUpload } from '../types/files';
 
 export async function postFile(file: FileUpload) {
-
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             files
@@ -33,10 +32,11 @@ export async function postFileMappings(fromType: string, fromIds: number[], toTy
             )
         VALUES`;
 
+    let values = [];
     for (let i = 0; i < fromIds.length; i++) {
-        sql += `
-            ('${fromType}', ${fromIds[i]}, '${toType}', ${toId})${i == (fromIds.length -1) ? ';' : ','}`;
+        values.push(`('${fromType}', ${fromIds[i]}, '${toType}', ${toId})`);
     }
+    sql += values.join(',') + `;`;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];

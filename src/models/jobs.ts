@@ -102,7 +102,7 @@ export async function getRecentJobs(idsForAssets: number[]) {
 }
 
 export async function getRecentJobsByIds(ids: number[]) {
-    const data: [RecentJobs[], FieldPacket[]]  = await db.execute(
+    const data: [RecentJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
@@ -125,7 +125,7 @@ export async function getRecentJobsByIds(ids: number[]) {
 }
 
 export async function getLoggedTimeDetails(jobId: number) {
-    const data: [TimeDetails[], FieldPacket[]]  = await db.execute(
+    const data: [TimeDetails[], FieldPacket[]] = await db.execute(
         `SELECT
             user_id AS id,
             time
@@ -214,14 +214,11 @@ export async function setTimeDetails(details: [{ id: number; time: number }], jo
                 )
             VALUES`;
 
+        let values = [];
         for (let i = 0; i < details.length; i++) {
-            if (i == details.length - 1) {
-                sql += `(${details[i].id}, ${jobId}, ${details[i].time})`;
-            } else {
-                sql += `(${details[i].id}, ${jobId}, ${details[i].time}),`;
-            }
+            values.push(`(${details[i].id}, ${jobId}, ${details[i].time})`);
         }
-        sql += `;`;
+        sql += values.join(',') + `;`;
 
         const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
         return response[0];

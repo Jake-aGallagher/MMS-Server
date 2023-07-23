@@ -210,21 +210,19 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
     if (res && userIds.length > 0) {
         let sql = `
             INSERT INTO
-                    property_users
-                    (
-                        property_id,
-                        user_id
-                    )
-                VALUES`;
+                property_users
+                (
+                    property_id,
+                    user_id
+                )
+            VALUES`;
 
+        let values = [];
         for (let i = 0; i < userIds.length; i++) {
-            if (i == userIds.length - 1) {
-                sql += `(${propertyNo}, ${userIds[i]})`;
-            } else {
-                sql += `(${propertyNo}, ${userIds[i]}),`;
-            }
+            values.push(`(${propertyNo}, ${userIds[i]})`);
         }
-        sql += `;`;
+        sql += values.join(',') + `;`;
+
         const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
         return response[0];
     } else if (res) {
@@ -252,7 +250,8 @@ export async function postLastProperty(body: { userId: string; propertyId: strin
 }
 
 export async function postAdminAssignments(userId: number, propertyIds: { id: number }[]) {
-    let sql = `INSERT INTO
+    let sql = `
+        INSERT INTO
             property_users
             (
                 property_id,
@@ -260,13 +259,11 @@ export async function postAdminAssignments(userId: number, propertyIds: { id: nu
             )
         VALUES`;
 
+    let values = [];
     for (let i = 0; i < propertyIds.length; i++) {
-        if (i < propertyIds.length - 1) {
-            sql += `('${propertyIds[i].id}', '${userId}'),`;
-        } else {
-            sql += `('${propertyIds[i].id}', '${userId}');`;
-        }
+        values.push(`('${propertyIds[i].id}', '${userId}')`);
     }
+    sql += values.join(',') + `;`;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
