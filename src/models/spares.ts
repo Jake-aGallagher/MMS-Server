@@ -247,6 +247,19 @@ export async function getSparesNotes(propertyId: number) {
     return data[0];
 }
 
+export async function getSpareStock(spareId: number) {
+    const data = await db.execute(
+        `SELECT
+            quant_remain
+        FROM
+            spares
+        WHERE
+            id = ?;`,
+        [spareId]
+    );
+    return data[0];
+}
+
 export async function getNote(noteId: number) {
     const data = await db.execute(
         `SELECT

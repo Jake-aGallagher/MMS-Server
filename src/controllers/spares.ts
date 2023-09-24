@@ -15,7 +15,7 @@ export async function getallSpares(req: Request, res: Response) {
         const spares = await Spares.getAllSpares(propertyId);
         const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
         const sparesUsed = await Spares.getUsedRecently(propertyId, monthsOfData);
-        const sparesFullDetails = allSparesAddUsage(spares, sparesUsed, monthsOfData)
+        const sparesFullDetails = allSparesAddUsage(spares, sparesUsed, monthsOfData);
         res.status(200).json(sparesFullDetails);
     } catch (err) {
         console.log(err);
@@ -28,13 +28,13 @@ export async function getSpare(req: Request, res: Response) {
         const spareId = parseInt(req.params.spareid);
         const propertyId = parseInt(req.params.propertyid);
         const spares = await Spares.getSpares(spareId);
-        let recentJobs: RowDataPacket[] = []
+        let recentJobs: RowDataPacket[] = [];
         const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
         if (recentJobNumbers.length > 0) {
             const jobIdList = makeIdList(recentJobNumbers, 'job_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
         }
-        res.status(200).json({spares, recentJobs});
+        res.status(200).json({ spares, recentJobs });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -49,6 +49,17 @@ export async function getNote(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getSpareStock(req: Request, res: Response) {
+    try {
+        const spareId = parseInt(req.params.spareid);
+        const spareStock = await Spares.getSpareStock(spareId);
+        res.status(200).send(spareStock);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({ message: 'Request failed' });
     }
 }
 
@@ -80,7 +91,7 @@ export async function getSparesWarnings(req: Request, res: Response) {
         const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
         const sparesUsed = await Spares.getUsedRecently(propertyId, monthsOfData);
         const sparesCount = await Spares.getSparesRemaining(propertyId);
-        const dataArrays = sparesWarningArray(sparesCount, sparesUsed, monthsOfData)
+        const dataArrays = sparesWarningArray(sparesCount, sparesUsed, monthsOfData);
         res.status(200).json({ outArray: dataArrays.outArray, warningsArray: dataArrays.warningsArray });
     } catch (err) {
         console.log(err);
@@ -134,7 +145,7 @@ export async function getDeliveries(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
         const deliveryToFind = parseInt(req.params.deliveryid);
-        let deliveries
+        let deliveries;
         if (deliveryToFind > 0) {
             deliveries = await Spares.getDeliveryById(deliveryToFind);
         } else {
@@ -143,15 +154,15 @@ export async function getDeliveries(req: Request, res: Response) {
         if (deliveries.length === 0) {
             res.status(200).json({});
         } else {
-            const data = deliveryMaps(deliveries)
-            const deliveryMap = data.deliveryMap
-            const deliveryIds = data.deliveryIds
-            const deliveriesWithContentsArr = data.deliveries
+            const data = deliveryMaps(deliveries);
+            const deliveryMap = data.deliveryMap;
+            const deliveryIds = data.deliveryIds;
+            const deliveriesWithContentsArr = data.deliveries;
             const deliveryItems = await Spares.getDeliveryItems(deliveryIds);
-            const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap)
+            const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap);
             if (deliveryToFind > 0) {
                 const suppliers = await Spares.getSuppliers(propertyId);
-                res.status(200).json({deliverywithContents, suppliers});
+                res.status(200).json({ deliverywithContents, suppliers });
             } else {
                 res.status(200).json(deliverywithContents);
             }
@@ -172,17 +183,17 @@ export async function addEditDelivery(req: Request, res: Response) {
         } else {
             response = await Spares.editDelivery(req.body);
             // update deliveryItems
-            const confirmDelete = await Spares.deleteDeliveryContents(deliveryId)
+            const confirmDelete = await Spares.deleteDeliveryContents(deliveryId);
             if (confirmDelete) {
-                await Spares.addDeliveryItems(deliveryId, req.body.contents)
+                await Spares.addDeliveryItems(deliveryId, req.body.contents);
             }
         }
         if (req.body.arrived) {
             // add the items to stock
-            const oldStockLevels = await Spares.getSparesRemainingToBeDelivered(deliveryId)// get delivery contents by using the delivery id
-            const justArrivedStock = await Spares.getDeliveryItems([deliveryId])
-            const updatedStock = deliveryArrivedUpdateStock(oldStockLevels, justArrivedStock)
-            updatedStock.forEach((item) => Spares.adjustSpareStock(item.id, item.quant_remain))
+            const oldStockLevels = await Spares.getSparesRemainingToBeDelivered(deliveryId); // get delivery contents by using the delivery id
+            const justArrivedStock = await Spares.getDeliveryItems([deliveryId]);
+            const updatedStock = deliveryArrivedUpdateStock(oldStockLevels, justArrivedStock);
+            updatedStock.forEach((item) => Spares.adjustSpareStock(item.id, item.quant_remain));
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
@@ -278,7 +289,7 @@ export async function deleteDelivery(req: Request, res: Response) {
     try {
         const deliveryId = parseInt(req.body.id);
         const deleted = await Spares.deleteDelivery(deliveryId);
-        Spares.deleteDeliveryContents(deliveryId)
+        Spares.deleteDeliveryContents(deliveryId);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
