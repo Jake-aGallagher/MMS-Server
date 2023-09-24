@@ -26,8 +26,8 @@ router.get('/usergroups/all', authorised, usersController.getAllUserGroups);
 router.put('/usergroups', authorised, usersController.addEditUserGroup);
 
 // Permissions
-router.get('/permissions/group/:groupid', authorised, permissionsController.getAllPermissionsForGroup)
-router.put('/permissions/group/:groupid', authorised, permissionsController.setPermissionsForGroup)
+router.get('/permissions/group/:groupid', authorised, permissionsController.getAllPermissionsForGroup);
+router.put('/permissions/group/:groupid', authorised, permissionsController.setPermissionsForGroup);
 
 // Properties
 router.get('/properties/all-properties', authorised, propertiesController.getAllProperties);
@@ -58,6 +58,7 @@ router.delete('/asset', authorised, assetsController.deleteAsset);
 router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
 router.get('/spare/:spareid/:propertyid', authorised, sparesController.getSpare);
 router.get('/spares-for-use/:propertyid', authorised, sparesController.getSparesForUse);
+router.get('/spares/instock/:spareid', authorised, sparesController.getSpareStock);
 router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/adjust-stock', authorised, sparesController.adjustSpareStock);
 router.delete('/spares/spares-item', authorised, sparesController.deleteSparesItem);
