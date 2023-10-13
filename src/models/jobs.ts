@@ -127,10 +127,15 @@ export async function getRecentJobsByIds(ids: number[]) {
 export async function getLoggedTimeDetails(jobId: number) {
     const data: [TimeDetails[], FieldPacket[]] = await db.execute(
         `SELECT
-            user_id AS id,
-            time
+            logged_time.user_id AS id,
+            logged_time.time,
+            concat(users.first_name, ' ', users.last_name) as 'name'
         FROM
             logged_time
+        INNER JOIN users ON
+        (
+            logged_time.user_id = users.id
+        )
         WHERE
             job_id = ?;`,
         [jobId]

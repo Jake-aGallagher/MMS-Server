@@ -34,6 +34,7 @@ export interface RecentJobs  extends RowDataPacket {
 
 export interface TimeDetails extends RowDataPacket {
     id: number;
+    name: string;
     time: number;
 }
 
