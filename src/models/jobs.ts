@@ -170,12 +170,12 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     return response[0];
 }
 
-export async function updateAndComplete(body: UpdateAndComplete) {
+export async function updateAndComplete(body: UpdateAndComplete, totalTime: number) {
     const id = body.id;
     const status = body.status;
     const description = body.description;
     const notes = body.notes;
-    const logged_time = body.logged_time;
+    const logged_time = totalTime;
     const completed = body.complete ? 1 : 0;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
