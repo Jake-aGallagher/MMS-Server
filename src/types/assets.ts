@@ -1,5 +1,9 @@
 import { RowDataPacket } from "mysql2";
 
+export interface AssetId extends RowDataPacket {
+    id: number
+}
+
 export interface Asset extends RowDataPacket {
     id: number;
     parentId: number;

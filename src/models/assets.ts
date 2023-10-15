@@ -1,5 +1,5 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { AssetById, Asset } from '../types/assets';
+import { AssetById, Asset, AssetId } from '../types/assets';
 import db from '../database/database';
 
 export async function getAssetTree(propertyId: number, rootId: number) {
@@ -42,6 +42,21 @@ export async function getAssetTree(propertyId: number, rootId: number) {
         [propertyId, propertyId, propertyId, rootId, propertyId]
     );
     return data[0];
+}
+
+export async function getAssetRoot(propertyId: number) {
+    const data: [AssetId[], FieldPacket[]] = await db.execute(
+        `SELECT
+            id
+        FROM
+            assets
+        WHERE
+            parent_id = 0
+        AND
+            property_id = ?;`,
+        [propertyId]
+    );
+    return data[0]
 }
 
 export async function getAssetById(id: number) {

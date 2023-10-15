@@ -3,6 +3,7 @@ import * as Properties from '../models/properties';
 import * as Users from '../models/users';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
+import * as Jobs from '../models/jobs';
 import assignedUsersList from '../helpers/assignedIdsList';
 import propertyUsersList from '../helpers/properties/propertyUsersList';
 import lastPropMapping from '../helpers/properties/lastPropMapping';
@@ -20,10 +21,14 @@ export async function getAllProperties(req: Request, res: Response) {
 
 export async function getPropertyDetails(req: Request, res: Response) {
     try {
-        const propertyId = req.params.propertyid;
-        const propDetails = await Properties.getPropertyDetails(parseInt(propertyId));
-        const assignedUsers = await Properties.getAssignedUsers(parseInt(propertyId));
-        res.status(200).json({propDetails, assignedUsers});
+        const propertyId = parseInt(req.params.propertyid);
+        const propDetails = await Properties.getPropertyDetails(propertyId);
+        const assignedUsers = await Properties.getAssignedUsers(propertyId);
+        const assetId = await Assets.getAssetRoot(propertyId);
+        const getChildren = await AssetRelations.getChildren(assetId[0].id);
+        const idsForRecents = makeIdList(getChildren, 'descendant_id');
+        const recentJobs = await Jobs.getRecentJobs(idsForRecents);
+        res.status(200).json({propDetails, assignedUsers, recentJobs});
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
