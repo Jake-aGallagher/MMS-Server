@@ -28,7 +28,8 @@ export async function getPropertyDetails(req: Request, res: Response) {
         const getChildren = await AssetRelations.getChildren(assetId[0].id);
         const idsForRecents = makeIdList(getChildren, 'descendant_id');
         const recentJobs = await Jobs.getRecentJobs(idsForRecents);
-        res.status(200).json({propDetails, assignedUsers, recentJobs});
+        const incompleteJobs = await Jobs.getIncompleteJobs(propertyId);
+        res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -39,9 +40,9 @@ export async function getUsersForAssign(req: Request, res: Response) {
     try {
         const propertyId = req.params.propertyid;
         const assignedUsers = await Properties.getAssignedUserIds(parseInt(propertyId));
-        const assignedlist = assignedUsersList(assignedUsers)
+        const assignedlist = assignedUsersList(assignedUsers);
         const allUsers = await Users.getAllUsers();
-        const usersList = propertyUsersList(allUsers, assignedlist)
+        const usersList = propertyUsersList(allUsers, assignedlist);
         res.status(200).json(usersList);
     } catch (err) {
         console.log(err);
@@ -60,13 +61,13 @@ export async function getLastProperty(req: Request, res: Response) {
         } else {
             allProps = await Properties.getAllPropertiesForUser(parseInt(userId));
         }
-        propIds = makeIdList(allProps, 'id')
+        propIds = makeIdList(allProps, 'id');
         const lastProp = await Properties.getLastPropertyForUser(parseInt(userId));
         if (lastProp[0] === undefined) {
             res.status(200).json(allProps);
         } else {
             if (propIds.includes(lastProp[0].property_id)) {
-                const propertiesMapped = lastPropMapping(allProps, lastProp[0].property_id)
+                const propertiesMapped = lastPropMapping(allProps, lastProp[0].property_id);
                 res.status(200).json(propertiesMapped);
             } else {
                 res.status(200).json(allProps);
@@ -83,7 +84,7 @@ export async function addEditProperty(req: Request, res: Response) {
         let response;
         if (req.body.id > 0) {
             response = await Properties.editProperty(req.body);
-            Assets.renameRootAsset(req.body.name, req.body.id)
+            Assets.renameRootAsset(req.body.name, req.body.id);
         } else {
             response = await Properties.postProperty(req.body);
             const asset = await Assets.insertAsset(0, response.insertId, req.body.name, '');
@@ -92,7 +93,7 @@ export async function addEditProperty(req: Request, res: Response) {
         }
         const propertyId = req.body.id ? req.body.id : response.insertId;
         // @ts-ignore
-        Properties.postLastProperty({userId: req.userId, propertyId: propertyId})
+        Properties.postLastProperty({ userId: req.userId, propertyId: propertyId });
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true, newPropId: propertyId });
         } else {

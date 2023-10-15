@@ -143,6 +143,20 @@ export async function getLoggedTimeDetails(jobId: number) {
     return data[0];
 }
 
+export async function getIncompleteJobs(propertyId: number) {
+    const data: [TimeDetails[], FieldPacket[]] = await db.execute(
+        `SELECT
+            COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+        FROM
+            jobs
+        WHERE
+            property_id = ?;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
 export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     const property_id = body.propertyNumber;
     const asset = body.assetNumber;
