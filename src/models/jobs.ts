@@ -17,7 +17,7 @@ export async function getAllJobs(propertyId: number) {
                 jobs.completed,
                 DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
                 CONCAT(users.first_name, " ", users.last_name) AS reporter,
-                jobs.status
+                statusEnum.value AS status
             FROM 
                 jobs
             LEFT JOIN users ON
@@ -28,6 +28,8 @@ export async function getAllJobs(propertyId: number) {
                 jobs.urgency = urgencyEnum.id
             LEFT JOIN enums AS typeEnum ON
                 jobs.type = typeEnum.id
+            LEFT JOIN enums AS statusEnum ON
+                jobs.status = statusEnum.id
             WHERE
                 jobs.property_id = ?
             ORDER BY
@@ -54,7 +56,7 @@ export async function getJobDetails(id: number) {
             DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
             CONCAT(users.first_name, " ", users.last_name) AS reporter,
             jobs.logged_time,
-            jobs.status,
+            statusEnum.value AS status,
             jobs.notes
         FROM 
             jobs
@@ -68,6 +70,8 @@ export async function getJobDetails(id: number) {
             jobs.urgency = urgencyEnum.id
         LEFT JOIN enums AS typeEnum ON
             jobs.type = typeEnum.id
+        LEFT JOIN enums AS statusEnum ON
+            jobs.status = statusEnum.id
         WHERE
             jobs.id = ?;`,
         [id]
