@@ -4,6 +4,7 @@ import * as Users from '../models/users';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
 import * as Jobs from '../models/jobs';
+import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import assignedUsersList from '../helpers/assignedIdsList';
 import propertyUsersList from '../helpers/properties/propertyUsersList';
 import lastPropMapping from '../helpers/properties/lastPropMapping';
@@ -28,7 +29,7 @@ export async function getPropertyDetails(req: Request, res: Response) {
         const getChildren = await AssetRelations.getChildren(assetId[0].id);
         const idsForRecents = makeIdList(getChildren, 'descendant_id');
         const recentJobs = await Jobs.getRecentJobs(idsForRecents);
-        const incompleteJobs = await Jobs.getIncompleteJobs(propertyId);
+        const incompleteJobs = await DefaultGraphs.getIncompleteJobs(propertyId);
         res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs });
     } catch (err) {
         console.log(err);
