@@ -19,3 +19,8 @@ export interface DefaultGraph6Months extends DefaultGraph3Months {
     month_5: number;
     month_6: number;
 }
+
+export interface MostUsedSpares6Months extends RowDataPacket {
+    quantity: number;
+    name: string;
+}

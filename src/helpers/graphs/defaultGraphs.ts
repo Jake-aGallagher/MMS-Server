@@ -1,6 +1,6 @@
 import db from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
-import { DefaultGraph6Months, IncompleteJobs } from '../../types/defaultGraphs';
+import { DefaultGraph6Months, IncompleteJobs, MostUsedSpares6Months } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
 export async function getIncompleteJobs(propertyId: number) {
@@ -17,7 +17,7 @@ export async function getIncompleteJobs(propertyId: number) {
     return data[0];
 }
 
-export async function getJobsRaised5Months(propertyId: number) {
+export async function getJobsRaised6Months(propertyId: number) {
     const d = new Date();
     const endNum = d.getMonth();
     let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
@@ -75,4 +75,30 @@ export async function getSparesUsed6Months(propertyId: number) {
         { month: monthsLooped[startNum + 5], value: data[0][0].month_6 },
     ];
     return returnObj;
+}
+
+export async function mostUsedSpares6Months(propertyId: number) {
+    const data: [MostUsedSpares6Months[], FieldPacket[]] = await db.execute(
+        `SELECT
+            SUM(spares_used.quantity) as quantity,
+            spares.name as name
+        FROM
+            spares_used
+        INNER JOIN spares ON
+        (
+            spares.id = spares_used.spare_id
+        )
+        WHERE
+            spares_used.property_id = ?
+        AND
+            spares_used.date_used > DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY
+            spares.name
+        ORDER BY
+            quantity DESC
+        LIMIT
+            5;`,
+        [propertyId]
+    );
+    return data[0];
 }
