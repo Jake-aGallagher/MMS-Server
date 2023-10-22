@@ -20,7 +20,7 @@ export interface DefaultGraph6M extends DefaultGraph3M {
     month_6: number;
 }
 
-export interface MostUsedSpares6M extends RowDataPacket {
-    quantity: number;
+export interface NameValue extends RowDataPacket {
     name: string;
+    value: number;
 }

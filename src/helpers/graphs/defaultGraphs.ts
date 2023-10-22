@@ -1,6 +1,6 @@
 import db from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
-import { DefaultGraph6M, IncompleteJobs, MostUsedSpares6M } from '../../types/defaultGraphs';
+import { DefaultGraph6M, IncompleteJobs, NameValue } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
 export async function getIncompleteJobs(propertyId: number) {
@@ -78,9 +78,9 @@ export async function getSparesUsed6M(propertyId: number) {
 }
 
 export async function mostUsedSpares6M(propertyId: number) {
-    const data: [MostUsedSpares6M[], FieldPacket[]] = await db.execute(
+    const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
-            SUM(spares_used.quantity) as quantity,
+            SUM(spares_used.quantity) as value,
             spares.name as name
         FROM
             spares_used
@@ -95,7 +95,7 @@ export async function mostUsedSpares6M(propertyId: number) {
         GROUP BY
             spares.name
         ORDER BY
-            quantity DESC
+            value DESC
         LIMIT
             5;`,
         [propertyId]
@@ -138,7 +138,7 @@ export async function sparesCost6M(propertyId: number) {
 }
 
 export async function jobsOfComponents6M(assetIds: number[]) {
-    const data: [MostUsedSpares6M[], FieldPacket[]] = await db.execute(
+    const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(*) as value,
             assets.name
