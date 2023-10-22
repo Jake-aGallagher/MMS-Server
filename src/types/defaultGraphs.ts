@@ -5,10 +5,17 @@ export interface IncompleteJobs extends RowDataPacket {
     overdue: number;
 }
 
-export interface JobsRaised5Months extends RowDataPacket {
+export interface DefaultGraph1Month extends RowDataPacket {
     month_1: number;
+}
+
+export interface DefaultGraph3Months extends DefaultGraph1Month {
     month_2: number;
     month_3: number;
+}
+
+export interface DefaultGraph6Months extends DefaultGraph3Months {
     month_4: number;
     month_5: number;
+    month_6: number;
 }
