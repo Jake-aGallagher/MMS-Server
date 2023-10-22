@@ -24,12 +24,12 @@ export async function getJobsRaised5Months(propertyId: number) {
 
     const data: [DefaultGraph6Months[], FieldPacket[]] = await db.execute(
         `SELECT
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum]}", 1, NULL)) AS month_1,
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 1]}", 1, NULL)) AS month_2,
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 2]}", 1, NULL)) AS month_3,
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 3]}", 1, NULL)) AS month_4,
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 4]}", 1, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 5]}", 1, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_1,
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 1]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_2,
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 2]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 3]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 4]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 5]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
         FROM
             jobs
         WHERE
@@ -54,12 +54,12 @@ export async function getSparesUsed6Months(propertyId: number) {
 
     const data: [DefaultGraph6Months[], FieldPacket[]] = await db.execute(
         `SELECT
-            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}", quantity, NULL)) AS month_1,
-            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}", quantity, NULL)) AS month_2,
-            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 2]}", quantity, NULL)) AS month_3,
-            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 3]}", quantity, NULL)) AS month_4,
-            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 4]}", quantity, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 5]}", quantity, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_1,
+            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_2,
+            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 2]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_3,
+            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 3]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_4,
+            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 4]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_5,
+            COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 5]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_6
         FROM
             spares_used
         WHERE
