@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
 import * as Jobs from '../models/jobs';
+import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import makeAssetTree from '../helpers/assets/makeAssetTree';
 import makeIdList from '../helpers/makeIdList';
 
@@ -19,7 +20,6 @@ export async function getAssetTree(req: Request, res: Response) {
 
 export async function getAsset(req: Request, res: Response) {
     const assetId = parseInt(req.params.assetid);
-
     try {
         const assetDetails = await Assets.getAssetById(assetId);
         if (assetDetails.length > 0) {
@@ -29,7 +29,8 @@ export async function getAsset(req: Request, res: Response) {
             const recentJobs = await Jobs.getRecentJobs(idsForRecents);
             const children = await Assets.getAssetTree(propertyId, assetId);
             const tree = makeAssetTree(children, assetId);
-            res.status(200).json({ assetDetails, recentJobs, tree });
+            const jobsOfComponents6M = await DefaultGraphs.jobsOfComponents6M([...idsForRecents, assetId])
+            res.status(200).json({ assetDetails, recentJobs, tree, jobsOfComponents6M });
         } else {
             res.status(500).json({ message: 'Request failed' });
         }

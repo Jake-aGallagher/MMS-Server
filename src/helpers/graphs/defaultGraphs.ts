@@ -136,3 +136,28 @@ export async function sparesCost6M(propertyId: number) {
     ];
     return returnObj;
 }
+
+export async function jobsOfComponents6M(assetIds: number[]) {
+    const data: [MostUsedSpares6M[], FieldPacket[]] = await db.execute(
+        `SELECT
+            COUNT(*) as value,
+            assets.name
+        FROM
+            jobs
+        INNER JOIN assets ON
+        (
+            assets.id = jobs.asset
+        )
+        WHERE
+            assets.id IN (${assetIds})
+        AND
+            jobs.created > DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY
+            assets.name
+        ORDER BY
+            value DESC
+        LIMIT
+            5;`
+    );
+    return data[0];
+}
