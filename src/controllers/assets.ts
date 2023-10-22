@@ -29,8 +29,10 @@ export async function getAsset(req: Request, res: Response) {
             const recentJobs = await Jobs.getRecentJobs(idsForRecents);
             const children = await Assets.getAssetTree(propertyId, assetId);
             const tree = makeAssetTree(children, assetId);
-            const jobsOfComponents6M = await DefaultGraphs.jobsOfComponents6M([...idsForRecents, assetId])
-            res.status(200).json({ assetDetails, recentJobs, tree, jobsOfComponents6M });
+            // Todo - batch graph calls
+            const jobsOfComponents6M = await DefaultGraphs.jobsOfComponents6M([...idsForRecents, assetId]);
+            const incompleteForAsset = await DefaultGraphs.incompleteForAsset([...idsForRecents, assetId]);
+            res.status(200).json({ assetDetails, recentJobs, tree, jobsOfComponents6M, incompleteForAsset });
         } else {
             res.status(500).json({ message: 'Request failed' });
         }

@@ -161,3 +161,16 @@ export async function jobsOfComponents6M(assetIds: number[]) {
     );
     return data[0];
 }
+
+export async function incompleteForAsset(assetIds: number[]) {
+    const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
+        `SELECT
+            COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+        FROM
+            jobs
+        WHERE
+            asset IN (${assetIds});`
+    );
+    return data[0];
+}
