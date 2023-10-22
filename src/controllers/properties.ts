@@ -34,7 +34,8 @@ export async function getPropertyDetails(req: Request, res: Response) {
         const raised6Months = await DefaultGraphs.getJobsRaised6Months(propertyId);
         const sparesUsed6Months = await DefaultGraphs.getSparesUsed6Months(propertyId);
         const mostUsed6Months = await DefaultGraphs.mostUsedSpares6Months(propertyId);
-        res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs, raised6Months, sparesUsed6Months, mostUsed6Months });
+        const sparesCost6M = await DefaultGraphs.sparesCost6M(propertyId);
+        res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs, raised6Months, sparesUsed6Months, mostUsed6Months, sparesCost6M });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
