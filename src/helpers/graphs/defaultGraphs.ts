@@ -1,6 +1,6 @@
 import db from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
-import { DefaultGraph6Months, IncompleteJobs, MostUsedSpares6Months } from '../../types/defaultGraphs';
+import { DefaultGraph6M, IncompleteJobs, MostUsedSpares6M } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
 export async function getIncompleteJobs(propertyId: number) {
@@ -17,12 +17,12 @@ export async function getIncompleteJobs(propertyId: number) {
     return data[0];
 }
 
-export async function getJobsRaised6Months(propertyId: number) {
+export async function getJobsRaised6M(propertyId: number) {
     const d = new Date();
     const endNum = d.getMonth();
     let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
 
-    const data: [DefaultGraph6Months[], FieldPacket[]] = await db.execute(
+    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_1,
             COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 1]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_2,
@@ -47,12 +47,12 @@ export async function getJobsRaised6Months(propertyId: number) {
     return returnObj;
 }
 
-export async function getSparesUsed6Months(propertyId: number) {
+export async function getSparesUsed6M(propertyId: number) {
     const d = new Date();
     const endNum = d.getMonth();
     let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
 
-    const data: [DefaultGraph6Months[], FieldPacket[]] = await db.execute(
+    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_1,
             COUNT(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_2,
@@ -77,8 +77,8 @@ export async function getSparesUsed6Months(propertyId: number) {
     return returnObj;
 }
 
-export async function mostUsedSpares6Months(propertyId: number) {
-    const data: [MostUsedSpares6Months[], FieldPacket[]] = await db.execute(
+export async function mostUsedSpares6M(propertyId: number) {
+    const data: [MostUsedSpares6M[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(spares_used.quantity) as quantity,
             spares.name as name
@@ -108,7 +108,7 @@ export async function sparesCost6M(propertyId: number) {
     const endNum = d.getMonth();
     let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
 
-    const data: [DefaultGraph6Months[], FieldPacket[]] = await db.execute(
+    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), (spares_used.quantity * spares.cost), NULL)) AS month_1,
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), (spares_used.quantity * spares.cost), NULL)) AS month_2,

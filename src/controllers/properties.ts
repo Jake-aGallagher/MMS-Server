@@ -31,11 +31,11 @@ export async function getPropertyDetails(req: Request, res: Response) {
         const recentJobs = await Jobs.getRecentJobs(idsForRecents);
         // Todo - batch all these default graph calls together
         const incompleteJobs = await DefaultGraphs.getIncompleteJobs(propertyId);
-        const raised6Months = await DefaultGraphs.getJobsRaised6Months(propertyId);
-        const sparesUsed6Months = await DefaultGraphs.getSparesUsed6Months(propertyId);
-        const mostUsed6Months = await DefaultGraphs.mostUsedSpares6Months(propertyId);
+        const raised6M = await DefaultGraphs.getJobsRaised6M(propertyId);
+        const sparesUsed6M = await DefaultGraphs.getSparesUsed6M(propertyId);
+        const mostUsed6M = await DefaultGraphs.mostUsedSpares6M(propertyId);
         const sparesCost6M = await DefaultGraphs.sparesCost6M(propertyId);
-        res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs, raised6Months, sparesUsed6Months, mostUsed6Months, sparesCost6M });
+        res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs, raised6M, sparesUsed6M, mostUsed6M, sparesCost6M });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
