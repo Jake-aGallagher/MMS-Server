@@ -4,6 +4,7 @@ import deliveryMaps from '../helpers/spares/deliveryMaps';
 import deliveryContents from '../helpers/spares/deliveryContents';
 import * as Spares from '../models/spares';
 import * as Jobs from '../models/jobs';
+import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
 import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
 import makeIdList from '../helpers/makeIdList';
@@ -30,11 +31,12 @@ export async function getSpare(req: Request, res: Response) {
         const spares = await Spares.getSpares(spareId);
         let recentJobs: RowDataPacket[] = [];
         const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
+        const used6M = await DefaultGraphs.sparesUsed6M(spareId);
         if (recentJobNumbers.length > 0) {
             const jobIdList = makeIdList(recentJobNumbers, 'job_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
         }
-        res.status(200).json({ spares, recentJobs });
+        res.status(200).json({ spares, recentJobs, used6M });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
