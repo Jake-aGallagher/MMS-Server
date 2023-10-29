@@ -76,11 +76,11 @@ export async function getUrgencyPayload(id: number) {
 }
 
 export async function addEnum(body: { value: string; enumTypeId: number; listPriority: number; payload: number; payloadTwo: string }) {
-    const value = body.value
-    const enumTypeId = body.enumTypeId
-    const listPriority = body.listPriority
-    const payload = body.payload
-    const payloadTwo = body.payloadTwo
+    const value = body.value;
+    const enumTypeId = body.enumTypeId;
+    const listPriority = body.listPriority;
+    const payload = body.payload;
+    const payloadTwo = body.payloadTwo;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
@@ -101,11 +101,11 @@ export async function addEnum(body: { value: string; enumTypeId: number; listPri
 
 export async function editEnum(body: { id: string; value: string; enumTypeId: number; listPriority: number; payload: number; payloadTwo: string }) {
     const id = parseInt(body.id);
-    const value = body.value
-    const enumTypeId = body.enumTypeId
-    const listPriority = body.listPriority
-    const payload = body.payload
-    const payloadTwo = body.payloadTwo
+    const value = body.value;
+    const enumTypeId = body.enumTypeId;
+    const listPriority = body.listPriority;
+    const payload = body.payload;
+    const payloadTwo = body.payloadTwo;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
@@ -133,3 +133,70 @@ export async function deleteEnum(body: { id: string }) {
     );
     return response[0];
 }
+
+//////////// Job_types ////////////////
+export async function getAllJobTypes() {
+    const data = await db.execute(
+        `SELECT
+            *
+        FROM 
+            job_types
+        ORDER BY
+            sort;`
+    );
+    return data[0];
+}
+
+export async function getJobTypeById(id: number) {
+    const data = await db.execute(
+        `SELECT
+            *
+        FROM 
+            job_types
+        WHERE
+            id = ?;`,
+        [id]
+    );
+    return data[0];
+}
+
+export async function addJobType(body: { value: string; sortOrder: number }) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO
+            job_types
+            (
+                value,
+                sort
+            )
+        VALUES
+            (?,?);`,
+        [body.value, body.sortOrder]
+    );
+    return response[0];
+}
+
+export async function editJobType(body: { id: number; value: string; sortOrder: number }) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            job_types
+        SET
+            value = ?,
+            sort = ?,
+        WHERE
+            id = ?;`,
+        [body.value, body.sortOrder, body.id]
+    );
+    return response[0];
+}
+
+export async function deleteJobType(body: { id: string }) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `DELETE FROM
+            job_types
+        WHERE
+            id = ?;`,
+        [body.id]
+    );
+    return response[0];
+}
+///////////////////////////////////////

@@ -26,7 +26,7 @@ export async function getAllJobs(propertyId: number) {
                 assets.id = jobs.asset
             LEFT JOIN enums AS urgencyEnum ON
                 jobs.urgency = urgencyEnum.id
-            LEFT JOIN enums AS typeEnum ON
+            LEFT JOIN job_types AS typeEnum ON
                 jobs.type = typeEnum.id
             LEFT JOIN enums AS statusEnum ON
                 jobs.status = statusEnum.id
@@ -68,7 +68,7 @@ export async function getJobDetails(id: number) {
             assets.id = jobs.asset
         LEFT JOIN enums AS urgencyEnum ON
             jobs.urgency = urgencyEnum.id
-        LEFT JOIN enums AS typeEnum ON
+        LEFT JOIN job_types AS typeEnum ON
             jobs.type = typeEnum.id
         LEFT JOIN enums AS statusEnum ON
             jobs.status = statusEnum.id
@@ -84,7 +84,7 @@ export async function getRecentJobs(idsForAssets: number[]) {
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            enums.value AS type,
+            job_types.value AS type,
             jobs.title,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
             jobs.completed
@@ -92,8 +92,8 @@ export async function getRecentJobs(idsForAssets: number[]) {
             jobs
         LEFT JOIN assets ON
             assets.id = jobs.asset
-        LEFT JOIN enums ON
-            jobs.type = enums.id
+        LEFT JOIN job_types ON
+            jobs.type = job_types.id
         WHERE
             asset IN (${idsForAssets})
         ORDER BY
@@ -110,7 +110,7 @@ export async function getRecentJobsByIds(ids: number[]) {
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            jobs.type,
+            job_types.value AS type,
             jobs.title,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
             jobs.completed
@@ -118,6 +118,8 @@ export async function getRecentJobsByIds(ids: number[]) {
             jobs
         LEFT JOIN assets ON
             assets.id = jobs.asset
+        LEFT JOIN job_types ON
+            jobs.type = job_types.id
         WHERE
             jobs.id IN (${ids})
         ORDER BY
