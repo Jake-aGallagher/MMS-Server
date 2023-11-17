@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import * as Enums from '../models/enums';
+import * as JobTypes from '../models/jobTypes';
 
 export async function getEnumsForCreateJob(req: Request, res: Response) {
     try {
         const urgency = await Enums.getEnumOptions('urgency options');
-        const types = await Enums.getAllJobTypes();
+        const types = await JobTypes.getAllJobTypes();
         res.status(200).json({ types, urgency });
     } catch (err) {
         console.log(err);
