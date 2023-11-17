@@ -9,6 +9,7 @@ import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
+import * as JobTypesController from '../controllers/jobTypes';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -86,5 +87,11 @@ router.get('/enums/types', authorised, enumsController.getEnumTypesForEdit);
 router.get('/enums/edit/:id', authorised, enumsController.getEnumForEdit);
 router.put('/enums', authorised, enumsController.addEditEnum);
 router.delete('/enum', authorised, enumsController.deleteEnum);
+
+// Job Types
+router.get('/jobtypes', authorised, JobTypesController.getJobTypes);
+router.get('/jobtypes/:id', authorised, JobTypesController.getJobTypeById);
+router.put('/jobtypes', authorised, JobTypesController.addEditJobType);
+router.delete('/jobtypes/:id', authorised, JobTypesController.deleteJobType);
 
 export default router;
