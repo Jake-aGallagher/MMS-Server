@@ -1,5 +1,4 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { PayloadBasics } from '../types/enums';
 import db from '../database/database';
 
 export async function getEnumOptions(enumTypeString: string) {
@@ -57,20 +56,6 @@ export async function getEnumTypes() {
             enum_types
         ORDER BY
             id;`
-    );
-    return data[0];
-}
-
-export async function getUrgencyPayload(id: number) {
-    const data: [PayloadBasics[], FieldPacket[]] = await db.execute(
-        `SELECT
-            payload AS number,
-            payload_two AS duration
-        FROM
-            enums
-        WHERE
-            id = ?;`,
-        [id]
     );
     return data[0];
 }

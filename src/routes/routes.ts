@@ -9,9 +9,9 @@ import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
-import * as JobTypesController from '../controllers/jobTypes';
-import * as StatusTypesController from '../controllers/statusTypes';
-import * as UrgencyTypesController from '../controllers/urgencyTypes'
+import * as jobTypesController from '../controllers/jobTypes';
+import * as statusTypesController from '../controllers/statusTypes';
+import * as urgencyTypesController from '../controllers/urgencyTypes'
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -45,6 +45,7 @@ router.put('/properties/Last-property', authorised, propertiesController.setLast
 
 // Jobs
 router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
+router.get('/jobs/create-job', authorised, jobsController.getEnumsForCreateJob);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
 router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobUpdate);
 router.post('/jobs', authorised, jobsController.postJob);
@@ -83,7 +84,6 @@ router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums
-router.get('/enums/create-job', authorised, enumsController.getEnumsForCreateJob);
 router.get('/enums/typesvalues', authorised, enumsController.getEnumsForSettings);
 router.get('/enums/types', authorised, enumsController.getEnumTypesForEdit);
 router.get('/enums/edit/:id', authorised, enumsController.getEnumForEdit);
@@ -91,21 +91,21 @@ router.put('/enums', authorised, enumsController.addEditEnum);
 router.delete('/enum', authorised, enumsController.deleteEnum);
 
 // Job Types
-router.get('/jobtypes', authorised, JobTypesController.getJobTypes);
-router.get('/jobtypes/:id', authorised, JobTypesController.getJobTypeById);
-router.put('/jobtypes', authorised, JobTypesController.addEditJobType);
-router.delete('/jobtypes/:id', authorised, JobTypesController.deleteJobType);
+router.get('/jobtypes', authorised, jobTypesController.getJobTypes);
+router.get('/jobtypes/:id', authorised, jobTypesController.getJobTypeById);
+router.put('/jobtypes', authorised, jobTypesController.addEditJobType);
+router.delete('/jobtypes/:id', authorised, jobTypesController.deleteJobType);
 
 // Job Status Types
-router.get('/statustypes', authorised, StatusTypesController.getStatusTypes);
-router.get('/statustypes/:id', authorised, StatusTypesController.getStatusTypeById);
-router.put('/statustypes', authorised, StatusTypesController.addEditStatusType);
-router.delete('/statustypes/:id', authorised, StatusTypesController.deleteStatusType);
+router.get('/statustypes', authorised, statusTypesController.getStatusTypes);
+router.get('/statustypes/:id', authorised, statusTypesController.getStatusTypeById);
+router.put('/statustypes', authorised, statusTypesController.addEditStatusType);
+router.delete('/statustypes/:id', authorised, statusTypesController.deleteStatusType);
 
 // Job Urgency Types
-router.get('/urgencytypes', authorised, UrgencyTypesController.getUrgencyTypes);
-router.get('/urgencytypes/:id', authorised, UrgencyTypesController.getUrgencyTypeById);
-router.put('/urgencytypes', authorised, UrgencyTypesController.addEditUrgencyType);
-router.delete('/urgencytypes/:id', authorised, UrgencyTypesController.deleteUrgencyType);
+router.get('/urgencytypes', authorised, urgencyTypesController.getUrgencyTypes);
+router.get('/urgencytypes/:id', authorised, urgencyTypesController.getUrgencyTypeById);
+router.put('/urgencytypes', authorised, urgencyTypesController.addEditUrgencyType);
+router.delete('/urgencytypes/:id', authorised, urgencyTypesController.deleteUrgencyType);
 
 export default router;

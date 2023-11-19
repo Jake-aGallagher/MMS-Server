@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import * as Jobs from '../models/jobs';
-import * as Enums from '../models/enums';
 import * as Properties from '../models/properties';
 import * as Users from '../models/users';
 import * as Spares from '../models/spares';
+import * as TypeEnums from '../models/jobTypes';
+import * as StatusEnums from '../models/statusTypes';
+import * as UrgencyEnums from '../models/urgencyTypes';
 import makeIdList from '../helpers/makeIdList';
 import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
 import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
@@ -42,11 +44,22 @@ export async function getJobDetails(req: Request, res: Response) {
     }
 }
 
+export async function getEnumsForCreateJob(req: Request, res: Response) {
+    try {
+        const urgency = await UrgencyEnums.getAllUrgencyTypes();
+        const types = await TypeEnums.getAllJobTypes();
+        res.status(200).json({ types, urgency });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
 export async function getJobUpdate(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const propertyId = parseInt(req.params.propertyid);
-        const statusOptions = await Enums.getEnumOptions('status');
+        const statusOptions = await StatusEnums.getAllStatusTypes();
         const jobDetails = await Jobs.getJobDetails(id);
         const users = await Properties.getAssignedUsers(propertyId);
         const timeDetails = await Jobs.getLoggedTimeDetails(id);
@@ -65,7 +78,7 @@ export async function getJobUpdate(req: Request, res: Response) {
 export async function postJob(req: Request, res: Response) {
     try {
         const urgencyReq = req.body.urgency;
-        const urgency = await Enums.getUrgencyPayload(urgencyReq);
+        const urgency = await UrgencyEnums.getUrgencyPayload(urgencyReq)
         const response = await Jobs.postJob(req.body, urgency);
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true, jobId: response.insertId });

@@ -1,5 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
+import { PayloadBasics } from '../types/enums';
 
 export async function getAllUrgencyTypes() {
     const data = await db.execute(
@@ -25,6 +26,20 @@ export async function getUrgencyTypeById(id: number) {
     );
     return data[0];
 }
+
+export async function getUrgencyPayload(id: number) {
+    const data: [PayloadBasics[], FieldPacket[]] = await db.execute(
+        `SELECT
+            payload AS number,
+            payload_two AS duration
+        FROM
+            urgency_types
+        WHERE
+            id = ?;`,
+        [id]
+    );
+    return data[0];
+} 
 
 export async function addUrgencyType(body: { value: string; listPriority: number, urgencyNumber: number, urgencyPeriod: string }) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
