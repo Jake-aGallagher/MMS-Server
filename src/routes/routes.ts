@@ -10,6 +10,7 @@ import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
 import * as JobTypesController from '../controllers/jobTypes';
+import * as StatusTypesController from '../controllers/statusTypes';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -93,5 +94,11 @@ router.get('/jobtypes', authorised, JobTypesController.getJobTypes);
 router.get('/jobtypes/:id', authorised, JobTypesController.getJobTypeById);
 router.put('/jobtypes', authorised, JobTypesController.addEditJobType);
 router.delete('/jobtypes/:id', authorised, JobTypesController.deleteJobType);
+
+// Job Status Types
+router.get('/statustypes', authorised, StatusTypesController.getStatusTypes);
+router.get('/statustypes/:id', authorised, StatusTypesController.getStatusTypeById);
+router.put('/statustypes', authorised, StatusTypesController.addEditStatusType);
+router.delete('/statustypes/:id', authorised, StatusTypesController.deleteStatusType);
 
 export default router;
