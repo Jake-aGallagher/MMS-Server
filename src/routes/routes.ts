@@ -11,6 +11,7 @@ import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
 import * as JobTypesController from '../controllers/jobTypes';
 import * as StatusTypesController from '../controllers/statusTypes';
+import * as UrgencyTypesController from '../controllers/urgencyTypes'
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -100,5 +101,11 @@ router.get('/statustypes', authorised, StatusTypesController.getStatusTypes);
 router.get('/statustypes/:id', authorised, StatusTypesController.getStatusTypeById);
 router.put('/statustypes', authorised, StatusTypesController.addEditStatusType);
 router.delete('/statustypes/:id', authorised, StatusTypesController.deleteStatusType);
+
+// Job Urgency Types
+router.get('/urgencytypes', authorised, UrgencyTypesController.getUrgencyTypes);
+router.get('/urgencytypes/:id', authorised, UrgencyTypesController.getUrgencyTypeById);
+router.put('/urgencytypes', authorised, UrgencyTypesController.addEditUrgencyType);
+router.delete('/urgencytypes/:id', authorised, UrgencyTypesController.deleteUrgencyType);
 
 export default router;
