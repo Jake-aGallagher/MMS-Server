@@ -1,45 +1,55 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
 
-export async function getEnumOptions(enumTypeString: string) {
+export async function getEnumGroups() {
     const data = await db.execute(
         `SELECT
-            enums.id,
-            enums.value
-        FROM 
-            enums
-        INNER JOIN enum_types ON
-            enum_types.id = enums.enum_type_id
+            id,
+            value
+        FROM
+            enum_groups
+        ORDER BY
+            id;`
+    );
+    return data[0];
+}
+
+export async function getEnumGroupById(groupId: number) {
+    const data = await db.execute(
+        `SELECT
+            value
+        FROM
+            enum_groups
         WHERE
-            enum_types.type = ?
-        ORDER BY
-            enums.list_priority;`,
-        [enumTypeString]
+            id = ?;`,
+        [groupId]
     );
     return data[0];
 }
 
-export async function getAllEnum() {
+export async function getEnumsByGroupId(enumGroupId: number) {
     const data = await db.execute(
         `SELECT
-            enums.*,
-            enum_types.type AS typeString
+            enum_values.id,
+            enum_values.value,
+            enum_values.list_priority
         FROM 
-            enums
-        INNER JOIN enum_types ON
-            enum_types.id = enums.enum_type_id
+            enum_values
+        WHERE
+            enum_values.enum_group_id = ?
         ORDER BY
-            enums.list_priority;`
+            enum_values.list_priority;`,
+        [enumGroupId]
     );
     return data[0];
 }
 
-export async function getEnumById(id: number) {
+export async function getEnumValueById(id: number) {
     const data = await db.execute(
         `SELECT
             *
         FROM 
-            enums
+            enum_values
         WHERE
             id = ?;`,
         [id]
@@ -47,76 +57,103 @@ export async function getEnumById(id: number) {
     return data[0];
 }
 
-export async function getEnumTypes() {
-    const data = await db.execute(
-        `SELECT
-            id,
-            type
-        FROM
-            enum_types
-        ORDER BY
-            id;`
+export async function addEnumGroup(body: { value: string; }) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO
+            enum_groups
+            (
+                value
+            )
+        VALUES
+            (?);`,
+        [body.value]
     );
-    return data[0];
+    return response[0];
 }
 
-export async function addEnum(body: { value: string; enumTypeId: number; listPriority: number; payload: number; payloadTwo: string }) {
+export async function editEnumGroup(body: { id: string; value: string; }) {
+    const id = parseInt(body.id);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            enum_groups
+        SET
+            value = ?
+        WHERE
+            id = ?;`,
+        [body.value, id]
+    );
+    return response[0];
+}
+
+export async function addEnumValue(body: { value: string; enumGroupId: number; listPriority: number }) {
     const value = body.value;
-    const enumTypeId = body.enumTypeId;
+    const enumGroupId = body.enumGroupId;
     const listPriority = body.listPriority;
-    const payload = body.payload;
-    const payloadTwo = body.payloadTwo;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
-            enums
+            enum_values
             (
-                enum_type_id,
+                enum_group_id,
                 value,
-                list_priority,
-                payload,
-                payload_two
+                list_priority
             )
         VALUES
-            (?,?,?,?,?);`,
-        [enumTypeId, value, listPriority, enumTypeId === 1 ? payload : null, enumTypeId === 1 ? payloadTwo : null]
+            (?,?,?);`,
+        [enumGroupId, value, listPriority]
     );
     return response[0];
 }
 
-export async function editEnum(body: { id: string; value: string; enumTypeId: number; listPriority: number; payload: number; payloadTwo: string }) {
+export async function editEnumValue(body: { id: string; value: string; enumGroupId: number; listPriority: number }) {
     const id = parseInt(body.id);
     const value = body.value;
-    const enumTypeId = body.enumTypeId;
+    const enumGroupId = body.enumGroupId;
     const listPriority = body.listPriority;
-    const payload = body.payload;
-    const payloadTwo = body.payloadTwo;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
-            enums
+            enum_values
         SET
-            enum_type_id = ?,
+            enum_group_id = ?,
             value = ?,
-            list_priority = ?,
-            payload = ?,
-            payload_two = ?
+            list_priority = ?
         WHERE
             id = ?;`,
-        [enumTypeId, value, listPriority, enumTypeId === 1 ? payload : null, enumTypeId === 1 ? payloadTwo : null, id]
+        [enumGroupId, value, listPriority, id]
     );
     return response[0];
 }
 
-export async function deleteEnum(body: { id: string }) {
+export async function deleteEnumGroup(id: number) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
-            enums
+            enum_groups
         WHERE
             id = ?;`,
-        [body.id]
+        [id]
     );
     return response[0];
 }
 
+export async function deleteEnumValue(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `DELETE FROM
+            enum_values
+        WHERE
+            id = ?;`,
+        [id]
+    );
+    return response[0];
+}
 
+export async function deleteEnumValueByGroupId(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `DELETE FROM
+            enum_values
+        WHERE
+            enum_group_id = ?;`,
+        [id]
+    );
+    return response[0];
+}

@@ -24,11 +24,11 @@ export async function getAllJobs(propertyId: number) {
                 users.id = jobs.reporter
             LEFT JOIN assets ON
                 assets.id = jobs.asset
-            LEFT JOIN enums AS urgencyEnum ON
+            LEFT JOIN urgency_types AS urgencyEnum ON
                 jobs.urgency = urgencyEnum.id
             LEFT JOIN job_types AS typeEnum ON
                 jobs.type = typeEnum.id
-            LEFT JOIN enums AS statusEnum ON
+            LEFT JOIN status_types AS statusEnum ON
                 jobs.status = statusEnum.id
             WHERE
                 jobs.property_id = ?
@@ -66,11 +66,11 @@ export async function getJobDetails(id: number) {
             properties.id = jobs.property_id
         LEFT JOIN assets ON
             assets.id = jobs.asset
-        LEFT JOIN enums AS urgencyEnum ON
+        LEFT JOIN urgency_types AS urgencyEnum ON
             jobs.urgency = urgencyEnum.id
         LEFT JOIN job_types AS typeEnum ON
             jobs.type = typeEnum.id
-        LEFT JOIN enums AS statusEnum ON
+        LEFT JOIN status_types AS statusEnum ON
             jobs.status = statusEnum.id
         WHERE
             jobs.id = ?;`,

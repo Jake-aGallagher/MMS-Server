@@ -84,11 +84,14 @@ router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note', authorised, sparesController.deleteNote);
 
 // Enums
-router.get('/enums/typesvalues', authorised, enumsController.getEnumsForSettings);
-router.get('/enums/types', authorised, enumsController.getEnumTypesForEdit);
-router.get('/enums/edit/:id', authorised, enumsController.getEnumForEdit);
-router.put('/enums', authorised, enumsController.addEditEnum);
-router.delete('/enum', authorised, enumsController.deleteEnum);
+router.get('/enumgroups', authorised, enumsController.getEnumsGroups);
+router.get('/enumgroup/:id', authorised, enumsController.getEnumsGroupById);
+router.get('/enumgroups/:id', authorised, enumsController.getEnumsByGroupId);
+router.put('/enumgroups', authorised, enumsController.addEditEnumGroup);
+router.delete('/enumgroups/:id', authorised, enumsController.deleteEnumGroup);
+router.get('/enumvalue/:id', authorised, enumsController.getEnumValueById);
+router.put('/enumvalues', authorised, enumsController.addEditEnumValue);
+router.delete('/enumvalues/:id', authorised, enumsController.deleteEnumValue);
 
 // Job Types
 router.get('/jobtypes', authorised, jobTypesController.getJobTypes);
