@@ -60,14 +60,15 @@ export async function getJobUpdate(req: Request, res: Response) {
         const id = parseInt(req.params.jobid);
         const propertyId = parseInt(req.params.propertyid);
         const statusOptions = await StatusEnums.getAllStatusTypes();
+        const completableStatus = statusOptions.filter((item) => item.can_complete).map((item) => item.id)
         const jobDetails = await Jobs.getJobDetails(id);
         const users = await Properties.getAssignedUsers(propertyId);
         const timeDetails = await Jobs.getLoggedTimeDetails(id);
         const usedSpares = await Spares.getUsedSpares(id);
         if (timeDetails.length > 0) {
-            res.status(200).json({ statusOptions, jobDetails, users, usedSpares, timeDetails });
+            res.status(200).json({ statusOptions, jobDetails, users, usedSpares, completableStatus, timeDetails });
         } else {
-            res.status(200).json({ statusOptions, jobDetails, users, usedSpares });
+            res.status(200).json({ statusOptions, jobDetails, users, usedSpares, completableStatus });
         }
     } catch (err) {
         console.log(err);
@@ -94,7 +95,6 @@ export async function postJob(req: Request, res: Response) {
 export async function updateAndComplete(req: Request, res: Response) {
     try {
         req.body = JSON.parse(req.body.data);
-        console.log(req.body);
         const jobId = parseInt(req.body.id);
         const propertyId = parseInt(req.body.propertyId);
         const totalTime = calcTotalLoggedTime(req.body.logged_time_details);

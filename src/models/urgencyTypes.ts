@@ -30,8 +30,8 @@ export async function getUrgencyTypeById(id: number) {
 export async function getUrgencyPayload(id: number) {
     const data: [PayloadBasics[], FieldPacket[]] = await db.execute(
         `SELECT
-            payload AS number,
-            payload_two AS duration
+            urgency_number AS number,
+            urgency_period AS duration
         FROM
             urgency_types
         WHERE

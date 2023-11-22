@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import { RowDataPacket } from 'mysql2';
 
 // Job //
 
@@ -21,13 +21,17 @@ export interface UpdateAndComplete {
     complete: boolean;
 }
 
-export interface RecentJobs  extends RowDataPacket {
+export interface RecentJobs extends RowDataPacket {
     id: number;
     asset_name: string;
     type: string;
     title: string;
     created: string;
     completed: boolean;
+}
+
+export interface InitialStatus extends RowDataPacket {
+    id: number;
 }
 
 // Logged Time //

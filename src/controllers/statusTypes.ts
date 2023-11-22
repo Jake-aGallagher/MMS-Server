@@ -26,6 +26,9 @@ export async function addEditStatusType(req: Request, res: Response) {
     try {
         const id = parseInt(req.body.id);
         let response;
+        if (req.body.initialStatus == true) {
+            await StatusTypes.clearInitialStatus();
+        }
         if (id > 0) {
             response = await StatusTypes.editStatusType(req.body);
         } else {

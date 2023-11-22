@@ -1,6 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob, RecentJobs } from '../types/jobs';
+import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus } from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
 export async function getAllJobs(propertyId: number) {
@@ -56,6 +56,7 @@ export async function getJobDetails(id: number) {
             DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
             CONCAT(users.first_name, " ", users.last_name) AS reporter,
             jobs.logged_time,
+            status AS status_id,
             statusEnum.value AS status,
             jobs.notes
         FROM 
@@ -160,6 +161,7 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     const numOfUrg = parseInt(urgencyObj[0].number);
     const lengthOfUrg = urgencyObj[0].duration;
 
+    const initialStatus: [InitialStatus[], FieldPacket[]] = await db.execute("SELECT id FROM status_types WHERE initial_status = '1' LIMIT 1");
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             jobs
@@ -172,11 +174,12 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
                 created,
                 urgency,
                 required_comp_date,
-                reporter
+                reporter,
+                status
             )
         VALUES
-            (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?);`,
-        [property_id, asset, type, title, description, urgency, reporter]
+            (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?,?);`,
+        [property_id, asset, type, title, description, urgency, reporter, initialStatus[0][0].id]
     );
     return response[0];
 }
