@@ -12,6 +12,7 @@ import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
 import { NewSpares } from '../types/spares';
 import { insertFiles } from '../helpers/files/insertFiles';
 import calcTotalLoggedTime from '../helpers/jobs/calcTotalLoggedTime';
+import { getFileIds } from '../helpers/files/getFileIds';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {
@@ -28,15 +29,16 @@ export async function getJobDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const jobDetails = await Jobs.getJobDetails(id);
+        const files = await getFileIds('job', id);
         const usedSpares = await Spares.getUsedSpares(id);
         const timeDetails = await Jobs.getLoggedTimeDetails(id);
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(userIds);
             const timeDetailsFull = timeDetailsArray(timeDetails, users);
-            res.status(200).json({ jobDetails, timeDetails: timeDetailsFull, usedSpares });
+            res.status(200).json({ jobDetails, files, timeDetails: timeDetailsFull, usedSpares });
         } else {
-            res.status(200).json({ jobDetails, usedSpares });
+            res.status(200).json({ jobDetails, files, usedSpares });
         }
     } catch (err) {
         console.log(err);

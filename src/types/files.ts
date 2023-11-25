@@ -1,3 +1,5 @@
+import { RowDataPacket } from 'mysql2';
+
 export interface FileUpload {
     fieldname: string;
     originalname: string;
@@ -7,4 +9,15 @@ export interface FileUpload {
     filename: string;
     path: string;
     size: number;
+}
+
+export interface MappedFiles extends RowDataPacket {
+    id: number;
+    name: string;
+}
+
+export interface FileLocation extends RowDataPacket {
+    file_name: string;
+    destination: string;
+    location_name: string;
 }

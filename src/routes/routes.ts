@@ -3,6 +3,7 @@ const router = express.Router();
 import { fileUpload } from '../middleware/multer';
 
 import * as usersController from '../controllers/users';
+import * as filesController from '../controllers/files';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
 import * as assetsController from '../controllers/assets';
@@ -17,8 +18,12 @@ import { authorised, checkAuth } from '../middleware/authentication';
 // Auth
 router.get('/check-auth', checkAuth);
 
+// Files
+router.get('/getfile/:fileid', filesController.getFile);
+router.delete('/file', authorised, filesController.deleteFile)
+
 // Users
-router.get('/all-users', usersController.getAllUsers);
+router.get('/all-users', usersController.getAllUsers); // should this route be controlled???
 router.get('/users/all/:propertyid', authorised, usersController.getAllUsersForProperty);
 router.get('/users/byuserid/:userid', authorised, usersController.getUserById);
 router.post('/users/login', usersController.login);

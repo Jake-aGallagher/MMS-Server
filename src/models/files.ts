@@ -1,6 +1,41 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { FileUpload } from '../types/files';
+import { FileLocation, FileUpload, MappedFiles } from '../types/files';
+
+export async function getMappedFiles(modelType: string, modelId: number) {
+    const data: [MappedFiles[], FieldPacket[]] = await db.execute(
+        `SELECT
+            files.id,
+            files.file_name
+        FROM
+            files
+        INNER JOIN file_mappings ON
+        (
+            file_mappings.from_id = files.id
+            AND
+            file_mappings.to_type = ?
+            AND
+            file_mappings.to_id = ?
+        );`,
+        [modelType, modelId]
+    );
+    return data[0];
+}
+
+export async function getFilePath(id: number | BigInt) {
+    const data: [FileLocation[], FieldPacket[]] = await db.execute(
+        `SELECT
+            file_name,
+            destination,
+            location_name
+        FROM
+            files
+        WHERE
+            id = ?;`,
+        [id]
+    );
+    return data[0]
+}
 
 export async function postFile(file: FileUpload) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
@@ -40,4 +75,10 @@ export async function postFileMappings(fromType: string, fromIds: number[], toTy
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
+}
+
+export async function deleteFile(id: number | BigInt) {
+    await db.execute(`DELETE FROM files WHERE id = ?;`, [id]);
+    await db.execute(`DELETE FROM file_mappings WHERE from_id = ?;`, [id]);
+    return
 }
