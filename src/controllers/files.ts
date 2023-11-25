@@ -13,7 +13,7 @@ export async function getFile(req: Request, res: Response) {
         res.status(200).download(filePath, fileDetails[0].file_name);
     } catch (err) {
         console.log(err);
-        res.status(500);
+        res.status(500).send();
     }
 }
 
@@ -28,6 +28,6 @@ export async function deleteFile(req: Request, res: Response) {
         res.status(200).send();
     } catch (err) {
         console.log(err);
-        res.status(500);
+        res.status(500).send();
     }
 }
