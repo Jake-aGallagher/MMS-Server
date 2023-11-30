@@ -1,6 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { AllPermissions, GroupPermissions } from '../types/permissions';
+import { AllPermissions, GroupPermissions, GroupPermObj } from '../types/permissions';
 
 export async function getAllPermissions() {
     const data: [AllPermissions[], FieldPacket[]] = await db.execute(
@@ -26,6 +26,31 @@ export async function getPermissionsForGroup(id: number) {
         [id]
     );
     return data[0];
+}
+
+export async function getPermissionObj(id: number) {
+    const data: [GroupPermObj[], FieldPacket[]] = await db.execute(
+        `SELECT
+             permissions.area,
+             permissions.permission
+        FROM
+            permission_mappings
+        INNER JOIN permissions ON
+        (
+            permissions.id = permission_mappings.permission_id
+        )
+        WHERE
+            user_group_id = ?;`,
+        [id]
+    );
+    const permObj = <{ [key: string]: { [key: string]: boolean } }>{};
+    data[0].forEach((item) => {
+        if (!permObj[item.area]) {
+            permObj[item.area] = {};
+        }
+        permObj[item.area][item.permission] = true;
+    });
+    return permObj;
 }
 
 export async function setPermissionsForGroup(userGroupId: number, permissions: string[]) {

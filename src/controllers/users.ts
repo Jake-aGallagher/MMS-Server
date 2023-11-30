@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as Users from '../models/users';
 import * as Properties from '../models/properties';
+import * as Permissions from '../models/permissions';
 import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
@@ -30,7 +31,7 @@ export async function getUserById(req: Request, res: Response) {
         const userId = parseInt(req.params.userid);
         const users = await Users.findById(userId);
         const userGroups = await Users.getAllUserGroups();
-        res.status(200).json({ users, userGroups});
+        res.status(200).json({ users, userGroups });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -40,7 +41,7 @@ export async function getUserById(req: Request, res: Response) {
 export async function getAllUserGroups(req: Request, res: Response) {
     try {
         const allUserGroups = await Users.getAllUserGroups();
-        res.status(200).json({userGroups: allUserGroups});
+        res.status(200).json({ userGroups: allUserGroups });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -51,20 +52,25 @@ export async function login(req: Request, res: Response) {
     const name: string = req.body.username;
     const password: string = req.body.password;
     if (name.length < 1) {
-        res.status(401).json({ response: { passedValidation: false } });
+        res.status(401).json({ passedValidation: false });
     } else {
         try {
             const user = await Users.findByUsername(name);
             const match = await bcrypt.compare(password, user[0].password);
             if (match) {
                 const token = jwt.sign({ userId: user[0].id }, process.env.SECRET!, { expiresIn: '1h' });
-                res.status(200).json({ response: { passedValidation: true, user: user[0], token: token } });
+                const isAdmin = user[0].user_group_id == 1; // user group 1 is always SuperAdmin
+                let permissions = <{ [key: string]: { [key: string]: boolean } }>{};
+                if (!isAdmin) {
+                    permissions = await Permissions.getPermissionObj(user[0].user_group_id);
+                }
+                res.status(200).json({ passedValidation: true, user: user[0], isAdmin, permissions, token: token });
             } else {
-                res.status(401).json({ response: { passedValidation: false } });
+                res.status(401).json({ passedValidation: false });
             }
         } catch (err) {
             console.log(err);
-            res.status(401).json({ response: { passedValidation: false } });
+            res.status(401).json({ passedValidation: false });
         }
     }
 }
@@ -82,7 +88,7 @@ export async function postUser(req: Request, res: Response) {
         }
         if (req.body.user_group_id === 1) {
             const propertyIds = await Properties.getAllPropertyIds();
-            await Properties.deleteAssignments(userId)
+            await Properties.deleteAssignments(userId);
             await Properties.postAdminAssignments(userId, propertyIds);
         }
         if (response.affectedRows === 1) {

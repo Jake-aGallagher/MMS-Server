@@ -10,6 +10,12 @@ export interface AllPermissions extends RowDataPacket {
 export interface GroupPermissions extends RowDataPacket {
     id: number;
 }
+
+export interface GroupPermObj extends RowDataPacket {
+    area: string;
+    permission: string;
+}
+
 export interface PermissionsList {
     id: number;
     area: string;
