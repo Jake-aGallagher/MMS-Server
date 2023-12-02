@@ -32,6 +32,8 @@ export async function getAllJobs(propertyId: number) {
                 jobs.status = statusEnum.id
             WHERE
                 jobs.property_id = ?
+            AND
+                jobs.deleted = 0
             ORDER BY
                 jobs.id
             DESC;`,
@@ -74,7 +76,9 @@ export async function getJobDetails(id: number) {
         LEFT JOIN status_types AS statusEnum ON
             jobs.status = statusEnum.id
         WHERE
-            jobs.id = ?;`,
+            jobs.id = ?
+        AND
+            jobs.deleted = 0;`,
         [id]
     );
     return data[0];
@@ -97,6 +101,8 @@ export async function getRecentJobs(idsForAssets: number[]) {
             jobs.type = job_types.id
         WHERE
             asset IN (${idsForAssets})
+        AND
+            jobs.deleted = 0 
         ORDER BY
             jobs.created
         DESC
@@ -123,6 +129,8 @@ export async function getRecentJobsByIds(ids: number[]) {
             jobs.type = job_types.id
         WHERE
             jobs.id IN (${ids})
+        AND
+            jobs.deleted = 0
         ORDER BY
             jobs.created DESC
         LIMIT
@@ -144,7 +152,7 @@ export async function getLoggedTimeDetails(jobId: number) {
             logged_time.user_id = users.id
         )
         WHERE
-            job_id = ?;`,
+            logged_time.job_id = ?;`,
         [jobId]
     );
     return data[0];
@@ -256,11 +264,6 @@ export async function updateNotes(body: UpdateNotes) {
 }
 
 export async function deleteJobs(idsForDelete: number[]) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            jobs
-        WHERE
-            asset IN (${idsForDelete});`
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE jobs SET deleted = 0, deleted_time = NOW() WHERE asset IN (${idsForDelete});`);
     return response[0];
 }
