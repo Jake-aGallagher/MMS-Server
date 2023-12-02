@@ -16,7 +16,11 @@ export async function getMappedFiles(modelType: string, modelId: number) {
             file_mappings.to_type = ?
             AND
             file_mappings.to_id = ?
-        );`,
+            AND
+            file_mappings.deleted = 0
+        )
+        WHERE
+            files.deleted = 0;`,
         [modelType, modelId]
     );
     return data[0];
@@ -31,7 +35,9 @@ export async function getFilePath(id: number | BigInt) {
         FROM
             files
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0]
@@ -78,7 +84,7 @@ export async function postFileMappings(fromType: string, fromIds: number[], toTy
 }
 
 export async function deleteFile(id: number | BigInt) {
-    await db.execute(`DELETE FROM files WHERE id = ?;`, [id]);
-    await db.execute(`DELETE FROM file_mappings WHERE from_id = ?;`, [id]);
+    await db.execute(`UPDATE files SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
+    await db.execute(`UPDATE file_mappings SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return
 }
