@@ -34,7 +34,9 @@ export async function getAllSpares(propertyId: number) {
         FROM 
             spares
         WHERE
-            property_id = ?;`,
+            property_id = ?
+        AND
+            deleted = 0;`,
         [propertyId]
     );
     return data[0];
@@ -50,6 +52,8 @@ export async function getAllSparesBasic(propertyId: number) {
             spares
         WHERE
             property_id = ?
+        AND
+            deleted = 0
         ORDER BY
             part_no
         DESC;`,
@@ -78,7 +82,9 @@ export async function getSpares(id: number) {
         FROM 
             spares
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0];
@@ -94,7 +100,9 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
         WHERE
             id IN (${stockChangeIds})
         AND
-            property_id = ?;`,
+            property_id = ?
+        AND
+            deleted = 0;`,
         [propertyId]
     );
     return data[0];
@@ -112,6 +120,8 @@ export async function getUsedSpares(jobId: number) {
         INNER JOIN spares ON
             (
                 spares_used.spare_id = spares.id
+                AND
+                spares.deleted = 0
             )
         WHERE
             job_id = ?;`,
@@ -168,7 +178,9 @@ export async function getSparesRemaining(propertyId: number) {
         FROM
             spares
         WHERE
-            property_id = ?;`,
+            property_id = ?
+        AND
+            deleted = 0;`,
         [propertyId]
     );
     return data[0];
@@ -186,7 +198,9 @@ export async function getSparesRemainingToBeDelivered(deliveryId: number) {
             delivery_items.spare_id = spares.id
         ) 
         WHERE
-            delivery_items.delivery_id = ?;`,
+            delivery_items.delivery_id = ?
+        AND
+            deleted = 0;`,
         [deliveryId]
     );
     return data[0];
@@ -209,7 +223,9 @@ export async function getSuppliers(propertyId: number) {
         FROM
             suppliers
         WHERE
-            property_id = ?;`,
+            property_id = ?
+        AND
+            deleted = 0;`,
         [propertyId]
     );
     return data[0];
@@ -222,7 +238,9 @@ export async function getSupplierInfo(supplierId: number) {
         FROM
             suppliers
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [supplierId]
     );
     return data[0];
@@ -254,7 +272,9 @@ export async function getSpareStock(spareId: number) {
         FROM
             spares
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [spareId]
     );
     return data[0];
@@ -419,7 +439,9 @@ export async function getDeliveries(propertyId: number) {
             suppliers.id = deliveries.supplier
         )
         WHERE
-            deliveries.property_id = ?;`,
+            deliveries.property_id = ?
+        AND
+            deliveries.deleted = 0;`,
         [propertyId]
     );
     return data[0];
@@ -438,7 +460,9 @@ export async function getDeliveryById(deliveryId: number) {
         FROM
             deliveries
         WHERE
-            deliveries.id = ?;`,
+            deliveries.id = ?
+        AND
+            deleted = 0;`,
         [deliveryId]
     );
     return data[0];
@@ -457,9 +481,11 @@ export async function getDeliveryItems(deliveryIds: number[]) {
         INNER JOIN spares ON
         (
             spares.id = delivery_items.spare_id
+            AND
+            spares.deleted = 0
         )
         WHERE
-            delivery_id IN (${deliveryIds});`,
+            delivery_items.delivery_id IN (${deliveryIds});`,
         [deliveryIds]
     );
     return data[0];
@@ -599,24 +625,12 @@ export async function postSparesNote(body: { propertyId: string; title: string; 
 }
 
 export async function deleteSupplier(body: { id: string }) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            suppliers
-        WHERE
-            id = ?;`,
-        [body.id]
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE suppliers SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [body.id]);
     return response[0];
 }
 
 export async function deleteSparesItem(body: { id: string }) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            spares
-        WHERE
-            id = ?;`,
-        [body.id]
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE spares SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [body.id]);
     return response[0];
 }
 
@@ -632,13 +646,7 @@ export async function deleteSparesUsed(body: { id: string }) {
 }
 
 export async function deleteDelivery(deliveryId: number) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            deliveries
-        WHERE
-            id = ?;`,
-        [deliveryId]
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE deliveries SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [deliveryId]);
     return response[0];
 }
 
