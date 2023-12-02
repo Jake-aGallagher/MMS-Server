@@ -8,7 +8,9 @@ export async function getAllPropertyIds() {
         `SELECT
              id
         FROM
-            properties;`
+            properties
+        WHERE
+            deleted = 0;`
     );
     return data[0];
 }
@@ -25,6 +27,8 @@ export async function getAllProperties() {
              postcode
         FROM
             properties
+        WHERE
+            deleted = 0
         ORDER BY
             name;`
     );
@@ -44,7 +48,9 @@ export async function getAllPropertiesForUser(userId: number) {
                 properties.id = property_users.property_id
             )
         WHERE
-            property_users.user_id = ?;`,
+            property_users.user_id = ?
+        AND
+            deleted = 0;`,
         [userId]
     );
     return data[0];
@@ -56,6 +62,12 @@ export async function getLastPropertyForUser(userId: number) {
             property_id
         FROM 
             last_property
+        INNER JOIN properties ON
+        (
+            properties.id = last_property.property_id
+            AND
+            properties.deleted = 0
+        )
         WHERE
             user_id = ?;`,
         [userId]
@@ -76,7 +88,9 @@ export async function getPropertyDetails(propertyId: number) {
         FROM 
             properties
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [propertyId]
     );
     return data[0];
@@ -102,9 +116,13 @@ export async function getAssignedUsers(propertyId: number) {
             users.user_group_id = user_groups.id
         )
         WHERE
+        (
             property_id = ?
-        OR
+            OR
             users.user_group_id = '1'
+        )
+        AND
+            users.deleted = 0
         GROUP BY
             users.id
         ORDER BY
@@ -126,9 +144,13 @@ export async function getAssignedUserIds(propertyId: number) {
             users.id = property_users.user_id
         )
         WHERE
+        (
             property_id = ?
-        OR
+            OR
             users.user_group_id = '1'
+        )
+        AND
+            users.deleted = 0
         GROUP BY
             users.id
         ORDER BY

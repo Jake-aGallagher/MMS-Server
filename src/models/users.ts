@@ -16,7 +16,9 @@ export async function getAllUsers() {
         INNER JOIN user_groups ON
         (
             users.user_group_id = user_groups.id
-        );`
+        )
+        WHERE
+            users.deleted = 0;`
     );
     return data[0];
 }
@@ -33,7 +35,9 @@ export async function findByUsername(username: string) {
         FROM
             users
         WHERE
-            username = ?;`,
+            username = ?
+        AND
+            deleted = 0;`,
         [username]
     );
     return data[0];
@@ -50,7 +54,9 @@ export async function findById(id: number) {
         FROM
             users
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0];
@@ -67,7 +73,9 @@ export async function getUsersByIds(userIds: number[]) {
         FROM
             users
         WHERE
-            id IN (${userIds});`
+            id IN (${userIds})
+        AND
+            deleted = 0;`
     );
     return data[0];
 }
@@ -80,7 +88,9 @@ export async function getAllUserGroups() {
         FROM
             user_groups
         WHERE
-            name != 'SuperAdmin';`
+            name != 'SuperAdmin'
+        AND
+            deleted = 0;`
     );
     return data[0];
 }
@@ -173,7 +183,9 @@ export async function getUserLevel(userId: number) {
         FROM
             users
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [userId]
     );
     return response[0][0].user_group_id;
