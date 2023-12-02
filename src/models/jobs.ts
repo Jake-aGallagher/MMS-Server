@@ -264,6 +264,6 @@ export async function updateNotes(body: UpdateNotes) {
 }
 
 export async function deleteJobs(idsForDelete: number[]) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE jobs SET deleted = 0, deleted_time = NOW() WHERE asset IN (${idsForDelete});`);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE jobs SET deleted = 1, deleted_date = NOW() WHERE asset IN (${idsForDelete});`);
     return response[0];
 }

@@ -7,6 +7,8 @@ export async function getAllJobTypes() {
             *
         FROM 
             job_types
+        WHERE
+            deleted = 0
         ORDER BY
             list_priority;`
     );
@@ -20,7 +22,9 @@ export async function getJobTypeById(id: number) {
         FROM 
             job_types
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0];
@@ -56,12 +60,6 @@ export async function editJobType(body: { id: number; value: string; listPriorit
 }
 
 export async function deleteJobType(id: number) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            job_types
-        WHERE
-            id = ?;`,
-        [id]
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE job_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
