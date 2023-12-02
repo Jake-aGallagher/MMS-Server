@@ -24,6 +24,8 @@ export async function getAssetTree(propertyId: number, rootId: number) {
             find_root.id = relations.ancestor_id
             AND
             find_root.property_id = ?
+            AND
+            find_root.deleted = 0
         )
         INNER JOIN assets_relations AS crumbs ON
         (
@@ -35,6 +37,8 @@ export async function getAssetTree(propertyId: number, rootId: number) {
             find_root.parent_id = ?
         AND
             assets.property_id = ?
+        AND
+            assets.deleted = 0
         GROUP BY
             assets.id
         ORDER BY
@@ -53,10 +57,12 @@ export async function getAssetRoot(propertyId: number) {
         WHERE
             parent_id = 0
         AND
+            deleted = 0
+        AND
             property_id = ?;`,
         [propertyId]
     );
-    return data[0]
+    return data[0];
 }
 
 export async function getAssetById(id: number) {
@@ -74,9 +80,13 @@ export async function getAssetById(id: number) {
         LEFT JOIN assets AS parent ON
             (
                 parent.id = assets.parent_id
+                AND
+                parent.deleted = 0
             )
         WHERE
-            assets.id = ?;`,
+            assets.id = ?
+        AND
+            assets.deleted = 0;`,
         [id]
     );
     return data[0];
@@ -135,8 +145,11 @@ export async function renameRootAsset(name: string, propertyId: number) {
 
 export async function deleteAsset(assetIds: number[]) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
+        `UPDATE
             assets
+        SET
+            deleted = 1,
+            deleted_date = NOW()
         WHERE
             id IN (${assetIds});`
     );

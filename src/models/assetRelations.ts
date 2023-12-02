@@ -1,4 +1,4 @@
-import {  FieldPacket, ResultSetHeader } from 'mysql2';
+import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetRelationBasic } from '../types/assets';
 import db from '../database/database';
 
@@ -86,6 +86,9 @@ export async function getChildren(ancestor_id: number) {
 }
 
 export async function deleteAssetRelations(assetIds: number[]) {
+    if (assetIds.length == 0) {
+        return;
+    }
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             assets_relations

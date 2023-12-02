@@ -105,11 +105,11 @@ export async function deleteAsset(req: Request, res: Response) {
         const idsForDelete = makeIdList(getChildren, 'descendant_id');
 
         // delete all relations
-        const deletedRelations = await AssetRelations.deleteAssetRelations(idsForDelete);
+        await AssetRelations.deleteAssetRelations(idsForDelete);
 
         // delete all the assets that have had their relations deleted
         const deleted = await Assets.deleteAsset(idsForDelete);
-        if (deleted.affectedRows > 0 && deletedRelations.affectedRows > 0) {
+        if (deleted.affectedRows > 0) {
             if (deleteType === 'assetAndJobs') {
                 Jobs.deleteJobs(idsForDelete);
             }
