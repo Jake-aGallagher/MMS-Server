@@ -48,6 +48,7 @@ export async function addEditStatusType(req: Request, res: Response) {
 export async function deleteStatusType(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
+        // todo - check if this is the job initial status and prevent deleting if so
         const deleted = await StatusTypes.deleteStatusType(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });

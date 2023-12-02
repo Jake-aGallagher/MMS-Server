@@ -8,6 +8,8 @@ export async function getAllUrgencyTypes() {
             *
         FROM 
             urgency_types
+        WHERE
+            deleted = 0
         ORDER BY
             list_priority;`
     );
@@ -21,7 +23,9 @@ export async function getUrgencyTypeById(id: number) {
         FROM 
             urgency_types
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0];
@@ -35,13 +39,15 @@ export async function getUrgencyPayload(id: number) {
         FROM
             urgency_types
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0];
-} 
+}
 
-export async function addUrgencyType(body: { value: string; listPriority: number, urgencyNumber: number, urgencyPeriod: string }) {
+export async function addUrgencyType(body: { value: string; listPriority: number; urgencyNumber: number; urgencyPeriod: string }) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             urgency_types
@@ -53,12 +59,12 @@ export async function addUrgencyType(body: { value: string; listPriority: number
             )
         VALUES
             (?,?,?,?);`,
-        [body.value, body.listPriority, body.urgencyNumber, body.urgencyPeriod ]
+        [body.value, body.listPriority, body.urgencyNumber, body.urgencyPeriod]
     );
     return response[0];
 }
 
-export async function editUrgencyType(body: { id: number; value: string; listPriority: number, urgencyNumber: number, urgencyPeriod: string }) {
+export async function editUrgencyType(body: { id: number; value: string; listPriority: number; urgencyNumber: number; urgencyPeriod: string }) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             urgency_types
@@ -75,12 +81,6 @@ export async function editUrgencyType(body: { id: number; value: string; listPri
 }
 
 export async function deleteUrgencyType(id: number) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            urgency_types
-        WHERE
-            id = ?;`,
-        [id]
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE urgency_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
