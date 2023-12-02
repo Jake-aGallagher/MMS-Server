@@ -8,6 +8,8 @@ export async function getEnumGroups() {
             value
         FROM
             enum_groups
+        WHERE
+            deleted = 0
         ORDER BY
             id;`
     );
@@ -21,6 +23,8 @@ export async function getEnumGroupById(groupId: number) {
         FROM
             enum_groups
         WHERE
+            deleted = 0
+        AND
             id = ?;`,
         [groupId]
     );
@@ -37,6 +41,8 @@ export async function getEnumsByGroupId(enumGroupId: number) {
             enum_values
         WHERE
             enum_values.enum_group_id = ?
+        AND
+            enum_values.deleted = 0
         ORDER BY
             enum_values.list_priority;`,
         [enumGroupId]
@@ -51,7 +57,9 @@ export async function getEnumValueById(id: number) {
         FROM 
             enum_values
         WHERE
-            id = ?;`,
+            id = ?
+        AND
+            deleted = 0;`,
         [id]
     );
     return data[0];
@@ -127,8 +135,11 @@ export async function editEnumValue(body: { id: string; value: string; enumGroup
 
 export async function deleteEnumGroup(id: number) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
+        `UPDATE
             enum_groups
+        SET
+            deleted = 1,
+            deleted_date = NOW()
         WHERE
             id = ?;`,
         [id]
@@ -138,8 +149,11 @@ export async function deleteEnumGroup(id: number) {
 
 export async function deleteEnumValue(id: number) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
+        `UPDATE
             enum_values
+        SET
+            deleted = 1,
+            deleted_date = NOW()
         WHERE
             id = ?;`,
         [id]
@@ -149,8 +163,11 @@ export async function deleteEnumValue(id: number) {
 
 export async function deleteEnumValueByGroupId(id: number) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
+        `UPDATE
             enum_values
+        SET
+            deleted = 1,
+            deleted_date = NOW()
         WHERE
             enum_group_id = ?;`,
         [id]
