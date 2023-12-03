@@ -12,7 +12,7 @@ import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
 import * as jobTypesController from '../controllers/jobTypes';
 import * as statusTypesController from '../controllers/statusTypes';
-import * as urgencyTypesController from '../controllers/urgencyTypes'
+import * as urgencyTypesController from '../controllers/urgencyTypes';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -20,7 +20,9 @@ router.get('/check-auth', checkAuth);
 
 // Files
 router.get('/getfile/:fileid', filesController.getFile);
-router.delete('/file', authorised, filesController.deleteFile)
+router.get('/files/:model/:id', authorised, filesController.getFilesForModel);
+router.post('/file', authorised, fileUpload.array('files'), filesController.postFile);
+router.delete('/file', authorised, filesController.deleteFile);
 
 // Users
 router.get('/all-users', usersController.getAllUsers); // should this route be controlled???
