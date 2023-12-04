@@ -120,3 +120,33 @@ export async function addEditUserGroup(req: Request, res: Response) {
         res.status(500).json({ created: false });
     }
 }
+
+export async function deleteUser(req: Request, res: Response) {
+    try {
+        const id = parseInt(req.params.id);
+        const deleted = await Users.deleteUser(id);
+        if (deleted.affectedRows > 0) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
+    }
+}
+
+export async function deleteUserGroup(req: Request, res: Response) {
+    try {
+        const id = parseInt(req.params.id);
+        const deleted = await Users.deleteUserGroup(id);
+        if (deleted.affectedRows > 0) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
+    }
+}

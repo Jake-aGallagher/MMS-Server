@@ -47,7 +47,7 @@ export async function postFile(req: Request, res: Response) {
 export async function deleteFile(req: Request, res: Response) {
     try {
         const hashIds = new Hashids('file', 8);
-        const fileId = hashIds.decode(req.body.id)[0];
+        const fileId = hashIds.decode(req.params.id)[0];
         const fileDetails = await Files.getFilePath(fileId);
         const filePath = path.join(fileDetails[0].destination, fileDetails[0].location_name);
         await fs.rm(filePath, { force: true });

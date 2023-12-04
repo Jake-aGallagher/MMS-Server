@@ -96,7 +96,7 @@ export async function insertAsset(req: Request, res: Response) {
 }
 
 export async function deleteAsset(req: Request, res: Response) {
-    const id = parseInt(req.body.id);
+    const id = parseInt(req.params.id);
     const deleteType = req.body.deleteType;
 
     try {

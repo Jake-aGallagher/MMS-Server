@@ -260,7 +260,8 @@ export async function postNote(req: Request, res: Response) {
 
 export async function deleteSupplier(req: Request, res: Response) {
     try {
-        const deleted = await Spares.deleteSupplier(req.body);
+        const id = parseInt(req.params.id);
+        const deleted = await Spares.deleteSupplier(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -274,8 +275,9 @@ export async function deleteSupplier(req: Request, res: Response) {
 
 export async function deleteSparesItem(req: Request, res: Response) {
     try {
-        const deleted = await Spares.deleteSparesItem(req.body);
-        Spares.deleteSparesUsed(req.body);
+        const id = parseInt(req.params.id);
+        const deleted = await Spares.deleteSparesItem(id);
+        Spares.deleteSparesUsed(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -289,9 +291,9 @@ export async function deleteSparesItem(req: Request, res: Response) {
 
 export async function deleteDelivery(req: Request, res: Response) {
     try {
-        const deliveryId = parseInt(req.body.id);
-        const deleted = await Spares.deleteDelivery(deliveryId);
-        Spares.deleteDeliveryContents(deliveryId);
+        const id = parseInt(req.params.id);
+        const deleted = await Spares.deleteDelivery(id);
+        Spares.deleteDeliveryContents(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -305,7 +307,8 @@ export async function deleteDelivery(req: Request, res: Response) {
 
 export async function deleteNote(req: Request, res: Response) {
     try {
-        const deleted = await Spares.deleteNote(req.body);
+        const id = parseInt(req.params.id);
+        const deleted = await Spares.deleteNote(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {

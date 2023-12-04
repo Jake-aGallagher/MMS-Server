@@ -550,7 +550,7 @@ export async function addSpare(s: AddEditSpare) {
             (part_no, man_part_no, name, man_name, description, notes, location, quant_remain, supplier, cost, property_id)
         VALUES
             (?,?,?,?,?,?,?,?,?,?,?);`,
-        [s.partNo, s.manPartNo, s.name, s.manName, s.description, s.notes, s.location, s.quantRemaining, s.supplier, s.cost, s.propertyId]
+        [s.partNo, s.manPartNo, s.name, s.manName, s.description || '', s.notes || '', s.location, s.quantRemaining, s.supplier, s.cost, s.propertyId]
     );
     return response[0];
 }
@@ -624,24 +624,18 @@ export async function postSparesNote(body: { propertyId: string; title: string; 
     return response[0];
 }
 
-export async function deleteSupplier(body: { id: string }) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE suppliers SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [body.id]);
+export async function deleteSupplier(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE suppliers SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
 
-export async function deleteSparesItem(body: { id: string }) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE spares SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [body.id]);
+export async function deleteSparesItem(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE spares SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
 
-export async function deleteSparesUsed(body: { id: string }) {
-    db.execute(
-        `DELETE FROM
-            spares_used
-        WHERE
-            spare_id = ?;`,
-        [body.id]
-    );
+export async function deleteSparesUsed(id: number ) {
+    db.execute(`DELETE FROM spares_used WHERE spare_id = ?;`, [id]);
     return;
 }
 
@@ -651,23 +645,11 @@ export async function deleteDelivery(deliveryId: number) {
 }
 
 export async function deleteDeliveryContents(deliveryId: number) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            delivery_items
-        WHERE
-            delivery_id = ?;`,
-        [deliveryId]
-    );
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`DELETE FROM delivery_items WHERE delivery_id = ?;`, [deliveryId]);
     return response[0];
 }
 
-export async function deleteNote(body: { id: string }) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            spares_notes
-        WHERE
-            id = ?;`,
-        [body.id]
-    );
+export async function deleteNote(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`DELETE FROM spares_notes WHERE id = ?;`, [id]);
     return response[0];
 }

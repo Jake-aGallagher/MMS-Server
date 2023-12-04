@@ -190,3 +190,13 @@ export async function getUserLevel(userId: number) {
     );
     return response[0][0].user_group_id;
 }
+
+export async function deleteUser(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE users SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
+    return response[0];
+}
+
+export async function deleteUserGroup(id: number) {
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE user_groups SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
+    return response[0];
+}

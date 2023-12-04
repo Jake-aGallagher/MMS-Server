@@ -22,7 +22,7 @@ router.get('/check-auth', checkAuth);
 router.get('/getfile/:fileid', filesController.getFile);
 router.get('/files/:model/:id', authorised, filesController.getFilesForModel);
 router.post('/file', authorised, fileUpload.array('files'), filesController.postFile);
-router.delete('/file', authorised, filesController.deleteFile);
+router.delete('/file/:id', authorised, filesController.deleteFile);
 
 // Users
 router.get('/all-users', usersController.getAllUsers); // should this route be controlled???
@@ -30,10 +30,12 @@ router.get('/users/all/:propertyid', authorised, usersController.getAllUsersForP
 router.get('/users/byuserid/:userid', authorised, usersController.getUserById);
 router.post('/users/login', usersController.login);
 router.post('/users', authorised, usersController.postUser);
+router.delete('/users/:id', authorised, usersController.deleteUser);
 
 // User Groups
 router.get('/usergroups/all', authorised, usersController.getAllUserGroups);
 router.put('/usergroups', authorised, usersController.addEditUserGroup);
+router.delete('/usergroups/:id', authorised, usersController.deleteUserGroup);
 
 // Permissions
 router.get('/permissions/group/:groupid', authorised, permissionsController.getAllPermissionsForGroup);
@@ -63,7 +65,7 @@ router.put('/jobs/notes', authorised, jobsController.updateNotes);
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
 router.post('/asset', authorised, assetsController.insertAsset);
-router.delete('/asset', authorised, assetsController.deleteAsset);
+router.delete('/asset/:id', authorised, assetsController.deleteAsset);
 
 // Spares
 router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
@@ -72,23 +74,23 @@ router.get('/spares-for-use/:propertyid', authorised, sparesController.getSpares
 router.get('/spares/instock/:spareid', authorised, sparesController.getSpareStock);
 router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/adjust-stock', authorised, sparesController.adjustSpareStock);
-router.delete('/spares/spares-item', authorised, sparesController.deleteSparesItem);
+router.delete('/spares/item/:id', authorised, sparesController.deleteSparesItem);
 //// Spares Suppliers
 router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
 router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
-router.delete('/spares/supplier', authorised, sparesController.deleteSupplier);
+router.delete('/spares/supplier/:id', authorised, sparesController.deleteSupplier);
 //// Spares Deliveries
 router.get('/spares/deliveries/:propertyid/:deliveryid', authorised, sparesController.getDeliveries);
 router.put('/spares/delivery/add-edit', authorised, sparesController.addEditDelivery);
-router.delete('/spares/delivery', authorised, sparesController.deleteDelivery);
+router.delete('/spares/delivery/:id', authorised, sparesController.deleteDelivery);
 //// Spares Warnings
 router.get('/spares/warnings/:propertyid', authorised, sparesController.getSparesWarnings);
 //// Spares Notes
 router.get('/spares/notes/:propertyid', authorised, sparesController.getSparesNotes);
 router.get('/spares/note/:noteid', authorised, sparesController.getNote);
 router.put('/spares/notes', authorised, sparesController.postNote);
-router.delete('/spares/note', authorised, sparesController.deleteNote);
+router.delete('/spares/note/:id', authorised, sparesController.deleteNote);
 
 // Enums
 router.get('/enumgroups', authorised, enumsController.getEnumsGroups);

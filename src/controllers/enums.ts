@@ -86,7 +86,7 @@ export async function addEditEnumValue(req: Request, res: Response) {
 
 export async function deleteEnumGroup(req: Request, res: Response) {
     try {
-        const id = parseInt(req.body.id);
+        const id = parseInt(req.params.id);
         const deleted = await Enums.deleteEnumGroup(id);
         Enums.deleteEnumValueByGroupId(id);
         if (deleted.affectedRows > 0) {
@@ -102,7 +102,7 @@ export async function deleteEnumGroup(req: Request, res: Response) {
 
 export async function deleteEnumValue(req: Request, res: Response) {
     try {
-        const id = parseInt(req.body.id);
+        const id = parseInt(req.params.id);
         const deleted = await Enums.deleteEnumValue(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
