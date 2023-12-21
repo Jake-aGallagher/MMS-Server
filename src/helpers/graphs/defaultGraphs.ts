@@ -47,6 +47,36 @@ export async function getJobsRaised6M(propertyId: number) {
     return returnObj;
 }
 
+export async function getJobsCompleted6M(propertyId: number) {
+    const d = new Date();
+    const endNum = d.getMonth();
+    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+
+    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
+        `SELECT
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_1,
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 1]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_2,
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 2]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 3]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 4]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
+        FROM
+            jobs
+        WHERE
+            property_id = ?;`,
+        [propertyId]
+    );
+    const returnObj = [
+        { month: monthsLooped[startNum], value: data[0][0].month_1 },
+        { month: monthsLooped[startNum + 1], value: data[0][0].month_2 },
+        { month: monthsLooped[startNum + 2], value: data[0][0].month_3 },
+        { month: monthsLooped[startNum + 3], value: data[0][0].month_4 },
+        { month: monthsLooped[startNum + 4], value: data[0][0].month_5 },
+        { month: monthsLooped[startNum + 5], value: data[0][0].month_6 },
+    ];
+    return returnObj;
+}
+
 export async function getSparesUsed6M(propertyId: number) {
     const d = new Date();
     const endNum = d.getMonth();
