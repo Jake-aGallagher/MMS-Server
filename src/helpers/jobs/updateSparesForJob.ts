@@ -8,6 +8,7 @@ import { NewSpares } from '../../types/spares';
 
 export async function updateSparesForJob(jobId: number, propertyId: number, newSpares: NewSpares[]) {
     let diffArray = <NewSpares[]>[];
+    let negativeDiffArray = <NewSpares[]>[];
     let stockChangesArray = <{ id: number; used: number }[]>[];
 
     const prevSpares = await Spares.getUsedSpares(jobId);
@@ -18,11 +19,15 @@ export async function updateSparesForJob(jobId: number, propertyId: number, newS
         // compare difference
         const diffAndStock = compareSpareDiff(newSpares, prevSpares);
         diffArray = diffAndStock.diffArray;
+        negativeDiffArray = diffAndStock.negativeDiffArray;
         stockChangesArray = diffAndStock.stockChangesArray;
 
         // insert the diff array (Update replace) table: spares_used
         if (diffArray.length > 0) {
-            Spares.updateUsedSpares(diffArray, jobId, propertyId);
+            Spares.updateUsedSparesPositive(diffArray, jobId, propertyId);
+        }
+        if (negativeDiffArray.length > 0) {
+            Spares.updateUsedSparesNegative(negativeDiffArray, jobId, propertyId);
         }
     }
     

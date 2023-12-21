@@ -12,6 +12,7 @@ import {
     AddEditSpare,
     SparesDetails,
     jobsOfRecentlyUsed,
+    UsedSparesIdQuantity,
 } from '../types/spares';
 import db from '../database/database';
 
@@ -114,7 +115,7 @@ export async function getUsedSpares(jobId: number) {
             spares.id,
             spares.part_no,
             spares.name,
-            spares_used.quantity
+            CONVERT(SUM(spares_used.quantity), UNSIGNED) as quantity
         FROM 
             spares_used
         INNER JOIN spares ON
@@ -124,7 +125,9 @@ export async function getUsedSpares(jobId: number) {
                 spares.deleted = 0
             )
         WHERE
-            job_id = ?;`,
+            job_id = ?
+        GROUP BY
+            spares_used.spare_id;`,
         [jobId]
     );
     return data[0];
@@ -366,6 +369,51 @@ export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, propert
         );
     }
     return;
+}
+
+export function updateUsedSparesPositive(sparesUsed: NewSpares[], jobId: number, property_id: number) {
+    let insertSql = `
+    INSERT INTO
+        spares_used
+        (
+            spare_id,
+            job_id,
+            quantity,
+            date_used,
+            property_id
+        )
+    VALUES`;
+
+    let insertVals = [];
+    for (let i = 0; i < sparesUsed.length; i++) {
+        if (sparesUsed[i].quantity > 0) {
+            insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+        }
+    }
+    insertSql += insertVals.join(',');
+
+    if (insertVals.length > 0) {
+        db.execute(insertSql);
+    }
+    return;
+}
+
+export function updateUsedSparesNegative(sparesUsed: NewSpares[], jobId: number, property_id: number) {
+    sparesUsed.forEach(async (item) => {
+        while (item.quantity > 0) {
+            const data: [UsedSparesIdQuantity[], FieldPacket[]] = await db.execute(
+                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND job_id = ? AND property_id = ? ORDER BY date_used DESC LIMIT 1;`,
+                [item.id, jobId, property_id]
+            );
+            if (data[0][0].quantity > item.quantity) {
+                await db.execute(`UPDATE spares_used SET quantity = quantity - ? WHERE id = ?;`, [item.quantity, data[0][0].id]);
+                item.quantity = 0;
+            } else {
+                await db.execute(`DELETE FROM spares_used WHERE id = ?;`, [data[0][0].id]);
+                item.quantity -= data[0][0].quantity;
+            }
+        }
+    });
 }
 
 export async function updateStock(stockArray: { id: number; property_id: number; quant_remain: number }[]) {
@@ -634,7 +682,7 @@ export async function deleteSparesItem(id: number) {
     return response[0];
 }
 
-export async function deleteSparesUsed(id: number ) {
+export async function deleteSparesUsed(id: number) {
     db.execute(`DELETE FROM spares_used WHERE spare_id = ?;`, [id]);
     return;
 }

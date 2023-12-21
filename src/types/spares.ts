@@ -26,6 +26,11 @@ export interface UsedSpares extends RowDataPacket {
     quantity: number;
 }
 
+export interface UsedSparesIdQuantity extends RowDataPacket {
+    id: number;
+    quantity: number;
+}
+
 export interface recentlyUsed extends RowDataPacket {
     spare_id: number;
     total_used: number;
