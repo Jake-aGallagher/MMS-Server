@@ -321,56 +321,6 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
     return response[0];
 }
 
-export function updateUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
-    let insertSql = `
-    INSERT INTO
-        spares_used
-        (
-            spare_id,
-            job_id,
-            quantity,
-            date_used,
-            property_id
-        )
-    VALUES`;
-
-    let insertVals = [];
-    let deleteVals = [];
-    for (let i = 0; i < sparesUsed.length; i++) {
-        if (sparesUsed[i].quantity > 0) {
-            insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
-        } else {
-            deleteVals.push(sparesUsed[i].id);
-        }
-    }
-    insertSql += insertVals.join(',');
-
-    insertSql += `
-    AS newSpare
-    ON DUPLICATE KEY UPDATE
-        quantity = newSpare.quantity,
-        date_used = NOW();`;
-
-    if (insertVals.length > 0) {
-        db.execute(insertSql);
-    }
-    if (deleteVals.length > 0) {
-        db.execute(
-            `
-            DELETE FROM
-                spares_used
-            WHERE
-                spare_id IN (?)
-            AND
-                job_id = ?
-            AND
-                property_id = ?;`,
-            [deleteVals.join(','), jobId, property_id]
-        );
-    }
-    return;
-}
-
 export function updateUsedSparesPositive(sparesUsed: NewSpares[], jobId: number, property_id: number) {
     let insertSql = `
     INSERT INTO
