@@ -1,6 +1,7 @@
-//import { FieldPacket, ResultSetHeader } from 'mysql2';
-//import db from '../database/database';
+import { FieldPacket } from 'mysql2';
+import db from '../database/database';
 import { getIncompleteJobs, getJobsCompleted6M, getJobsRaised6M } from '../helpers/graphs/defaultGraphs';
+import { BreakdownPlanned } from '../types/dashboard';
 
 export async function getRaisedJobs(propertyId: number) {
     const data = await getJobsRaised6M(propertyId);
@@ -42,4 +43,22 @@ export async function getCompletedJobs(propertyId: number) {
     const avgData = { value: Math.round((((thisMonth / (total / 5)) * 100 - 100) + Number.EPSILON) * 100) / 100, flipped: true };
 
     return { thisMonth, mainData: formattedArr, avgData };
+}
+
+export async function getBreakdownVsPlanned(propertyId: number) {
+    const data: [BreakdownPlanned[], FieldPacket[]] = await db.execute(
+        `SELECT
+            COUNT(IF(completed = 0 AND scheduled = 0, 1, NULL)) AS breakdown,
+            COUNT(IF(completed = 0 AND scheduled = 1, 1, NULL)) AS planned
+        FROM
+            jobs
+        WHERE
+            property_id = ?;`,
+        [propertyId]
+    );
+    const dataArr = [
+        { label: 'Breakdown', value: data[0][0].breakdown },
+        { label: 'Planned', value: data[0][0].planned },
+    ]
+    return { mainData: dataArr };
 }
