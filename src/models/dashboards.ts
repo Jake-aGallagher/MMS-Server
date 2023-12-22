@@ -13,7 +13,7 @@ export async function getRaisedJobs(propertyId: number) {
         }
         formattedArr.push({ label: data[i].month, value: data[i].value });
     }
-    const avgData = { value: (thisMonth / (total / 5)) * 100 - 100, flipped: false };
+    const avgData = { value: Math.round((((thisMonth / (total / 5)) * 100 - 100) + Number.EPSILON) * 100) / 100, flipped: false };
 
     return { thisMonth, mainData: formattedArr, avgData };
 }
@@ -39,7 +39,7 @@ export async function getCompletedJobs(propertyId: number) {
         }
         formattedArr.push({ label: data[i].month, value: data[i].value });
     }
-    const avgData = { value: (thisMonth / (total / 5)) * 100 - 100, flipped: true };
+    const avgData = { value: Math.round((((thisMonth / (total / 5)) * 100 - 100) + Number.EPSILON) * 100) / 100, flipped: true };
 
     return { thisMonth, mainData: formattedArr, avgData };
 }
