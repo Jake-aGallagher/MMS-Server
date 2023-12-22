@@ -2,14 +2,73 @@ import { RowDataPacket } from 'mysql2';
 
 // Job //
 
+export interface JobDetails extends RowDataPacket {
+    id: number;
+    property_id: number;
+    asset_id: number;
+    asset_name: string;
+    type: string;
+    title: string;
+    description: string;
+    urgency: string;
+    status: string;
+    reporter: string;
+    created: string;
+    completed: boolean;
+    logged_time: number;
+    notes: string;
+    scheduled: number;
+    frequency_interval: number;
+    frequency_time_unit: string;
+}
+
+export interface JobDetailsForReentry extends RowDataPacket {
+    property_id: number;
+    asset: number;
+    type: number;
+    title: string;
+    description: string;
+    required_comp_date: string;
+    reporter: string;
+    frequency_time: number;
+    frequency_unit: string;
+}
+
 export interface PostJob {
     propertyNumber: string;
     assetNumber: string;
+    breakdownOrSchedule: string;
     type: string;
     title: string;
     description: string;
     urgency: string;
     reporter: string;
+    startNow: string;
+    scheduleStart: string;
+    intervalFrequency: number;
+    intervalTimeUnit: string;
+}
+
+export interface PostScheduledJob {
+    propertyNumber: string;
+    assetNumber: string;
+    type: string;
+    title: string;
+    description: string;
+    reporter: string;
+    startNow: string;
+    scheduleStart: string;
+    intervalFrequency: number;
+    intervalTimeUnit: string;
+}
+
+export interface Frequency extends RowDataPacket {
+    frequency_interval: number;
+    frequency_unit: string;
+}
+
+export interface IsScheduled extends RowDataPacket {
+    scheduled: number;
 }
 
 export interface UpdateAndComplete {

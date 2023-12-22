@@ -1,6 +1,18 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { TimeDetails, UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus } from '../types/jobs';
+import {
+    TimeDetails,
+    UpdateNotes,
+    UpdateAndComplete,
+    PostJob,
+    RecentJobs,
+    InitialStatus,
+    JobDetails,
+    Frequency,
+    IsScheduled,
+    JobDetailsForReentry,
+    PostScheduledJob,
+} from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
 export async function getAllJobs(propertyId: number) {
@@ -12,12 +24,15 @@ export async function getAllJobs(propertyId: number) {
                 typeEnum.value AS type,
                 jobs.title,
                 DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
-                urgencyEnum.value AS urgency,
+                IF (jobs.urgency > 0, urgencyEnum.value, 'Scheduled') AS urgency,
                 DATE_FORMAT(jobs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
                 jobs.completed,
                 DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
                 CONCAT(users.first_name, " ", users.last_name) AS reporter,
-                statusEnum.value AS status
+                statusEnum.value AS status,
+                jobs.scheduled,
+                jobs.frequency_time,
+                jobs.frequency_unit
             FROM 
                 jobs
             LEFT JOIN users ON
@@ -43,7 +58,7 @@ export async function getAllJobs(propertyId: number) {
 }
 
 export async function getJobDetails(id: number) {
-    const data = await db.execute(
+    const data: [JobDetails[], FieldPacket[]] = await db.execute(
         `SELECT 
             jobs.id,
             properties.name AS property_name,
@@ -60,7 +75,10 @@ export async function getJobDetails(id: number) {
             jobs.logged_time,
             status AS status_id,
             statusEnum.value AS status,
-            jobs.notes
+            jobs.notes,
+            jobs.scheduled,
+            jobs.frequency_time,
+            jobs.frequency_unit
         FROM 
             jobs
         LEFT JOIN users ON
@@ -79,6 +97,49 @@ export async function getJobDetails(id: number) {
             jobs.id = ?
         AND
             jobs.deleted = 0;`,
+        [id]
+    );
+    return data[0];
+}
+
+export async function getScheduleDates(id: number) {
+    const frequency: [Frequency[], FieldPacket[]] = await db.execute(`SELECT frequency_time, frequency_unit FROM jobs WHERE id = ? LIMIT 1;`, [id]);
+    const time = frequency[0][0].frequency_time;
+    const unit = frequency[0][0].frequency_unit;
+    const data = await db.execute(
+        `SELECT
+            DATE_FORMAT(DATE_ADD(jobs.required_comp_date, INTERVAL ${time} ${unit}), "%d/%m/%y") AS 'current_schedule',
+            DATE_FORMAT(DATE_ADD(NOW(), INTERVAL ${time} ${unit}), "%d/%m/%y") AS 'new_schedule'
+        FROM
+            jobs
+        WHERE
+            jobs.id = ?;`,
+        [id]
+    );
+    return data[0];
+}
+
+export async function checkIfJobIsScheduled(id: number) {
+    const data: [IsScheduled[], FieldPacket[]] = await db.execute(`SELECT scheduled FROM jobs WHERE id = ? LIMIT 1;`, [id]);
+    return data[0];
+}
+
+export async function getScheduledJobForReentry(id: number) {
+    const data: [JobDetailsForReentry[], FieldPacket[]] = await db.execute(
+        `SELECT
+            property_id,
+            asset,
+            type,
+            title,
+            description,
+            DATE_FORMAT(required_comp_date, "%Y-%m-%d") AS required_comp_date,
+            reporter,
+            frequency_time,
+            frequency_unit
+        FROM
+            jobs
+        WHERE
+            id = ?;`,
         [id]
     );
     return data[0];
@@ -164,30 +225,65 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     const type = body.type;
     const title = body.title;
     const description = body.description;
-    const urgency = body.urgency;
     const reporter = body.reporter;
+    const urgency = body.urgency;
     const numOfUrg = parseInt(urgencyObj[0].number);
     const lengthOfUrg = urgencyObj[0].duration;
-
     const initialStatus: [InitialStatus[], FieldPacket[]] = await db.execute("SELECT id FROM status_types WHERE initial_status = '1' LIMIT 1");
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
-            jobs
-            (
-                property_id,
-                asset,
-                type,
-                title,
-                description,
-                created,
-                urgency,
-                required_comp_date,
-                reporter,
-                status
-            )
-        VALUES
-            (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?,?);`,
+                jobs
+                (
+                    property_id,
+                    asset,
+                    type,
+                    title,
+                    description,
+                    created,
+                    urgency,
+                    required_comp_date,
+                    reporter,
+                    status
+                )
+            VALUES
+                (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?,?);`,
         [property_id, asset, type, title, description, urgency, reporter, initialStatus[0][0].id]
+    );
+    return response[0];
+}
+
+export async function postScheduledJob(body: PostScheduledJob) {
+    const property_id = body.propertyNumber;
+    const asset = body.assetNumber;
+    const type = body.type;
+    const title = body.title;
+    const description = body.description;
+    const reporter = body.reporter;
+    const dueDate = body.startNow === 'Yes' ? 'CURDATE()' : body.scheduleStart;
+    const initialStatus: [InitialStatus[], FieldPacket[]] = await db.execute("SELECT id FROM status_types WHERE initial_status = '1' LIMIT 1");
+
+    console.log(dueDate);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO
+                jobs
+                (
+                    property_id,
+                    asset,
+                    type,
+                    title,
+                    description,
+                    created,
+                    urgency,
+                    required_comp_date,
+                    reporter,
+                    status,
+                    scheduled,
+                    frequency_time,
+                    frequency_unit
+                )
+            VALUES
+                (?,?,?,?,?, NOW() , 0 , ${dueDate} ,?,?, 1 ,?,?);`,
+        [property_id, asset, type, title, description, reporter, initialStatus[0][0].id, body.intervalFrequency, body.intervalTimeUnit]
     );
     return response[0];
 }
