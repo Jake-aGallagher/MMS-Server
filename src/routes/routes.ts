@@ -68,6 +68,8 @@ router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
 // Schedules
 router.get('/schedules/all-schedules/:propertyid', authorised, schedulesController.getAllSchedules);
+router.get('/schedules/add-schedule', authorised, schedulesController.getAddScheduleEnums);
+router.post('/schedules', authorised, schedulesController.addSchedule);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);

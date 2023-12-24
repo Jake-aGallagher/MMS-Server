@@ -1,5 +1,6 @@
+import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-//import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
+import { InitialStatus } from '../types/jobs';
 
 export async function getAllSchedules(propertyId: number) {
     const data = await db.execute(
@@ -38,6 +39,37 @@ export async function getAllSchedules(propertyId: number) {
                 schedules.id
             DESC;`,
         [propertyId]
+    );
+    return data[0];
+}
+
+export async function addSchedule(body: any) {
+    const initialStatus: [InitialStatus[], FieldPacket[]] = await db.execute("SELECT id FROM status_types WHERE initial_status = '1' LIMIT 1");
+    const dueDate = body.startNow === 'Yes' ? 'CURDATE()' : body.scheduleStart;
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO schedules (
+            property_id,
+            asset_id,
+            type,
+            title,
+            description,
+            created,
+            required_comp_date,
+            status,
+            frequency_time,
+            frequency_unit
+        ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?);`,
+        [
+            body.propertyId,
+            body.assetId,
+            body.type,
+            body.title,
+            body.description,
+            dueDate,
+            initialStatus[0][0].id,
+            body.frequencyTime,
+            body.frequencyUnit,
+        ]
     );
     return data[0];
 }
