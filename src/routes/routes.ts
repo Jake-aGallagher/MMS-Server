@@ -7,6 +7,7 @@ import * as filesController from '../controllers/files';
 import * as dashboardsController from '../controllers/dashboards';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
+import * as schedulesController from '../controllers/schedules';
 import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
@@ -64,6 +65,9 @@ router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobU
 router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
+
+// Schedules
+router.get('/schedules/all-schedules/:propertyid', authorised, schedulesController.getAllSchedules);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
