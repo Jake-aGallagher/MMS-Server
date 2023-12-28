@@ -1,7 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import {
-    TimeDetails,
     UpdateNotes,
     UpdateAndComplete,
     PostJob,
@@ -200,25 +199,6 @@ export async function getRecentJobsByIds(ids: number[]) {
     return data[0];
 }
 
-export async function getLoggedTimeDetails(jobId: number) {
-    const data: [TimeDetails[], FieldPacket[]] = await db.execute(
-        `SELECT
-            logged_time.user_id AS id,
-            logged_time.time,
-            concat(users.first_name, ' ', users.last_name) as 'name'
-        FROM
-            logged_time
-        INNER JOIN users ON
-        (
-            logged_time.user_id = users.id
-        )
-        WHERE
-            logged_time.job_id = ?;`,
-        [jobId]
-    );
-    return data[0];
-}
-
 export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     const property_id = body.propertyNumber;
     const asset = body.assetNumber;
@@ -311,36 +291,6 @@ export async function updateAndComplete(body: UpdateAndComplete, totalTime: numb
         [status, description, notes, logged_time, completed, id]
     );
     return response[0];
-}
-
-export async function setTimeDetails(details: [{ id: number; time: number }], jobId: number) {
-    const res: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            logged_time
-        WHERE
-            job_id = ?;`,
-        [jobId]
-    );
-    if (res) {
-        let sql = `
-            INSERT INTO
-                logged_time
-                (
-                    user_id,
-                    job_id,
-                    time
-                )
-            VALUES`;
-
-        let values = [];
-        for (let i = 0; i < details.length; i++) {
-            values.push(`(${details[i].id}, ${jobId}, ${details[i].time})`);
-        }
-        sql += values.join(',') + `;`;
-
-        const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
-        return response[0];
-    }
 }
 
 export async function updateNotes(body: UpdateNotes) {
