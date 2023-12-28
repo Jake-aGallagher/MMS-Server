@@ -47,7 +47,7 @@ export async function setTimeDetails(details: [{ id: number; time: number }], mo
 
         let values = [];
         for (let i = 0; i < details.length; i++) {
-            values.push(`(${details[i].id}, ${model}, ${modelId}, ${details[i].time})`);
+            values.push(`(${details[i].id}, '${model}', ${modelId}, ${details[i].time})`);
         }
         sql += values.join(',') + `;`;
 
