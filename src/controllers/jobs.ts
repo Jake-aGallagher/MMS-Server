@@ -6,6 +6,7 @@ import * as Spares from '../models/spares';
 import * as TypeEnums from '../models/jobTypes';
 import * as StatusEnums from '../models/statusTypes';
 import * as UrgencyEnums from '../models/urgencyTypes';
+import * as LoggedTime from '../models/loggedTime';
 import makeIdList from '../helpers/makeIdList';
 import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
 import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
@@ -32,8 +33,8 @@ export async function getJobDetails(req: Request, res: Response) {
         const id = parseInt(req.params.jobid);
         const jobDetails = await Jobs.getJobDetails(id);
         const files = await getFileIds('job', id);
-        const usedSpares = await Spares.getUsedSpares(id);
-        const timeDetails = await Jobs.getLoggedTimeDetails(id);
+        const usedSpares = await Spares.getUsedSpares('job', id);
+        const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(userIds);
@@ -71,8 +72,8 @@ export async function getJobUpdate(req: Request, res: Response) {
             scheduleDates = await Jobs.getScheduleDates(id);
         }
         const users = await Properties.getAssignedUsers(propertyId);
-        const timeDetails = await Jobs.getLoggedTimeDetails(id);
-        const usedSpares = await Spares.getUsedSpares(id);
+        const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
+        const usedSpares = await Spares.getUsedSpares('job', id);
         if (timeDetails.length > 0) {
             res.status(200).json({ statusOptions, jobDetails, users, usedSpares, completableStatus, scheduleDates, timeDetails });
         } else {
@@ -121,7 +122,7 @@ export async function updateAndComplete(req: Request, res: Response) {
             updateSparesForJob(jobId, propertyId, newSpares);
         }
         if (req.body.logged_time_details.length > 0) {
-            Jobs.setTimeDetails(req.body.logged_time_details, jobId);
+            LoggedTime.setTimeDetails(req.body.logged_time_details, 'job', jobId);
         }
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
             insertFiles(req.files, 'job', jobId);
