@@ -109,7 +109,7 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
     return data[0];
 }
 
-export async function getUsedSpares(jobId: number) {
+export async function getUsedSpares(model: string, modelId: number) {
     const data: [UsedSpares[], FieldPacket[]] = await db.execute(
         `SELECT 
             spares.id,
@@ -125,10 +125,12 @@ export async function getUsedSpares(jobId: number) {
                 spares.deleted = 0
             )
         WHERE
-            job_id = ?
+            model = ?
+            AND
+            model_id = ?
         GROUP BY
             spares_used.spare_id;`,
-        [jobId]
+        [model, modelId]
     );
     return data[0];
 }
@@ -154,13 +156,15 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
 export async function getRecentJobsForSpare(propertyId: number, spareId: number) {
     const data: [jobsOfRecentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
-            job_id
+            model_id,
         FROM
             spares_used
         WHERE
             property_id = ?
         AND
             spare_id = ?
+        AND
+            model = 'job'
         ORDER BY 
             date_used DESC    
         LIMIT
@@ -298,13 +302,14 @@ export async function getNote(noteId: number) {
     return data[0];
 }
 
-export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, property_id: number) {
+export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number) {
     let sql = `
     INSERT INTO
         spares_used
         (
             spare_id,
-            job_id,
+            model,
+            model_id,
             quantity,
             date_used,
             property_id
@@ -313,7 +318,7 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
 
     let values = [];
     for (let i = 0; i < sparesUsed.length; i++) {
-        values.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+        values.push(`(${sparesUsed[i].id}, '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
     }
     sql += values.join(',') + `;`;
 
@@ -321,13 +326,14 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], jobId: number, p
     return response[0];
 }
 
-export function updateUsedSparesPositive(sparesUsed: NewSpares[], jobId: number, property_id: number) {
+export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number) {
     let insertSql = `
     INSERT INTO
         spares_used
         (
             spare_id,
-            job_id,
+            model,
+            model_id,
             quantity,
             date_used,
             property_id
@@ -337,7 +343,7 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], jobId: number,
     let insertVals = [];
     for (let i = 0; i < sparesUsed.length; i++) {
         if (sparesUsed[i].quantity > 0) {
-            insertVals.push(`(${sparesUsed[i].id}, ${jobId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+            insertVals.push(`(${sparesUsed[i].id}, '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
         }
     }
     insertSql += insertVals.join(',');
@@ -348,12 +354,12 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], jobId: number,
     return;
 }
 
-export function updateUsedSparesNegative(sparesUsed: NewSpares[], jobId: number, property_id: number) {
+export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number) {
     sparesUsed.forEach(async (item) => {
         while (item.quantity > 0) {
             const data: [UsedSparesIdQuantity[], FieldPacket[]] = await db.execute(
-                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND job_id = ? AND property_id = ? ORDER BY date_used DESC LIMIT 1;`,
-                [item.id, jobId, property_id]
+                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND model = ? AND model_id = ? AND property_id = ? ORDER BY date_used DESC LIMIT 1;`,
+                [item.id, model, modelId, property_id]
             );
             if (data[0][0].quantity > item.quantity) {
                 await db.execute(`UPDATE spares_used SET quantity = quantity - ? WHERE id = ?;`, [item.quantity, data[0][0].id]);

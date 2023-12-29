@@ -33,7 +33,7 @@ export async function getSpare(req: Request, res: Response) {
         const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
         const used6M = await DefaultGraphs.sparesUsed6M(spareId);
         if (recentJobNumbers.length > 0) {
-            const jobIdList = makeIdList(recentJobNumbers, 'job_id');
+            const jobIdList = makeIdList(recentJobNumbers, 'model_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
         }
         res.status(200).json({ spares, recentJobs, used6M });

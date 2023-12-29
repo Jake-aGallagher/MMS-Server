@@ -37,7 +37,7 @@ export interface recentlyUsed extends RowDataPacket {
 }
 
 export interface jobsOfRecentlyUsed extends RowDataPacket {
-    job_id: number;
+    model_id: number;
 }
 
 export interface NewSpares {
