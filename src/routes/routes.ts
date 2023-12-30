@@ -66,10 +66,12 @@ router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
+// Schedule Templates
+router.get('/schedule-templates/all-schedules/:propertyid', authorised, schedulesController.getAllScheduleTemplates);
+router.get('/schedule-templates/:propertyid/:templateid', authorised, schedulesController.getScheduleTemplate);
+
 // Schedules
-router.get('/schedules/all-schedules/:propertyid', authorised, schedulesController.getAllSchedules);
-router.get('/schedules/add-schedule', authorised, schedulesController.getAddScheduleEnums);
-router.get('/schedules/:scheduleid', authorised, schedulesController.getScheduleDetails);
+router.get('/schedules/:scheduleid', authorised, schedulesController.getSchedulePMDetails);
 router.post('/schedules', authorised, schedulesController.addSchedule);
 
 // Assets
