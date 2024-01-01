@@ -61,18 +61,21 @@ router.put('/properties/Last-property', authorised, propertiesController.setLast
 router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
 router.get('/jobs/create-job', authorised, jobsController.getEnumsForCreateJob);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
-router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobUpdate);
+router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobUpdate);//
 router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
-// Schedule Templates
+// Schedule Templates     change all these to PM schedules
 router.get('/schedule-templates/all-schedules/:propertyid', authorised, schedulesController.getAllScheduleTemplates);
 router.get('/schedule-templates/:propertyid/:templateid', authorised, schedulesController.getScheduleTemplate);
+router.get('/schedule-templates/add-schedule', authorised, schedulesController.getAddScheduleEnums);
+router.post('/schedule-templates', authorised, schedulesController.addScheduleTemplate);
 
-// Schedules
+// Schedules              change all these to PMs
 router.get('/schedules/:scheduleid', authorised, schedulesController.getSchedulePMDetails);
-router.post('/schedules', authorised, schedulesController.addSchedule);
+router.get('/schedules/edit/:propertyid/:scheduleid', authorised, schedulesController.getScheduleEdit);
+router.put('/schedules/edit', authorised, fileUpload.array('files'), schedulesController.editPM);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);

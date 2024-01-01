@@ -1,6 +1,7 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { InitialStatus } from '../types/jobs';
+import { Frequency, InitialStatus } from '../types/jobs';
+import { ScheduleDates, TemplateId } from '../types/PMs';
 
 export async function getScheduleTemplates(propertyId: number, templateId?: number) {
     let sql = `
@@ -115,23 +116,105 @@ export async function getSchedulePMDetails(id: number) {
     return data[0];
 }
 
-export async function addSchedule(body: any) {
+export async function getScheduleDates(id: number, forInsert?: boolean) {
+    const frequency: [Frequency[], FieldPacket[]] = await db.execute(
+        `SELECT
+            schedule_templates.frequency_time,
+            schedule_templates.frequency_unit
+        FROM
+            schedules
+        INNER JOIN schedule_templates ON
+            schedule_templates.id = schedules.template_id
+        WHERE
+            schedules.id = ?
+        LIMIT 1;`,
+        [id]
+    );
+
+    const time = frequency[0][0].frequency_time;
+    const unit = frequency[0][0].frequency_unit;
+
+    let sql: string;
+    if (forInsert) {
+        sql = `
+            SELECT
+                DATE_ADD(schedules.required_comp_date, INTERVAL ${time} ${unit}) AS 'current_schedule',
+                DATE_ADD(NOW(), INTERVAL ${time} ${unit}) AS 'new_schedule'`;
+    } else {
+        sql = `
+            SELECT
+                DATE_FORMAT(DATE_ADD(schedules.required_comp_date, INTERVAL ${time} ${unit}), "%d/%m/%y") AS 'current_schedule',
+                DATE_FORMAT(DATE_ADD(NOW(), INTERVAL ${time} ${unit}), "%d/%m/%y") AS 'new_schedule'`;
+    }
+
+    sql += `
+        FROM
+            schedules
+        WHERE
+            schedules.id = ?;`;
+
+    const data: [ScheduleDates[], FieldPacket[]] = await db.execute(sql, [id]);
+    return data[0];
+}
+
+export async function getTemplateId(PMId: number) {
+    const data: [TemplateId[], FieldPacket[]] = await db.execute(
+        `SELECT
+            template_id
+        FROM
+            schedules
+        WHERE
+            id = ?
+        LIMIT
+            1;`,
+        [PMId]
+    );
+    return data[0][0].template_id;
+}
+
+export async function getPMforEdit(id: number) {
+    const data = await db.execute(
+        `SELECT
+            status,
+            notes
+        FROM
+            schedules
+        WHERE
+            schedules.id = ?;`,
+        [id]
+    );
+    return data[0];
+}
+
+export async function addPM(templateId: number, required_comp_date: string) {
     const initialStatus: [InitialStatus[], FieldPacket[]] = await db.execute("SELECT id FROM status_types WHERE initial_status = '1' LIMIT 1");
-    const dueDate = body.startNow === 'Yes' ? 'CURDATE()' : body.scheduleStart;
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO schedules (
-            property_id,
-            asset_id,
-            type,
-            title,
-            description,
+            template_id,
             created,
             required_comp_date,
-            status,
-            frequency_time,
-            frequency_unit
-        ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?);`,
-        [body.propertyId, body.assetId, body.type, body.title, body.description, dueDate, initialStatus[0][0].id, body.frequencyTime, body.frequencyUnit]
+            status
+        )
+        VALUES
+            (?, NOW(), ?, ?);`,
+        [templateId, required_comp_date, initialStatus[0][0].id]
+    );
+    return data[0];
+}
+
+export async function editPM(body: any, completed: boolean, logged_time: number) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            schedules
+        SET
+            notes = ?,
+            completed = ?,
+            comp_date = ${completed ? 'NOW()' : null},
+            logged_time = ?,
+            status = ?
+        WHERE
+            id = ?;`,
+        [body.notes, completed, logged_time, body.status, body.id]
     );
     return data[0];
 }
