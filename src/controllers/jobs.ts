@@ -119,7 +119,7 @@ export async function updateAndComplete(req: Request, res: Response) {
         const response = await Jobs.updateAndComplete(req.body, totalTime);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(jobId, propertyId, newSpares);
+            updateSparesForJob(jobId, propertyId, newSpares, 'job');
         }
         if (req.body.logged_time_details.length > 0) {
             LoggedTime.setTimeDetails(req.body.logged_time_details, 'job', jobId);
