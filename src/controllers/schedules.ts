@@ -104,7 +104,7 @@ export async function getEditPM(req: Request, res: Response) {
 export async function addScheduleTemplate(req: Request, res: Response) {
     try {
         const response = await Schedules.addScheduleTemplate(req.body);
-        const dueDate = req.body.startNow === 'Yes' ? 'CURDATE()' : req.body.scheduleStart;
+        const dueDate = req.body.startNow === 'Yes' ? 'CAST(CURDATE() as datetime)' : req.body.scheduleStart;
         const PM = await Schedules.addPM(response.insertId, dueDate)
         if (PM.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -159,5 +159,20 @@ export async function editPM(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ updated: false });
+    }
+}
+
+export async function deleteScheduleTemplate(req: Request, res: Response) {
+    try {
+        const id = parseInt(req.params.id);
+        const response = await Schedules.deleteScheduleTemplate(id);
+        if (response.affectedRows === 1) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
     }
 }

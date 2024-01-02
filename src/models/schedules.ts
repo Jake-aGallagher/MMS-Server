@@ -185,7 +185,7 @@ export async function getPMScheduleForEdit(id: number) {
         WHERE
             id = ?;`,
         [id]
-    )
+    );
     return data[0];
 }
 
@@ -213,8 +213,8 @@ export async function addPM(templateId: number, required_comp_date: string) {
             status
         )
         VALUES
-            (?, NOW(), ?, ?);`,
-        [templateId, required_comp_date, initialStatus[0][0].id]
+            (?, NOW(), ${required_comp_date}, ?);`,
+        [templateId, initialStatus[0][0].id]
     );
     return data[0];
 }
@@ -282,5 +282,10 @@ export async function editScheduleTemplate(body: any) {
             id = ?;`,
         [body.type, body.title, body.description, body.frequencyTime, body.frequencyUnit, body.id]
     );
+    return data[0];
+}
+
+export async function deleteScheduleTemplate(id: number) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE schedule_templates SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return data[0];
 }

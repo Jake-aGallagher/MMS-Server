@@ -73,6 +73,7 @@ router.get('/schedule-templates/add-schedule', authorised, schedulesController.g
 router.get('/schedule-template/edit-schedule/:templateid', authorised, schedulesController.getEditSchedule);
 router.post('/schedule-templates', authorised, schedulesController.addScheduleTemplate);
 router.put('/schedule-templates', authorised, schedulesController.editScheduleTemplate);
+router.delete('/schedule-templates/:id', authorised, schedulesController.deleteScheduleTemplate);
 
 // Schedules              change all these to PMs
 router.get('/schedules/:scheduleid', authorised, schedulesController.getSchedulePMDetails);
