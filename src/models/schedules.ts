@@ -172,6 +172,23 @@ export async function getTemplateId(PMId: number) {
     return data[0][0].template_id;
 }
 
+export async function getPMScheduleForEdit(id: number) {
+    const data = await db.execute(
+        `SELECT
+            type,
+            title,
+            description,
+            frequency_time,
+            frequency_unit
+        FROM
+            schedule_templates
+        WHERE
+            id = ?;`,
+        [id]
+    )
+    return data[0];
+}
+
 export async function getPMforEdit(id: number) {
     const data = await db.execute(
         `SELECT
@@ -219,6 +236,21 @@ export async function editPM(body: any, completed: boolean, logged_time: number)
     return data[0];
 }
 
+export async function editPMdue(templateId: number, dueDate: string) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            schedules
+        SET
+           required_comp_date = ? 
+        WHERE
+            template_id = ?
+            AND
+            completed = 0;`,
+        [dueDate, templateId]
+    );
+    return data[0];
+}
+
 export async function addScheduleTemplate(body: any) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO schedule_templates (
@@ -232,6 +264,23 @@ export async function addScheduleTemplate(body: any) {
             frequency_unit
         ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?);`,
         [body.propertyId, body.assetId, body.type, body.title, body.description, body.frequencyTime, body.frequencyUnit]
+    );
+    return data[0];
+}
+
+export async function editScheduleTemplate(body: any) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            schedule_templates
+        SET
+            type = ?,
+            title = ?,
+            description = ?,
+            frequency_time = ?,
+            frequency_unit = ?
+        WHERE
+            id = ?;`,
+        [body.type, body.title, body.description, body.frequencyTime, body.frequencyUnit, body.id]
     );
     return data[0];
 }

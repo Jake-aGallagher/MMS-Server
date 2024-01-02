@@ -67,7 +67,19 @@ export async function getAddScheduleEnums(req: Request, res: Response) {
     }
 }
 
-export async function getScheduleEdit(req: Request, res: Response) {
+export async function getEditSchedule(req: Request, res: Response) {
+    try {
+        const id = parseInt(req.params.templateid);
+        const PMScheduleDetails = await Schedules.getPMScheduleForEdit(id);
+        const types = await TypeEnums.getAllJobTypes();
+        res.status(200).json({ PMScheduleDetails, types });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getEditPM(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.scheduleid);
         const propertyId = parseInt(req.params.propertyid);
@@ -102,6 +114,23 @@ export async function addScheduleTemplate(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ created: false });
+    }
+}
+
+export async function editScheduleTemplate(req: Request, res: Response) {
+    try {
+        const response = await Schedules.editScheduleTemplate(req.body);
+        if (req.body.editStart) {
+            await Schedules.editPMdue(req.body.id, req.body.scheduleStart);
+        }
+        if (response.affectedRows === 1) {
+            res.status(200).json({ updated: true });
+        } else {
+            res.status(500).json({ updated: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ updated: false });
     }
 }
 

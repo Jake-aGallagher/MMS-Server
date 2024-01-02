@@ -70,11 +70,13 @@ router.put('/jobs/notes', authorised, jobsController.updateNotes);
 router.get('/schedule-templates/all-schedules/:propertyid', authorised, schedulesController.getAllScheduleTemplates);
 router.get('/schedule-templates/:propertyid/:templateid', authorised, schedulesController.getScheduleTemplate);
 router.get('/schedule-templates/add-schedule', authorised, schedulesController.getAddScheduleEnums);
+router.get('/schedule-template/edit-schedule/:templateid', authorised, schedulesController.getEditSchedule);
 router.post('/schedule-templates', authorised, schedulesController.addScheduleTemplate);
+router.put('/schedule-templates', authorised, schedulesController.editScheduleTemplate);
 
 // Schedules              change all these to PMs
 router.get('/schedules/:scheduleid', authorised, schedulesController.getSchedulePMDetails);
-router.get('/schedules/edit/:propertyid/:scheduleid', authorised, schedulesController.getScheduleEdit);
+router.get('/schedules/edit/:propertyid/:scheduleid', authorised, schedulesController.getEditPM);
 router.put('/schedules/edit', authorised, fileUpload.array('files'), schedulesController.editPM);
 
 // Assets
