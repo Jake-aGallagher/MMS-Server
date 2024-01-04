@@ -22,11 +22,13 @@ export async function getRaisedJobs(propertyId: number) {
 export async function getIncomplete(propertyId: number) {
     const data = await getIncompleteJobs(propertyId);
     const formattedArr = [
-        { label: 'Open & Not Due', value: data[0].incomplete },
-        { label: 'Open & Overdue', value: data[0].overdue },
+        { label: 'Non-overdue Job', value: data[0].incomplete },
+        { label: 'Overdue Job', value: data[0].overdue },
+        { label: 'Non-Overdue PM', value: data[1].incomplete},
+        { label: 'Overdue PM', value: data[1].overdue},
     ];
 
-    return { thisMonth: data[0].overdue + data[0].incomplete, mainData: formattedArr };
+    return { thisMonth: data[0].overdue + data[0].incomplete + data[1].overdue + data[1].incomplete, mainData: formattedArr };
 }
 
 export async function getCompletedJobs(propertyId: number) {
@@ -48,17 +50,28 @@ export async function getCompletedJobs(propertyId: number) {
 export async function getBreakdownVsPlanned(propertyId: number) {
     const data: [BreakdownPlanned[], FieldPacket[]] = await db.execute(
         `SELECT
-            COUNT(IF(completed = 0 AND scheduled = 0, 1, NULL)) AS breakdown,
-            COUNT(IF(completed = 0 AND scheduled = 1, 1, NULL)) AS planned
+            COUNT(IF(completed = 0, 1, NULL)) AS result
         FROM
             jobs
         WHERE
-            property_id = ?;`,
-        [propertyId]
+            property_id = ?
+                    
+        UNION
+                    
+        SELECT
+            COUNT(IF(schedules.completed = 0, 1, NULL)) AS result
+        FROM
+            schedules
+        INNER JOIN schedule_templates ON
+            schedules.template_id = schedule_templates.id
+        WHERE
+            schedule_templates.property_id = ?;`,
+        [propertyId, propertyId]
     );
+
     const dataArr = [
-        { label: 'Breakdown', value: data[0][0].breakdown },
-        { label: 'Planned', value: data[0][0].planned },
+        { label: 'Breakdown', value: data[0][0].result },
+        { label: 'Planned', value: data[0][1].result },
     ]
     return { mainData: dataArr };
 }

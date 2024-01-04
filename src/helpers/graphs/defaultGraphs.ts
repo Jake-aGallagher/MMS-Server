@@ -3,7 +3,7 @@ import { FieldPacket } from 'mysql2/typings/mysql';
 import { DefaultGraph6M, IncompleteJobs, NameValue } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
-export async function getIncompleteJobs(propertyId: number) {
+export async function getIncompleteJobs(propertyId: number) {// pm
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
@@ -11,8 +11,20 @@ export async function getIncompleteJobs(propertyId: number) {
         FROM
             jobs
         WHERE
-            property_id = ?;`,
-        [propertyId]
+            property_id = ?
+        
+        UNION
+        
+        SELECT
+            COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+        FROM
+            schedules
+        INNER JOIN schedule_templates ON
+            schedules.template_id = schedule_templates.id
+        WHERE
+            schedule_templates.property_id = ?;`,
+        [propertyId, propertyId]
     );
     return data[0];
 }
@@ -47,7 +59,7 @@ export async function getJobsRaised6M(propertyId: number) {
     return returnObj;
 }
 
-export async function getJobsCompleted6M(propertyId: number) {
+export async function getJobsCompleted6M(propertyId: number) {// pm
     const d = new Date();
     const endNum = d.getMonth();
     let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
@@ -192,7 +204,7 @@ export async function jobsOfComponents6M(assetIds: number[]) {
     return data[0];
 }
 
-export async function incompleteForAsset(assetIds: number[]) {
+export async function incompleteForAsset(assetIds: number[]) {// pm
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
