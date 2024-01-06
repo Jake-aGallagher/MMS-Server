@@ -156,7 +156,7 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
 export async function getRecentJobsForSpare(propertyId: number, spareId: number) {
     const data: [jobsOfRecentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
-            model_id,
+            model_id
         FROM
             spares_used
         WHERE
