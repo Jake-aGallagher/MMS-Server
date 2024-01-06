@@ -12,7 +12,7 @@ export interface JobDetails extends RowDataPacket {
     description: string;
     urgency: string;
     status: string;
-    reporter: string;
+    reported_by: string;
     created: string;
     completed: boolean;
     logged_time: number;
@@ -29,7 +29,7 @@ export interface JobDetailsForReentry extends RowDataPacket {
     title: string;
     description: string;
     required_comp_date: string;
-    reporter: string;
+    reported_by: string;
     frequency_time: number;
     frequency_unit: string;
 }
@@ -42,7 +42,7 @@ export interface PostJob {
     title: string;
     description: string;
     urgency: string;
-    reporter: string;
+    reported_by: string;
     startNow: string;
     scheduleStart: string;
     intervalFrequency: number;
@@ -55,7 +55,7 @@ export interface PostScheduledJob {
     type: string;
     title: string;
     description: string;
-    reporter: string;
+    reported_by: string;
     startNow: string;
     scheduleStart: string;
     intervalFrequency: number;

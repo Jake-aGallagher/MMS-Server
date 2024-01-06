@@ -23,12 +23,12 @@ export async function getAllJobs(propertyId: number) {
                 DATE_FORMAT(jobs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
                 jobs.completed,
                 DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
-                CONCAT(users.first_name, " ", users.last_name) AS reporter,
+                CONCAT(users.first_name, " ", users.last_name) AS reported_by,
                 statusEnum.value AS status
             FROM 
                 jobs
             LEFT JOIN users ON
-                users.id = jobs.reporter
+                users.id = jobs.reported_by
             LEFT JOIN assets ON
                 assets.id = jobs.asset
             LEFT JOIN urgency_types AS urgencyEnum ON
@@ -63,7 +63,7 @@ export async function getJobDetails(id: number) {
             DATE_FORMAT(jobs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
             jobs.completed,
             DATE_FORMAT(jobs.comp_date, "%d/%m/%y") AS 'comp_date',
-            CONCAT(users.first_name, " ", users.last_name) AS reporter,
+            CONCAT(users.first_name, " ", users.last_name) AS reported_by,
             jobs.logged_time,
             status AS status_id,
             statusEnum.value AS status,
@@ -71,7 +71,7 @@ export async function getJobDetails(id: number) {
         FROM 
             jobs
         LEFT JOIN users ON
-            users.id = jobs.reporter
+            users.id = jobs.reported_by
         LEFT JOIN properties ON
             properties.id = jobs.property_id
         LEFT JOIN assets ON
@@ -152,7 +152,7 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     const type = body.type;
     const title = body.title;
     const description = body.description;
-    const reporter = body.reporter;
+    const reported_by = body.reported_by;
     const urgency = body.urgency;
     const numOfUrg = parseInt(urgencyObj[0].number);
     const lengthOfUrg = urgencyObj[0].duration;
@@ -169,12 +169,12 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
                     created,
                     urgency,
                     required_comp_date,
-                    reporter,
+                    reported_by,
                     status
                 )
             VALUES
                 (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?,?);`,
-        [property_id, asset, type, title, description, urgency, reporter, initialStatus[0][0].id]
+        [property_id, asset, type, title, description, urgency, reported_by, initialStatus[0][0].id]
     );
     return response[0];
 }
