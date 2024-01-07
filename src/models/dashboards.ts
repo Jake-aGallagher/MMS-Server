@@ -62,10 +62,10 @@ export async function getBreakdownVsPlanned(propertyId: number) {
             COUNT(IF(schedules.completed = 0, 1, NULL)) AS result
         FROM
             schedules
-        INNER JOIN schedule_templates ON
-            schedules.template_id = schedule_templates.id
+        INNER JOIN pm_schedules ON
+            schedules.template_id = pm_schedules.id
         WHERE
-            schedule_templates.property_id = ?;`,
+            pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
 

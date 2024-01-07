@@ -20,10 +20,10 @@ export async function getIncompleteJobs(propertyId: number) {
             COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
         FROM
             schedules
-        INNER JOIN schedule_templates ON
-            schedules.template_id = schedule_templates.id
+        INNER JOIN pm_schedules ON
+            schedules.template_id = pm_schedules.id
         WHERE
-            schedule_templates.property_id = ?;`,
+            pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
     return data[0];
@@ -58,10 +58,10 @@ export async function getJobsRaised6M(propertyId: number) {
             COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum + 5]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
         FROM
             schedules
-        INNER JOIN schedule_templates ON
-            schedules.template_id = schedule_templates.id
+        INNER JOIN pm_schedules ON
+            schedules.template_id = pm_schedules.id
         WHERE
-            schedule_templates.property_id = ?;`,
+            pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
     const returnObj = [
@@ -104,10 +104,10 @@ export async function getJobsCompleted6M(propertyId: number) {
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
         FROM
             schedules
-        INNER JOIN schedule_templates ON
-            schedules.template_id = schedule_templates.id
+        INNER JOIN pm_schedules ON
+            schedules.template_id = pm_schedules.id
         WHERE
-            schedule_templates.property_id = ?;`,
+            pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
     const returnObj = [
@@ -253,10 +253,10 @@ export async function incompleteForAsset(assetIds: number[]) {
             COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
         FROM
             schedules
-        INNER JOIN schedule_templates ON
-            schedules.template_id = schedule_templates.id
+        INNER JOIN pm_schedules ON
+            schedules.template_id = pm_schedules.id
         WHERE
-            schedule_templates.asset_id IN (${assetIds});`
+            pm_schedules.asset_id IN (${assetIds});`
     );
     return data[0];
 }

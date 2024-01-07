@@ -6,50 +6,50 @@ import { ScheduleDates, TemplateId } from '../types/PMs';
 export async function getScheduleTemplates(propertyId: number, templateId?: number) {
     let sql = `
         SELECT 
-            schedule_templates.id,
+            pm_schedules.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset,
             typeEnum.value AS type,
-            schedule_templates.title,
-            schedule_templates.description,
-            DATE_FORMAT(schedule_templates.created, "%d/%m/%y") AS 'created',
+            pm_schedules.title,
+            pm_schedules.description,
+            DATE_FORMAT(pm_schedules.created, "%d/%m/%y") AS 'created',
             CONCAT(
-                schedule_templates.frequency_time,
+                pm_schedules.frequency_time,
                 ' ',
                 CASE
-                    WHEN schedule_templates.frequency_unit = 'DAY' THEN 'Day(s)'
-                    WHEN schedule_templates.frequency_unit = 'WEEK' THEN 'Week(s)'
-                    WHEN schedule_templates.frequency_unit = 'MONTH' THEN 'Month(s)'
-                    WHEN schedule_templates.frequency_unit = 'YEAR' THEN 'Year(s)'
+                    WHEN pm_schedules.frequency_unit = 'DAY' THEN 'Day(s)'
+                    WHEN pm_schedules.frequency_unit = 'WEEK' THEN 'Week(s)'
+                    WHEN pm_schedules.frequency_unit = 'MONTH' THEN 'Month(s)'
+                    WHEN pm_schedules.frequency_unit = 'YEAR' THEN 'Year(s)'
                 END
             ) AS frequency,
             MAX(DATE_FORMAT(schedules.comp_date, "%d/%m/%y")) AS 'last_comp_date',
             MAX(DATE_FORMAT(schedules.required_comp_date, "%d/%m/%y")) AS 'next_due_date',
             CONVERT(IF (MAX(schedules.required_comp_date) > CURDATE(), '1', '0'), UNSIGNED) AS 'up_to_date'
         FROM 
-            schedule_templates
+            pm_schedules
         LEFT JOIN schedules ON
-            schedules.template_id = schedule_templates.id
+            schedules.template_id = pm_schedules.id
         LEFT JOIN assets ON
-            assets.id = schedule_templates.asset_id
+            assets.id = pm_schedules.asset_id
         LEFT JOIN job_types AS typeEnum ON
-            schedule_templates.type = typeEnum.id
+            pm_schedules.type = typeEnum.id
         WHERE
-            schedule_templates.property_id = ?
+            pm_schedules.property_id = ?
         `;
 
     if (templateId) {
         sql += `
             AND
-                schedule_templates.id = ?`;
+                pm_schedules.id = ?`;
     }
 
     sql += `
         AND
-            schedule_templates.deleted = 0
+            pm_schedules.deleted = 0
         GROUP BY
-            schedule_templates.id
+            pm_schedules.id
         ORDER BY
-            schedule_templates.id
+            pm_schedules.id
         DESC;`;
 
     let sqlArr = [propertyId];
@@ -101,7 +101,7 @@ export async function getSchedulePMDetails(id: number) {
             schedules.logged_time
         FROM
             schedules
-        INNER JOIN schedule_templates AS template ON
+        INNER JOIN pm_schedules AS template ON
             template.id = schedules.template_id
         LEFT JOIN assets ON
             assets.id = template.asset_id
@@ -119,12 +119,12 @@ export async function getSchedulePMDetails(id: number) {
 export async function getScheduleDates(id: number, forInsert?: boolean) {
     const frequency: [Frequency[], FieldPacket[]] = await db.execute(
         `SELECT
-            schedule_templates.frequency_time,
-            schedule_templates.frequency_unit
+            pm_schedules.frequency_time,
+            pm_schedules.frequency_unit
         FROM
             schedules
-        INNER JOIN schedule_templates ON
-            schedule_templates.id = schedules.template_id
+        INNER JOIN pm_schedules ON
+            pm_schedules.id = schedules.template_id
         WHERE
             schedules.id = ?
         LIMIT 1;`,
@@ -181,7 +181,7 @@ export async function getPMScheduleForEdit(id: number) {
             frequency_time,
             frequency_unit
         FROM
-            schedule_templates
+            pm_schedules
         WHERE
             id = ?;`,
         [id]
@@ -253,7 +253,7 @@ export async function editPMdue(templateId: number, dueDate: string) {
 
 export async function addScheduleTemplate(body: any) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `INSERT INTO schedule_templates (
+        `INSERT INTO pm_schedules (
             property_id,
             asset_id,
             type,
@@ -271,7 +271,7 @@ export async function addScheduleTemplate(body: any) {
 export async function editScheduleTemplate(body: any) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
-            schedule_templates
+            pm_schedules
         SET
             type = ?,
             title = ?,
@@ -286,6 +286,6 @@ export async function editScheduleTemplate(body: any) {
 }
 
 export async function deleteScheduleTemplate(id: number) {
-    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE schedule_templates SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE pm_schedules SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return data[0];
 }
