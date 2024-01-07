@@ -5,7 +5,7 @@ export default function sparesWarningArray(sparesCount: ExtendedStock[], sparesU
     const outArray = <WarningArrays[]>[];
     sparesCount.forEach((item) => {
         const data = sparesUsed.find((x) => x.spare_id === item.id);
-        if (item.quant_remain === 0) {
+        if (item.quant_remain <= 0) {
             outArray.push({
                 id: item.id,
                 part_no: item.part_no,
