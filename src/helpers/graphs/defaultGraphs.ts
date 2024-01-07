@@ -19,9 +19,9 @@ export async function getIncompleteJobs(propertyId: number) {
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
             COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
         FROM
-            schedules
+            pms
         INNER JOIN pm_schedules ON
-            schedules.template_id = pm_schedules.id
+            pms.schedule_id = pm_schedules.id
         WHERE
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
@@ -50,16 +50,16 @@ export async function getJobsRaised6M(propertyId: number) {
         UNION
         
         SELECT
-            COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_1,
-            COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum + 1]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_2,
-            COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum + 2]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
-            COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum + 3]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
-            COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum + 4]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(schedules.created) = "${monthsLooped[startNum + 5]}" && schedules.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_1,
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 1]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_2,
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 2]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 3]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 4]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 5]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
         FROM
-            schedules
+            pms
         INNER JOIN pm_schedules ON
-            schedules.template_id = pm_schedules.id
+            pms.schedule_id = pm_schedules.id
         WHERE
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
@@ -103,9 +103,9 @@ export async function getJobsCompleted6M(propertyId: number) {
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 4]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
         FROM
-            schedules
+            pms
         INNER JOIN pm_schedules ON
-            schedules.template_id = pm_schedules.id
+            pms.schedule_id = pm_schedules.id
         WHERE
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
@@ -252,9 +252,9 @@ export async function incompleteForAsset(assetIds: number[]) {
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
             COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
         FROM
-            schedules
+            pms
         INNER JOIN pm_schedules ON
-            schedules.template_id = pm_schedules.id
+            pms.schedule_id = pm_schedules.id
         WHERE
             pm_schedules.asset_id IN (${assetIds});`
     );

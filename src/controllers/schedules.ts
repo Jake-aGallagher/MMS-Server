@@ -12,10 +12,10 @@ import calcTotalLoggedTime from '../helpers/jobs/calcTotalLoggedTime';
 import { NewSpares } from '../types/spares';
 import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
 
-export async function getAllScheduleTemplates(req: Request, res: Response) {
+export async function getAllPMSchedules(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
-        const schedules = await Schedules.getScheduleTemplates(propertyId);
+        const schedules = await Schedules.getPMSchedules(propertyId);
         res.status(200).json(schedules);
     } catch (err) {
         console.log(err);
@@ -23,12 +23,12 @@ export async function getAllScheduleTemplates(req: Request, res: Response) {
     }
 }
 
-export async function getScheduleTemplate(req: Request, res: Response) {
+export async function getPMSchedule(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
-        const id = parseInt(req.params.templateid);
-        const scheduleDetails = await Schedules.getScheduleTemplates(propertyId, id);
-        const schedulePMs = await Schedules.getSchedulePMs(id);
+        const id = parseInt(req.params.scheduleid);
+        const scheduleDetails = await Schedules.getPMSchedules(propertyId, id);
+        const schedulePMs = await Schedules.getPMs(id);
         res.status(200).json({ scheduleDetails, schedulePMs });
     } catch (err) {
         console.log(err);
@@ -36,10 +36,10 @@ export async function getScheduleTemplate(req: Request, res: Response) {
     }
 }
 
-export async function getSchedulePMDetails(req: Request, res: Response) {
+export async function getPMDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.scheduleid);
-        const schedulePMDetails = await Schedules.getSchedulePMDetails(id);
+        const schedulePMDetails = await Schedules.getPMDetails(id);
         const usedSpares = await Spares.getUsedSpares('pm', id);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('pm', id);
         if (timeDetails.length > 0) {
@@ -57,7 +57,7 @@ export async function getSchedulePMDetails(req: Request, res: Response) {
 
 }
 
-export async function getAddScheduleEnums(req: Request, res: Response) {
+export async function getAddSchedule(req: Request, res: Response) {
     try {
         const types = await TypeEnums.getAllJobTypes();
         res.status(200).json({ types });
@@ -69,7 +69,7 @@ export async function getAddScheduleEnums(req: Request, res: Response) {
 
 export async function getEditSchedule(req: Request, res: Response) {
     try {
-        const id = parseInt(req.params.templateid);
+        const id = parseInt(req.params.scheduleid);
         const PMScheduleDetails = await Schedules.getPMScheduleForEdit(id);
         const types = await TypeEnums.getAllJobTypes();
         res.status(200).json({ PMScheduleDetails, types });
@@ -101,9 +101,9 @@ export async function getEditPM(req: Request, res: Response) {
     }
 }
 
-export async function addScheduleTemplate(req: Request, res: Response) {
+export async function addPMSchedule(req: Request, res: Response) {
     try {
-        const response = await Schedules.addScheduleTemplate(req.body);
+        const response = await Schedules.addPMSchedule(req.body);
         const dueDate = req.body.startNow === 'Yes' ? 'CAST(CURDATE() as datetime)' : req.body.scheduleStart;
         const PM = await Schedules.addPM(response.insertId, dueDate)
         if (PM.affectedRows === 1) {
@@ -117,11 +117,11 @@ export async function addScheduleTemplate(req: Request, res: Response) {
     }
 }
 
-export async function editScheduleTemplate(req: Request, res: Response) {
+export async function editPMSchedule(req: Request, res: Response) {
     try {
-        const response = await Schedules.editScheduleTemplate(req.body);
+        const response = await Schedules.editPMSchedule(req.body);
         if (req.body.editStart) {
-            await Schedules.editPMdue(req.body.id, req.body.scheduleStart);
+            await Schedules.editPMdueDate(req.body.id, req.body.scheduleStart);
         }
         if (response.affectedRows === 1) {
             res.status(200).json({ updated: true });
@@ -148,8 +148,8 @@ export async function editPM(req: Request, res: Response) {
         }
         if (req.body.complete == 1) {
             const scheduleDates = await Schedules.getScheduleDates(req.body.id, true);
-            const templateId = await Schedules.getTemplateId(req.body.id);
-            Schedules.addPM(templateId, req.body.continueSchedule ? scheduleDates[0].current_schedule : scheduleDates[0].new_schedule)
+            const scheduleId = await Schedules.getScheduleId(req.body.id);
+            Schedules.addPM(scheduleId, req.body.continueSchedule ? scheduleDates[0].current_schedule : scheduleDates[0].new_schedule)
         }
         if (response.affectedRows === 1) {
             res.status(200).json({ updated: true });
@@ -162,10 +162,10 @@ export async function editPM(req: Request, res: Response) {
     }
 }
 
-export async function deleteScheduleTemplate(req: Request, res: Response) {
+export async function deletePMSchedule(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const response = await Schedules.deleteScheduleTemplate(id);
+        const response = await Schedules.deletePMSchedule(id);
         if (response.affectedRows === 1) {
             res.status(200).json({ deleted: true });
         } else {

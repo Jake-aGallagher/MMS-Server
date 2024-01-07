@@ -66,19 +66,19 @@ router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
-// Schedule Templates     change all these to PM schedules
-router.get('/schedule-templates/all-schedules/:propertyid', authorised, schedulesController.getAllScheduleTemplates);
-router.get('/schedule-templates/:propertyid/:templateid', authorised, schedulesController.getScheduleTemplate);
-router.get('/schedule-templates/add-schedule', authorised, schedulesController.getAddScheduleEnums);
-router.get('/schedule-template/edit-schedule/:templateid', authorised, schedulesController.getEditSchedule);
-router.post('/schedule-templates', authorised, schedulesController.addScheduleTemplate);
-router.put('/schedule-templates', authorised, schedulesController.editScheduleTemplate);
-router.delete('/schedule-templates/:id', authorised, schedulesController.deleteScheduleTemplate);
+// PM Schedules
+router.get('/pm-schedules/all-schedules/:propertyid', authorised, schedulesController.getAllPMSchedules);
+router.get('/pm-schedules/:propertyid/:scheduleid', authorised, schedulesController.getPMSchedule);
+router.get('/pm-schedules/add-schedule', authorised, schedulesController.getAddSchedule);
+router.get('/pm-schedule/edit-schedule/:scheduleid', authorised, schedulesController.getEditSchedule);
+router.post('/pm-schedules', authorised, schedulesController.addPMSchedule);
+router.put('/pm-schedules', authorised, schedulesController.editPMSchedule);
+router.delete('/pm-schedules/:id', authorised, schedulesController.deletePMSchedule);
 
-// Schedules              change all these to PMs
-router.get('/schedules/:scheduleid', authorised, schedulesController.getSchedulePMDetails);
-router.get('/schedules/edit/:propertyid/:scheduleid', authorised, schedulesController.getEditPM);
-router.put('/schedules/edit', authorised, fileUpload.array('files'), schedulesController.editPM);
+// PMs
+router.get('/pms/:scheduleid', authorised, schedulesController.getPMDetails);
+router.get('/pms/edit/:propertyid/:scheduleid', authorised, schedulesController.getEditPM);
+router.put('/pms/edit', authorised, fileUpload.array('files'), schedulesController.editPM);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
