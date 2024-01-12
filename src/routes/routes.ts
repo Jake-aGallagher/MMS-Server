@@ -12,7 +12,7 @@ import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
-import * as jobTypesController from '../controllers/jobTypes';
+import * as taskTypesController from '../controllers/jobTypes';
 import * as statusTypesController from '../controllers/statusTypes';
 import * as urgencyTypesController from '../controllers/urgencyTypes';
 import { authorised, checkAuth } from '../middleware/authentication';
@@ -121,19 +121,19 @@ router.get('/enumvalue/:id', authorised, enumsController.getEnumValueById);
 router.put('/enumvalues', authorised, enumsController.addEditEnumValue);
 router.delete('/enumvalues/:id', authorised, enumsController.deleteEnumValue);
 
-// Job Types
-router.get('/jobtypes', authorised, jobTypesController.getJobTypes);
-router.get('/jobtypes/:id', authorised, jobTypesController.getJobTypeById);
-router.put('/jobtypes', authorised, jobTypesController.addEditJobType);
-router.delete('/jobtypes/:id', authorised, jobTypesController.deleteJobType);
+// Task Types
+router.get('/tasktypes', authorised, taskTypesController.getJobTypes);
+router.get('/tasktypes/:id', authorised, taskTypesController.getJobTypeById);
+router.put('/tasktypes', authorised, taskTypesController.addEditJobType);
+router.delete('/tasktypes/:id', authorised, taskTypesController.deleteJobType);
 
-// Job Status Types
+// Status Types
 router.get('/statustypes', authorised, statusTypesController.getStatusTypes);
 router.get('/statustypes/:id', authorised, statusTypesController.getStatusTypeById);
 router.put('/statustypes', authorised, statusTypesController.addEditStatusType);
 router.delete('/statustypes/:id', authorised, statusTypesController.deleteStatusType);
 
-// Job Urgency Types
+// Urgency Types
 router.get('/urgencytypes', authorised, urgencyTypesController.getUrgencyTypes);
 router.get('/urgencytypes/:id', authorised, urgencyTypesController.getUrgencyTypeById);
 router.put('/urgencytypes', authorised, urgencyTypesController.addEditUrgencyType);

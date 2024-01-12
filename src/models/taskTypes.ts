@@ -6,7 +6,7 @@ export async function getAllJobTypes() {
         `SELECT
             *
         FROM 
-            job_types
+            task_types
         WHERE
             deleted = 0
         ORDER BY
@@ -20,7 +20,7 @@ export async function getJobTypeById(id: number) {
         `SELECT
             *
         FROM 
-            job_types
+            task_types
         WHERE
             id = ?
         AND
@@ -33,7 +33,7 @@ export async function getJobTypeById(id: number) {
 export async function addJobType(body: { value: string; listPriority: number }) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
-            job_types
+            task_types
             (
                 value,
                 list_priority
@@ -48,7 +48,7 @@ export async function addJobType(body: { value: string; listPriority: number }) 
 export async function editJobType(body: { id: number; value: string; listPriority: number }) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
-            job_types
+            task_types
         SET
             value = ?,
             list_priority = ?
@@ -60,6 +60,6 @@ export async function editJobType(body: { id: number; value: string; listPriorit
 }
 
 export async function deleteJobType(id: number) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE job_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE task_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }

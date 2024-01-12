@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import * as JobTypes from '../models/jobTypes';
+import * as TaskTypes from '../models/taskTypes';
 
 export async function getJobTypes(req: Request, res: Response) {
     try {
-        const jobTypes = await JobTypes.getAllJobTypes();
-        res.status(200).json({ jobTypes });
+        const taskTypes = await TaskTypes.getAllJobTypes();
+        res.status(200).json({ taskTypes });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -14,8 +14,8 @@ export async function getJobTypes(req: Request, res: Response) {
 export async function getJobTypeById(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const jobType = await JobTypes.getJobTypeById(id);
-        res.status(200).json({ jobType });
+        const taskType = await TaskTypes.getJobTypeById(id);
+        res.status(200).json({ taskType });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -27,9 +27,9 @@ export async function addEditJobType(req: Request, res: Response) {
         const id = parseInt(req.body.id);
         let response;
         if (id > 0) {
-            response = await JobTypes.editJobType(req.body);
+            response = await TaskTypes.editJobType(req.body);
         } else {
-            response = await JobTypes.addJobType(req.body);
+            response = await TaskTypes.addJobType(req.body);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -45,7 +45,7 @@ export async function addEditJobType(req: Request, res: Response) {
 export async function deleteJobType(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await JobTypes.deleteJobType(id);
+        const deleted = await TaskTypes.deleteJobType(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {

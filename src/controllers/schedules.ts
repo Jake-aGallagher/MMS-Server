@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as Schedules from '../models/schedules';
-import * as TypeEnums from '../models/jobTypes';
+import * as TypeEnums from '../models/taskTypes';
 import * as Users from '../models/users';
 import * as Spares from '../models/spares';
 import * as LoggedTime from '../models/loggedTime';

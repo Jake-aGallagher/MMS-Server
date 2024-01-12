@@ -16,7 +16,7 @@ export async function getAllJobs(propertyId: number) {
                 jobs.id,
                 jobs.property_id,
                 IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-                typeEnum.value AS type,
+                task_types.value AS type,
                 jobs.title,
                 DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
                 IF (jobs.urgency > 0, urgencyEnum.value, 'Scheduled') AS urgency,
@@ -33,8 +33,8 @@ export async function getAllJobs(propertyId: number) {
                 assets.id = jobs.asset
             LEFT JOIN urgency_types AS urgencyEnum ON
                 jobs.urgency = urgencyEnum.id
-            LEFT JOIN job_types AS typeEnum ON
-                jobs.type = typeEnum.id
+            LEFT JOIN task_types AS task_types ON
+                jobs.type = task_types.id
             LEFT JOIN status_types AS statusEnum ON
                 jobs.status = statusEnum.id
             WHERE
@@ -55,7 +55,7 @@ export async function getJobDetails(id: number) {
             jobs.id,
             properties.name AS property_name,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            typeEnum.value AS type,
+            task_types.value AS type,
             jobs.title,
             jobs.description,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
@@ -78,8 +78,8 @@ export async function getJobDetails(id: number) {
             assets.id = jobs.asset
         LEFT JOIN urgency_types AS urgencyEnum ON
             jobs.urgency = urgencyEnum.id
-        LEFT JOIN job_types AS typeEnum ON
-            jobs.type = typeEnum.id
+        LEFT JOIN task_types AS task_types ON
+            jobs.type = task_types.id
         LEFT JOIN status_types AS statusEnum ON
             jobs.status = statusEnum.id
         WHERE
@@ -96,7 +96,7 @@ export async function getRecentJobs(idsForAssets: number[]) {
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            job_types.value AS type,
+            task_types.value AS type,
             jobs.title,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
             jobs.completed
@@ -104,8 +104,8 @@ export async function getRecentJobs(idsForAssets: number[]) {
             jobs
         LEFT JOIN assets ON
             assets.id = jobs.asset
-        LEFT JOIN job_types ON
-            jobs.type = job_types.id
+        LEFT JOIN task_types ON
+            jobs.type = task_types.id
         WHERE
             asset IN (${idsForAssets})
         AND
@@ -124,7 +124,7 @@ export async function getRecentJobsByIds(ids: number[]) {
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
-            job_types.value AS type,
+            task_types.value AS type,
             jobs.title,
             DATE_FORMAT(jobs.created, "%d/%m/%y") AS 'created',
             jobs.completed
@@ -132,8 +132,8 @@ export async function getRecentJobsByIds(ids: number[]) {
             jobs
         LEFT JOIN assets ON
             assets.id = jobs.asset
-        LEFT JOIN job_types ON
-            jobs.type = job_types.id
+        LEFT JOIN task_types ON
+            jobs.type = task_types.id
         WHERE
             jobs.id IN (${ids})
         AND

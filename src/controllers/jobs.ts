@@ -3,7 +3,7 @@ import * as Jobs from '../models/jobs';
 import * as Properties from '../models/properties';
 import * as Users from '../models/users';
 import * as Spares from '../models/spares';
-import * as TypeEnums from '../models/jobTypes';
+import * as TypeEnums from '../models/taskTypes';
 import * as StatusEnums from '../models/statusTypes';
 import * as UrgencyEnums from '../models/urgencyTypes';
 import * as LoggedTime from '../models/loggedTime';

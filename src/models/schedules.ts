@@ -8,7 +8,7 @@ export async function getPMSchedules(propertyId: number, scheduleId?: number) {
         SELECT 
             pm_schedules.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset,
-            typeEnum.value AS type,
+            task_types.value AS type,
             pm_schedules.title,
             pm_schedules.description,
             DATE_FORMAT(pm_schedules.created, "%d/%m/%y") AS 'created',
@@ -31,8 +31,8 @@ export async function getPMSchedules(propertyId: number, scheduleId?: number) {
             pms.schedule_id = pm_schedules.id
         LEFT JOIN assets ON
             assets.id = pm_schedules.asset_id
-        LEFT JOIN job_types AS typeEnum ON
-            pm_schedules.type = typeEnum.id
+        LEFT JOIN task_types AS task_types ON
+            pm_schedules.type = task_types.id
         WHERE
             pm_schedules.property_id = ?
         `;
@@ -90,7 +90,7 @@ export async function getPMDetails(id: number) {
             pms.schedule_id AS schedule_id,
             pm_schedules.title,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset,
-            typeEnum.value AS type,
+            task_types.value AS type,
             pm_schedules.description,
             pms.notes,
             DATE_FORMAT(pms.created, "%d/%m/%y") AS 'created',
@@ -105,8 +105,8 @@ export async function getPMDetails(id: number) {
             pm_schedules.id = pms.schedule_id
         LEFT JOIN assets ON
             assets.id = pm_schedules.asset_id
-        LEFT JOIN job_types AS typeEnum ON
-            pm_schedules.type = typeEnum.id
+        LEFT JOIN task_types AS task_types ON
+            pm_schedules.type = task_types.id
         LEFT JOIN status_types ON
             status_types.id = pms.status
         WHERE
