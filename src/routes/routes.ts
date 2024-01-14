@@ -83,6 +83,7 @@ router.put('/pms/edit', authorised, fileUpload.array('files'), schedulesControll
 
 // Logs
 router.get('/logs/all-log-templates/:propertyid', authorised, logsController.getAllLogTemplates);
+router.get('/logs/log-templates/:propertyid/:logtemplateid', authorised, logsController.getLogTemplate);
 router.get('/logs/edit-log-template/:logtemplateid', authorised, logsController.getEditLogTemplate);
 router.post('/logs/log-templates', authorised, logsController.addEditLogTemplate);
 router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTemplate);

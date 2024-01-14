@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { LogForEdit } from '../types/logs';
+import { LogForEdit, LogTemplate } from '../types/logs';
 
 export async function getLogTemplates(propertyId: number, LogId?: number) {
     let sql = `
@@ -49,7 +49,7 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
         sqlArr.push(LogId);
     }
 
-    const data = await db.execute(sql, sqlArr);
+    const data: [LogTemplate[], FieldPacket[]] = await db.execute(sql, sqlArr);
     return data[0];
 }
 

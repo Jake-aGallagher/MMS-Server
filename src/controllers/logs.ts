@@ -13,6 +13,19 @@ export async function getAllLogTemplates(req: Request, res: Response) {
     }
 }
 
+export async function getLogTemplate(req: Request, res: Response) {
+    try {
+        const propertyId = parseInt(req.params.propertyid);
+        const logTemplateId = parseInt(req.params.logtemplateid);
+        const logTemplate = await Logs.getLogTemplates(propertyId, logTemplateId);
+        res.status(200).json({ logTemplate: logTemplate[0] });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+
+}
+
 export async function getEditLogTemplate(req: Request, res: Response) {
     try {
         const logTemplateId = parseInt(req.params.logtemplateid);
