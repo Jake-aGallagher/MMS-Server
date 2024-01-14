@@ -8,6 +8,7 @@ import * as dashboardsController from '../controllers/dashboards';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
 import * as schedulesController from '../controllers/schedules';
+import * as logsController from '../controllers/logs';
 import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
 import * as enumsController from '../controllers/enums';
@@ -79,6 +80,12 @@ router.delete('/pm-schedules/:id', authorised, schedulesController.deletePMSched
 router.get('/pms/:scheduleid', authorised, schedulesController.getPMDetails);
 router.get('/pms/edit/:propertyid/:scheduleid', authorised, schedulesController.getEditPM);
 router.put('/pms/edit', authorised, fileUpload.array('files'), schedulesController.editPM);
+
+// Logs
+router.get('/logs/all-log-templates/:propertyid', authorised, logsController.getAllLogTemplates);
+router.get('/logs/edit-log-template/:logtemplateid', authorised, logsController.getEditLogTemplate);
+router.post('/logs/log-templates', authorised, logsController.addEditLogTemplate);
+router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTemplate);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
