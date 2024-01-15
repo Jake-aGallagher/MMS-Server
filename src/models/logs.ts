@@ -1,6 +1,8 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { LogForEdit, LogTemplate } from '../types/logs';
+import { LogForEdit, LogTemplate, LogTemplateFields } from '../types/logs';
+
+// Templates
 
 export async function getLogTemplates(propertyId: number, LogId?: number) {
     let sql = `
@@ -101,5 +103,59 @@ export async function editLogTemplate(body: any) {
 
 export async function deleteLogTemplate(id: number) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE log_templates SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
+    return data[0];
+}
+
+// Fields
+
+export async function getLogFields(logTemplateId: number) {
+    const data: [LogTemplateFields[], FieldPacket[]] = await db.execute(
+        `SELECT
+            id,
+            type,
+            field_name AS name,
+            required,
+            guidance,
+            sort_order
+        FROM
+            log_fields
+        WHERE
+            log_fields.template_id = ?
+        ORDER BY
+            log_fields.sort_order`,
+        [logTemplateId]
+    );
+    return data[0];
+
+}
+
+export async function addLogField(body: any) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO log_fields (
+            template_id,
+            type,
+            field_name,
+            required,
+            guidance,
+            sort_order,
+            created
+        ) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+        [body.templateId, body.type, body.name, body.required, body.guidance, body.order]
+    );
+    return data[0];
+}
+
+export async function editLogField(body: any) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE log_fields SET
+            type = ?,
+            field_name = ?,
+            required = ?,
+            guidance = ?,
+            sort_order = ?
+        WHERE
+            id = ?`,
+        [body.type, body.name, body.required, body.guidance, body.order, body.id]
+    );
     return data[0];
 }

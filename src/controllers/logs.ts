@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import * as Logs from '../models/logs';
 import { ResultSetHeader } from 'mysql2';
 
+// Templates
+
 export async function getAllLogTemplates(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
@@ -69,5 +71,37 @@ export async function deleteLogTemplate(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ deleted: false });
+    }
+}
+
+// Fields
+
+export async function getLogFields(req: Request, res: Response) {
+    try {
+        const logTemplateId = parseInt(req.params.logtemplateid);
+        const logFields = await Logs.getLogFields(logTemplateId);
+        res.status(200).json({ logFields });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function addEditLogField(req: Request, res: Response) {
+    try {
+        let response: ResultSetHeader;
+        if (req.body.id > 0) {
+            response = await Logs.editLogField(req.body);
+        } else {
+            response = await Logs.addLogField(req.body);
+        }
+        if (response.affectedRows === 1) {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ created: false });
     }
 }

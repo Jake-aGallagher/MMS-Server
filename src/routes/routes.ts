@@ -85,7 +85,9 @@ router.put('/pms/edit', authorised, fileUpload.array('files'), schedulesControll
 router.get('/logs/all-log-templates/:propertyid', authorised, logsController.getAllLogTemplates);
 router.get('/logs/log-templates/:propertyid/:logtemplateid', authorised, logsController.getLogTemplate);
 router.get('/logs/edit-log-template/:logtemplateid', authorised, logsController.getEditLogTemplate);
+router.get('/logs/log-fields/:logtemplateid', authorised, logsController.getLogFields);
 router.post('/logs/log-templates', authorised, logsController.addEditLogTemplate);
+router.post('/logs/log-fields', authorised, logsController.addEditLogField);
 router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTemplate);
 
 // Assets

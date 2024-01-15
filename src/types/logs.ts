@@ -15,3 +15,12 @@ export interface LogForEdit extends RowDataPacket {
     frequency_time: number;
     frequency_unit: string;
 }
+
+export interface LogTemplateFields extends RowDataPacket {
+    id: number;
+    type: string;
+    name: string;
+    required: boolean;
+    guidance: string;
+    sort_order: number;
+}
