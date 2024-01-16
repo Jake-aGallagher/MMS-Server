@@ -87,6 +87,17 @@ export async function getLogFields(req: Request, res: Response) {
     }
 }
 
+export async function getEditLogField(req: Request, res: Response) {
+    try {
+        const logFieldId = parseInt(req.params.logfieldid);
+        const logField = await Logs.getLogFieldForEdit(logFieldId);
+        res.status(200).json({ logField });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
 export async function addEditLogField(req: Request, res: Response) {
     try {
         let response: ResultSetHeader;
@@ -103,5 +114,20 @@ export async function addEditLogField(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ created: false });
+    }
+}
+
+export async function deleteLogField(req: Request, res: Response) {
+    try {
+        const id = parseInt(req.params.id);
+        const response = await Logs.deleteLogField(id);
+        if (response.affectedRows === 1) {
+            res.status(200).json({ deleted: true });
+        } else {
+            res.status(500).json({ deleted: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ deleted: false });
     }
 }

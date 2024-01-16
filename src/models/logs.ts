@@ -121,12 +121,30 @@ export async function getLogFields(logTemplateId: number) {
             log_fields
         WHERE
             log_fields.template_id = ?
+            AND
+            deleted = 0
         ORDER BY
             log_fields.sort_order`,
         [logTemplateId]
     );
     return data[0];
+}
 
+export async function getLogFieldForEdit(id: number) {
+    const data: [LogTemplateFields[], FieldPacket[]] = await db.execute(
+        `SELECT
+            type,
+            field_name AS name,
+            required,
+            guidance,
+            sort_order
+        FROM
+            log_fields
+        WHERE
+            log_fields.id = ?`,
+        [id]
+    );
+    return data[0][0];
 }
 
 export async function addLogField(body: any) {
@@ -157,5 +175,10 @@ export async function editLogField(body: any) {
             id = ?`,
         [body.type, body.name, body.required, body.guidance, body.order, body.id]
     );
+    return data[0];
+}
+
+export async function deleteLogField(id: number) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE log_fields SET deleted = '1', deleted_date = NOW() WHERE id = ?;`, [id]);
     return data[0];
 }

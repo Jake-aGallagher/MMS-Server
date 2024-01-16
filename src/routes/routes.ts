@@ -86,9 +86,11 @@ router.get('/logs/all-log-templates/:propertyid', authorised, logsController.get
 router.get('/logs/log-templates/:propertyid/:logtemplateid', authorised, logsController.getLogTemplate);
 router.get('/logs/edit-log-template/:logtemplateid', authorised, logsController.getEditLogTemplate);
 router.get('/logs/log-fields/:logtemplateid', authorised, logsController.getLogFields);
+router.get('/logs/edit-log-field/:logfieldid', authorised, logsController.getEditLogField);
 router.post('/logs/log-templates', authorised, logsController.addEditLogTemplate);
 router.post('/logs/log-fields', authorised, logsController.addEditLogField);
 router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTemplate);
+router.delete('/logs/log-fields/:id', authorised, logsController.deleteLogField);
 
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
