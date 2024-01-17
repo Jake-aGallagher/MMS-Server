@@ -20,7 +20,7 @@ export async function getAllPermissionsForGroup(req: Request, res: Response) {
 export async function setPermissionsForGroup(req: Request, res: Response) {
     try {
         const response = await Permissions.setPermissionsForGroup(req.body.userGroupId, req.body.assignedPermissions);
-        if (response && response.affectedRows > 0) {
+        if (response) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });

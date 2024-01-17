@@ -114,7 +114,7 @@ export async function addEditProperty(req: Request, res: Response) {
 export async function setAssignedUsers(req: Request, res: Response) {
     try {
         const response = await Properties.setAssignedUsers(req.body.propertyNo, req.body.assignedUsers);
-        if (response && response.affectedRows > 0) {
+        if (response) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });

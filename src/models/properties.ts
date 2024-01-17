@@ -214,8 +214,11 @@ export async function editProperty(body: { id: string; name: string; type: strin
 }
 
 export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]) {
-    const res: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE
+    try {
+        const conn = await db.getConnection();
+        await conn.beginTransaction();
+        await conn.execute(
+            `DELETE
             property_users
         FROM
             property_users
@@ -227,11 +230,10 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
             Property_id = ?
         AND
             users.user_group_id != '1';`,
-        [propertyNo]
-    );
-    if (res && userIds.length > 0) {
-        let sql = `
-            INSERT INTO
+            [propertyNo]
+        );
+        if (userIds.length > 0) {
+            let sql = `INSERT INTO
                 property_users
                 (
                     property_id,
@@ -239,17 +241,20 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
                 )
             VALUES`;
 
-        let values = [];
-        for (let i = 0; i < userIds.length; i++) {
-            values.push(`(${propertyNo}, ${userIds[i]})`);
+            let values = [];
+            for (let i = 0; i < userIds.length; i++) {
+                values.push(`(${propertyNo}, ${userIds[i]})`);
+            }
+            sql += values.join(',') + `;`;
+            await conn.execute(sql);
         }
-        sql += values.join(',') + `;`;
-
-        const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
-        return response[0];
-    } else if (res) {
-        return res[0];
+        await conn.commit();
+        conn.release();
+    } catch (err) {
+        console.log(err);
+        return false;
     }
+    return true;
 }
 
 export async function postLastProperty(body: { userId: string; propertyId: string }) {

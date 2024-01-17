@@ -528,6 +528,43 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
     return response[0];
 }
 
+export async function updateDeliveryItems(deliveryId: number, items: DeliveryItems[]) {
+    try {
+        const conn = await db.getConnection();
+        await conn.beginTransaction();
+        await conn.execute(
+            `DELETE FROM
+                delivery_items
+            WHERE
+                delivery_id = ?;`,
+            [deliveryId]
+        );
+        if (items.length > 0) {
+            let sql = `INSERT INTO
+                delivery_items
+                (
+                    delivery_id,
+                    spare_id,
+                    quantity
+                )
+            VALUES`;
+
+            let values = [];
+            for (let i = 0; i < items.length; i++) {
+                values.push(`(${deliveryId}, ${items[i].id}, ${items[i].quantity})`);
+            }
+            sql += values.join(',') + `;`;
+            await conn.execute(sql);
+        }
+        await conn.commit();
+        conn.release();
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+    return true;
+}
+
 export async function editDelivery(d: Delivery) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE

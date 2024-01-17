@@ -185,10 +185,7 @@ export async function addEditDelivery(req: Request, res: Response) {
         } else {
             response = await Spares.editDelivery(req.body);
             // update deliveryItems
-            const confirmDelete = await Spares.deleteDeliveryContents(deliveryId);
-            if (confirmDelete) {
-                await Spares.addDeliveryItems(deliveryId, req.body.contents);
-            }
+            await Spares.updateDeliveryItems(deliveryId, req.body.contents);
         }
         if (req.body.arrived) {
             // add the items to stock

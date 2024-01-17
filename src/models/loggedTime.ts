@@ -1,5 +1,5 @@
 import db from '../database/database';
-import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
+import { FieldPacket } from 'mysql2/typings/mysql';
 import { TimeDetails } from '../types/jobs';
 
 export async function getLoggedTimeDetails(model: string, modelId: number) {
@@ -24,18 +24,20 @@ export async function getLoggedTimeDetails(model: string, modelId: number) {
 }
 
 export async function setTimeDetails(details: [{ id: number; time: number }], model: string, modelId: number) {
-    const res: [ResultSetHeader, FieldPacket[]] = await db.execute(
-        `DELETE FROM
-            logged_time
-        WHERE
-            model = ?
-            AND
-            model_id = ?;`,
-        [model, modelId]
-    );
-    if (res) {
-        let sql = `
-            INSERT INTO
+    try {
+        const conn = await db.getConnection();
+        await conn.beginTransaction();
+        await conn.execute(
+            `DELETE FROM
+                logged_time
+            WHERE
+                model = ?
+                AND
+                model_id = ?;`,
+            [model, modelId]
+        );
+        if (details.length > 0) {
+            let sql = `INSERT INTO
                 logged_time
                 (
                     user_id,
@@ -45,13 +47,18 @@ export async function setTimeDetails(details: [{ id: number; time: number }], mo
                 )
             VALUES`;
 
-        let values = [];
-        for (let i = 0; i < details.length; i++) {
-            values.push(`(${details[i].id}, '${model}', ${modelId}, ${details[i].time})`);
+            let values = [];
+            for (let i = 0; i < details.length; i++) {
+                values.push(`(${details[i].id}, '${model}', ${modelId}, ${details[i].time})`);
+            }
+            sql += values.join(',') + `;`;
+            await conn.execute(sql);
         }
-        sql += values.join(',') + `;`;
-
-        const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
-        return response[0];
+        await conn.commit();
+        conn.release();
+    } catch (err) {
+        console.log(err);
+        return false;
     }
+    return true;
 }
