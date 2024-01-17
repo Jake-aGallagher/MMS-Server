@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { StatusTypes } from '../types/enums';
+import { InitialStatusId, StatusTypes } from '../types/enums';
 
 export async function getAllStatusTypes() {
     const data: [StatusTypes[], FieldPacket[]] = await db.execute(
@@ -29,6 +29,20 @@ export async function getStatusTypeById(id: number) {
         [id]
     );
     return data[0];
+}
+
+export async function getInitialStatusId() {
+    const data: [InitialStatusId[], FieldPacket[]] = await db.execute(
+        `SELECT
+            id
+        FROM 
+            status_types
+        WHERE
+            initial_status = 1
+        AND
+            deleted = 0;`
+    );
+    return data[0][0].id;
 }
 
 export async function addStatusType(body: { value: string; listPriority: number; canComplete: number; initialStatus: boolean }) {

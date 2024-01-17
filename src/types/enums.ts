@@ -17,3 +17,7 @@ export interface StatusTypes extends RowDataPacket {
     can_complete: number;
     initial_status: number;
 }
+
+export interface InitialStatusId extends RowDataPacket {
+    id: number;
+}

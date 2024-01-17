@@ -27,7 +27,7 @@ export async function addEditStatusType(req: Request, res: Response) {
         const id = parseInt(req.body.id);
         let response;
         if (req.body.initialStatus == true) {
-            await StatusTypes.clearInitialStatus();
+            await StatusTypes.clearInitialStatus();// todo - this should be a transaction
         }
         if (id > 0) {
             response = await StatusTypes.editStatusType(req.body);
@@ -48,7 +48,11 @@ export async function addEditStatusType(req: Request, res: Response) {
 export async function deleteStatusType(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        // todo - check if this is the job initial status and prevent deleting if so
+        const initial = await StatusTypes.getInitialStatusId();
+        if (initial === id) {
+            res.status(200).json({ deleted: false, message: 'Cannot delete the initial status' });
+            return;
+        }
         const deleted = await StatusTypes.deleteStatusType(id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
