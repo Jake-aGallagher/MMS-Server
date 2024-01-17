@@ -50,7 +50,8 @@ export async function getCompletedJobs(propertyId: number) {
 export async function getBreakdownVsPlanned(propertyId: number) {
     const data: [BreakdownPlanned[], FieldPacket[]] = await db.execute(
         `SELECT
-            COUNT(IF(completed = 0, 1, NULL)) AS result
+            COUNT(IF(completed = 0, 1, NULL)) AS result,
+            1 AS dataset
         FROM
             jobs
         WHERE
@@ -59,7 +60,8 @@ export async function getBreakdownVsPlanned(propertyId: number) {
         UNION
                     
         SELECT
-            COUNT(IF(pms.completed = 0, 1, NULL)) AS result
+            COUNT(IF(pms.completed = 0, 1, NULL)) AS result,
+            2 AS dataset
         FROM
             pms
         INNER JOIN pm_schedules ON

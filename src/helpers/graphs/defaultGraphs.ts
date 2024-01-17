@@ -7,7 +7,8 @@ export async function getIncompleteJobs(propertyId: number) {
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
-            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue,
+            1 AS dataset
         FROM
             jobs
         WHERE
@@ -17,7 +18,8 @@ export async function getIncompleteJobs(propertyId: number) {
         
         SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
-            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue,
+            2 AS dataset
         FROM
             pms
         INNER JOIN pm_schedules ON
@@ -41,7 +43,8 @@ export async function getJobsRaised6M(propertyId: number) {
             COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 2]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
             COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 3]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
             COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 4]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 5]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(created) = "${monthsLooped[startNum + 5]}" && created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6,
+            1 AS dataset
         FROM
             jobs
         WHERE
@@ -55,7 +58,8 @@ export async function getJobsRaised6M(propertyId: number) {
             COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 2]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
             COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 3]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
             COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 4]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 5]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(pms.created) = "${monthsLooped[startNum + 5]}" && pms.created > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6,
+            2 AS dataset
         FROM
             pms
         INNER JOIN pm_schedules ON
@@ -64,6 +68,7 @@ export async function getJobsRaised6M(propertyId: number) {
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
+    console.log(data[0]);
     const returnObj = [
         { month: monthsLooped[startNum], value: data[0][0].month_1 + data[0][1].month_1 },
         { month: monthsLooped[startNum + 1], value: data[0][0].month_2 + data[0][1].month_2 },
@@ -87,7 +92,8 @@ export async function getJobsCompleted6M(propertyId: number) {
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 2]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 3]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 4]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6,
+            1 AS dataset
         FROM
             jobs
         WHERE
@@ -101,7 +107,8 @@ export async function getJobsCompleted6M(propertyId: number) {
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 2]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_3,
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 3]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_4,
             COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 4]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_5,
-            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6
+            COUNT(IF(MONTHNAME(comp_date) = "${monthsLooped[startNum + 5]}" && comp_date > DATE_SUB(NOW(), INTERVAL 7 MONTH), 1, NULL)) AS month_6,
+            2 AS dataset
         FROM
             pms
         INNER JOIN pm_schedules ON
@@ -240,7 +247,8 @@ export async function incompleteForAsset(assetIds: number[]) {
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
-            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue,
+            1 AS dataset
         FROM
             jobs
         WHERE
@@ -250,7 +258,8 @@ export async function incompleteForAsset(assetIds: number[]) {
         
         SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
-            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue
+            COUNT(IF(completed = 0 AND required_comp_date <= CURDATE(), 1, NULL)) AS overdue,
+            2 AS dataset
         FROM
             pms
         INNER JOIN pm_schedules ON
