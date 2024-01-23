@@ -166,12 +166,13 @@ export async function addLogField(body: any) {
             template_id,
             type,
             field_name,
+            field_label,
             required,
             guidance,
             sort_order,
             created
-        ) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-        [body.templateId, body.type, body.name, body.required, body.guidance, body.order]
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [body.templateId, body.type, body.name, body.name.replace(/ /g, '_'), body.required, body.guidance, body.order]
     );
     return data[0];
 }
