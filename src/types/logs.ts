@@ -1,8 +1,11 @@
 import { RowDataPacket } from "mysql2";
 
-export interface LogTemplate extends RowDataPacket {
-    id: number;
+export interface LogTemplateTitle extends RowDataPacket {
     title: string;
+}
+
+export interface LogTemplate extends LogTemplateTitle {
+    id: number;
     description: string;
     frequency_time: number;
     frequency_unit: string;

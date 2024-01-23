@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { LogForEdit, LogTemplate, LogTemplateFields } from '../types/logs';
+import { LogForEdit, LogTemplate, LogTemplateFields, LogTemplateTitle } from '../types/logs';
 
 // Templates
 
@@ -53,6 +53,19 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
 
     const data: [LogTemplate[], FieldPacket[]] = await db.execute(sql, sqlArr);
     return data[0];
+}
+
+export async function getLogTemplateTitle(logTemplateId: number) {
+    const data: [LogTemplateTitle[], FieldPacket[]] = await db.execute(
+        `SELECT
+            log_templates.title
+        FROM
+            log_templates
+        WHERE
+            log_templates.id = ?`,
+        [logTemplateId]
+    );
+    return data[0][0]['title'];
 }
 
 export async function getLogTemplateForEdit(logTemplateId: number) {
