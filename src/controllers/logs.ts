@@ -36,7 +36,6 @@ export async function getEditLogTemplate(req: Request, res: Response) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
     }
-
 }
 
 export async function addEditLogTemplate(req: Request, res: Response) {
@@ -46,6 +45,8 @@ export async function addEditLogTemplate(req: Request, res: Response) {
             response = await Logs.editLogTemplate(req.body);
         } else {
             response = await Logs.addLogTemplate(req.body);
+            const dueDate = req.body.startNow === 'Yes' ? 'CAST(CURDATE() as datetime)' : req.body.scheduleStart;
+            await Logs.addLog(response.insertId, req.body.propertyId, dueDate);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -70,6 +71,31 @@ export async function deleteLogTemplate(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ deleted: false });
+    }
+}
+
+// Logs
+
+export async function getAllLogs(req: Request, res: Response) {
+    try {
+        const propertyId = parseInt(req.params.propertyid);
+        const logs = await Logs.getLogs(propertyId);
+        res.status(200).json({ logs });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getLog(req: Request, res: Response) {
+    try {
+        const logId = parseInt(req.params.logid);
+        const { log, fields } = await Logs.getLog(logId);
+        console.log(log, fields)
+        res.status(200).json({ log, fields });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
     }
 }
 

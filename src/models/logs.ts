@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { LogForEdit, LogTemplate, LogTemplateFields, LogTemplateTitle } from '../types/logs';
+import { AllLogs, Log, LogFieldValues, LogForEdit, LogTemplate, LogTemplateFields, LogTemplateTitle } from '../types/logs';
 
 // Templates
 
@@ -119,6 +119,111 @@ export async function deleteLogTemplate(id: number) {
     return data[0];
 }
 
+// Logs
+
+export async function getLogs(propertyId: number) {
+    const data: [AllLogs[], FieldPacket[]] = await db.execute(
+        `SELECT
+            logs.id,
+            log_templates.title,
+            DATE_FORMAT(logs.created, "%d/%m/%y") AS 'created',
+            DATE_FORMAT(logs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
+            logs.completed,
+            logs.comp_date,
+            CONCAT(
+                log_templates.frequency_time,
+                ' ',
+                CASE
+                    WHEN log_templates.frequency_unit = 'DAY' THEN 'Day(s)'
+                    WHEN log_templates.frequency_unit = 'WEEK' THEN 'Week(s)'
+                    WHEN log_templates.frequency_unit = 'MONTH' THEN 'Month(s)'
+                    WHEN log_templates.frequency_unit = 'YEAR' THEN 'Year(s)'
+                END
+            ) AS frequency
+        FROM
+            logs
+        INNER JOIN
+            log_templates
+        ON
+            log_templates.id = logs.template_id
+        WHERE
+            logs.property_id = ?
+        GROUP BY
+            logs.id
+        ORDER BY
+            logs.id
+        DESC;`,
+        [propertyId]
+    );
+    return data[0];
+}
+
+export async function getLog(logId: number) {
+    const data: [Log[], FieldPacket[]] = await db.execute(
+        `SELECT
+            logs.id,
+            log_templates.title,
+            log_templates.description,
+            DATE_FORMAT(logs.created, "%d/%m/%y") AS 'created',
+            DATE_FORMAT(logs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
+            logs.completed,
+            logs.comp_date,
+            CONCAT(
+                log_templates.frequency_time,
+                ' ',
+                CASE
+                    WHEN log_templates.frequency_unit = 'DAY' THEN 'Day(s)'
+                    WHEN log_templates.frequency_unit = 'WEEK' THEN 'Week(s)'
+                    WHEN log_templates.frequency_unit = 'MONTH' THEN 'Month(s)'
+                    WHEN log_templates.frequency_unit = 'YEAR' THEN 'Year(s)'
+                END
+            ) AS frequency
+        FROM
+            logs
+        INNER JOIN
+            log_templates
+        ON
+            log_templates.id = logs.template_id
+        WHERE
+            logs.id = ?;`,
+        [logId]
+    );
+
+    const fields: [LogFieldValues[], FieldPacket[]] = await db.execute(
+        `SELECT
+            log_field_values.id,
+            log_fields.type,
+            log_fields.field_name AS name,
+            log_field_values.value
+        FROM
+            log_field_values
+        INNER JOIN
+            log_fields
+        ON
+            log_fields.id = log_field_values.field_id
+        WHERE
+            log_field_values.log_id = ?
+        ORDER BY
+            log_fields.sort_order;`,
+        [logId]
+    );
+
+    return { log: data[0][0], fields: fields[0] };
+}
+
+export async function addLog(templateId: number, propertyId: number, req_comp_date: string) {
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `INSERT INTO logs (
+            template_id,
+            property_id,
+            created,
+            required_comp_date
+        ) VALUES (?, ?, NOW(), ${req_comp_date})`,
+        [templateId, propertyId]
+    );
+    return data[0];
+}
+
 // Fields
 
 export async function getLogFields(logTemplateId: number) {
@@ -127,7 +232,7 @@ export async function getLogFields(logTemplateId: number) {
             id,
             type,
             field_name AS name,
-            required,
+            IF(required = 1, true, false) AS required,
             guidance,
             sort_order
         FROM
