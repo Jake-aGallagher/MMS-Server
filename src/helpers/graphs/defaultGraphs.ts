@@ -68,7 +68,6 @@ export async function getJobsRaised6M(propertyId: number) {
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
-    console.log(data[0]);
     const returnObj = [
         { month: monthsLooped[startNum], value: data[0][0].month_1 + data[0][1].month_1 },
         { month: monthsLooped[startNum + 1], value: data[0][0].month_2 + data[0][1].month_2 },
