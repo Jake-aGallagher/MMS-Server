@@ -91,7 +91,6 @@ export async function getLog(req: Request, res: Response) {
     try {
         const logId = parseInt(req.params.logid);
         const { log, fields } = await Logs.getLog(logId);
-        console.log(log, fields)
         res.status(200).json({ log, fields });
     } catch (err) {
         console.log(err);
