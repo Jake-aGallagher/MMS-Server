@@ -54,7 +54,6 @@ export async function getPMDetails(req: Request, res: Response) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
     }
-
 }
 
 export async function getAddSchedule(req: Request, res: Response) {
@@ -105,7 +104,7 @@ export async function addPMSchedule(req: Request, res: Response) {
     try {
         const response = await Schedules.addPMSchedule(req.body);
         const dueDate = req.body.startNow === 'Yes' ? 'CAST(CURDATE() as datetime)' : req.body.scheduleStart;
-        const PM = await Schedules.addPM(response.insertId, dueDate)
+        const PM = await Schedules.addPM(response.insertId, dueDate);
         if (PM.affectedRows === 1) {
             res.status(201).json({ created: true });
         } else {
@@ -149,7 +148,10 @@ export async function editPM(req: Request, res: Response) {
         if (req.body.complete == 1) {
             const scheduleDates = await Schedules.getScheduleDates(req.body.id, true);
             const scheduleId = await Schedules.getScheduleId(req.body.id);
-            Schedules.addPM(scheduleId, req.body.continueSchedule ? scheduleDates[0].current_schedule : scheduleDates[0].new_schedule)
+            Schedules.addPM(
+                scheduleId,
+                req.body.continueSchedule === 'Yes' ? "'" + scheduleDates[0].current_schedule + "'" : "'" + scheduleDates[0].new_schedule + "'"
+            );
         }
         if (response.affectedRows === 1) {
             res.status(200).json({ updated: true });

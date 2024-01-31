@@ -87,10 +87,12 @@ router.get('/logs/log-templates/:propertyid/:logtemplateid', authorised, logsCon
 router.get('/logs/all-logs/:propertyid', authorised, logsController.getAllLogs);
 router.get('/logs/log/:logid', authorised, logsController.getLog);
 router.get('/logs/edit-log-template/:logtemplateid', authorised, logsController.getEditLogTemplate);
-router.get('/logs/log-fields/:logtemplateid', authorised, logsController.getLogFields);
+router.get('/logs/log-fields/:logid', authorised, logsController.getLogFields);
+router.get('/logs/log-fields-preview/:logtemplateid', authorised, logsController.getLogFieldsPreview);
 router.get('/logs/edit-log-field/:logfieldid', authorised, logsController.getEditLogField);
 router.post('/logs/log-templates', authorised, logsController.addEditLogTemplate);
 router.post('/logs/log-fields', authorised, logsController.addEditLogField);
+router.put('/logs/log', authorised, logsController.updateLog);
 router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTemplate);
 router.delete('/logs/log-fields/:id', authorised, logsController.deleteLogField);
 

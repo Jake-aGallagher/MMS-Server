@@ -134,20 +134,10 @@ export async function getScheduleDates(id: number, forInsert?: boolean) {
     const time = frequency[0][0].frequency_time;
     const unit = frequency[0][0].frequency_unit;
 
-    let sql: string;
-    if (forInsert) {
-        sql = `
-            SELECT
-                DATE_ADD(pms.required_comp_date, INTERVAL ${time} ${unit}) AS 'current_schedule',
-                DATE_ADD(NOW(), INTERVAL ${time} ${unit}) AS 'new_schedule'`;
-    } else {
-        sql = `
-            SELECT
-                DATE_FORMAT(DATE_ADD(pms.required_comp_date, INTERVAL ${time} ${unit}), "%d/%m/%y") AS 'current_schedule',
-                DATE_FORMAT(DATE_ADD(NOW(), INTERVAL ${time} ${unit}), "%d/%m/%y") AS 'new_schedule'`;
-    }
-
-    sql += `
+    let sql = `
+        SELECT
+            DATE_FORMAT(DATE_ADD(pms.required_comp_date, INTERVAL ${time} ${unit}), "${forInsert ? '%Y-%m-%d' : '%d/%m/%y'}" ) AS 'current_schedule',
+            DATE_FORMAT(DATE_ADD(NOW(), INTERVAL ${time} ${unit}), "${forInsert ? '%Y-%m-%d' : '%d/%m/%y'}") AS 'new_schedule'
         FROM
             pms
         WHERE
