@@ -35,7 +35,7 @@ export async function postFile(req: Request, res: Response) {
     try {
         req.body = JSON.parse(req.body.data);
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-            insertFiles(req.files, req.body.model, req.body.id);
+            await insertFiles(req.files, req.body.model, req.body.id);
         }
         res.status(201).json({ created: true });
     } catch (err) {

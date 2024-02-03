@@ -8,5 +8,6 @@ export const insertFiles = async (fileList: Express.Multer.File[], toType: strin
         fileIdList.push(fileResponse.insertId);
     }
     // save file mappings
-    Files.postFileMappings('file', fileIdList, toType, toId)
+    await Files.postFileMappings('file', fileIdList, toType, toId)
+    return;
 } 
