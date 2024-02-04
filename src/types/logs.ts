@@ -45,6 +45,7 @@ export interface LogForEdit extends RowDataPacket {
 export interface LogTemplateFields extends RowDataPacket {
     id: number;
     type: string;
+    enumGroupId: number | null;
     name: string;
     required: boolean;
     guidance: string;
@@ -53,7 +54,9 @@ export interface LogTemplateFields extends RowDataPacket {
 
 export interface LogFieldValues extends RowDataPacket {
     id: number;
-    type: string;
     name: string;
+    type: string;
+    enumGroupId: number | null;
+    required: number;
     value: string;
 }

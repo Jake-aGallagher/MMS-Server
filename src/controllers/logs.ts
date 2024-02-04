@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import * as Logs from '../models/logs';
 import { ResultSetHeader } from 'mysql2';
+import { LogFieldValues, LogTemplateFields } from '../types/logs';
+import { getEnumsByGroupIds } from '../models/enums';
+import { enumObjForSelect } from '../helpers/enums/enumObjForSelect';
 
 // Templates
 
@@ -91,7 +94,12 @@ export async function getLog(req: Request, res: Response) {
     try {
         const logId = parseInt(req.params.logid);
         const { log, fields } = await Logs.getLog(logId);
-        res.status(200).json({ log, fields });
+        const enumGroupIds: number[] = fields.flatMap((field: LogFieldValues) =>
+            field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
+        );
+        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
+        const enumGroups = enumObjForSelect(enumGroupsRaw);
+        res.status(200).json({ log, fields, enumGroups });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -131,8 +139,12 @@ export async function getLogFields(req: Request, res: Response) {
         const logId = parseInt(req.params.logid);
         const logFields = await Logs.getLogFields(logId);
         const logDates = await Logs.getLogDates(logId);
-        console.log(logDates);
-        res.status(200).json({ logFields, logDates });
+        const enumGroupIds: number[] = logFields.flatMap((field: LogFieldValues) =>
+            field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
+        );
+        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
+        const enumGroups = enumObjForSelect(enumGroupsRaw);
+        res.status(200).json({ logFields, logDates, enumGroups });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -144,7 +156,12 @@ export async function getLogFieldsPreview(req: Request, res: Response) {
         const logTemplateId = parseInt(req.params.logtemplateid);
         const logTitle = await Logs.getLogTemplateTitle(logTemplateId);
         const logFields = await Logs.getLogFieldsPreview(logTemplateId);
-        res.status(200).json({ logFields, logTitle });
+        const enumGroupIds: number[] = logFields.flatMap((field: LogTemplateFields) =>
+            field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
+        );
+        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
+        const enumGroups = enumObjForSelect(enumGroupsRaw);
+        res.status(200).json({ logFields, logTitle, enumGroups });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

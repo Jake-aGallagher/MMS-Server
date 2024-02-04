@@ -21,3 +21,10 @@ export interface StatusTypes extends RowDataPacket {
 export interface InitialStatusId extends RowDataPacket {
     id: number;
 }
+
+export interface ValuesByGroupIds extends RowDataPacket {
+    enum_group_id: number;
+    id: number;
+    value: string;
+    list_priority: number;
+}

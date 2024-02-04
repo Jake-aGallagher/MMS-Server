@@ -1,5 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
+import { ValuesByGroupIds } from '../types/enums';
 
 export async function getEnumGroups() {
     const data = await db.execute(
@@ -50,6 +51,26 @@ export async function getEnumsByGroupId(enumGroupId: number) {
     return data[0];
 }
 
+export async function getEnumsByGroupIds(enumGroupIds: number[]) {
+    const data: [ValuesByGroupIds[], FieldPacket[]] = await db.execute(
+        `SELECT
+            enum_values.enum_group_id,
+            enum_values.id,
+            enum_values.value,
+            enum_values.list_priority
+        FROM 
+            enum_values
+        WHERE
+            enum_values.enum_group_id IN (?)
+        AND
+            enum_values.deleted = 0
+        ORDER BY
+            enum_values.list_priority;`,
+        [enumGroupIds.join(',')]
+    );
+    return data[0];
+}
+
 export async function getEnumValueById(id: number) {
     const data = await db.execute(
         `SELECT
@@ -65,7 +86,7 @@ export async function getEnumValueById(id: number) {
     return data[0];
 }
 
-export async function addEnumGroup(body: { value: string; }) {
+export async function addEnumGroup(body: { value: string }) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             enum_groups
@@ -79,7 +100,7 @@ export async function addEnumGroup(body: { value: string; }) {
     return response[0];
 }
 
-export async function editEnumGroup(body: { id: string; value: string; }) {
+export async function editEnumGroup(body: { id: string; value: string }) {
     const id = parseInt(body.id);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE

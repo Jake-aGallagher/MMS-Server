@@ -262,6 +262,7 @@ export async function getLog(logId: number) {
             log_fields.id,
             log_fields.field_name AS name,
             log_fields.type,
+            log_fields.enum_group_id AS enumGroupId,
             log_field_values.value
         FROM
             log_fields
@@ -314,6 +315,7 @@ export async function getLogFields(logId: number) {
             log_fields.id,
             log_fields.field_name AS name,
             log_fields.type,
+            log_fields.enum_group_id AS enumGroupId,
             log_fields.required,
             log_field_values.value
         FROM
@@ -338,6 +340,7 @@ export async function getLogFieldsPreview(logTemplateId: number) {
         `SELECT
             id,
             type,
+            enum_group_id AS enumGroupId,
             field_name AS name,
             IF(required = 1, true, false) AS required,
             guidance,
