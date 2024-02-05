@@ -44,6 +44,21 @@ export async function postFile(req: Request, res: Response) {
     }
 }
 
+export async function postFieldFile(req: Request, res: Response) {
+    try {
+        if (req.files && Array.isArray(req.files) && req.files.length == 1) {
+            const response = await Files.postFile(req.files[0]);
+            const hashIds = new Hashids('file', 8);
+            res.status(201).json({ fileId: response.insertId, encodedId: hashIds.encode(response.insertId), fileName: req.files[0].originalname });
+        } else {
+            res.status(400).json({ message: 'Invalid file' });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).send();
+    }
+}
+
 export async function deleteFile(req: Request, res: Response) {
     try {
         const hashIds = new Hashids('file', 8);

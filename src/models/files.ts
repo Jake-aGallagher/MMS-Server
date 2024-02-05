@@ -1,6 +1,7 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { FileLocation, FileUpload, MappedFiles } from '../types/files';
+import { FileLocation, FileName, FileUpload, MappedFiles } from '../types/files';
+import Hashids from 'hashids';
 
 export async function getMappedFiles(modelType: string, modelId: number) {
     const data: [MappedFiles[], FieldPacket[]] = await db.execute(
@@ -26,6 +27,35 @@ export async function getMappedFiles(modelType: string, modelId: number) {
     return data[0];
 }
 
+export async function getFieldFileData(fileIds: string[], fileToFieldMap: {[key:string]: number}) {
+    const sql = db.format(
+        `SELECT
+            id,
+            file_name
+        FROM
+            files
+        WHERE
+            id IN (?)
+        AND
+            deleted = 0;`,
+        [fileIds]);
+    const data: [FileName[], FieldPacket[]] = await db.execute(sql);
+
+    const hashIds = new Hashids('file', 8);
+    const fileObj: {[key:string]: { id: string; encodedId: string; name: string }[]} = {};
+
+    data[0].forEach((item) => {
+        const hashedId = hashIds.encode(item.id);
+        if (!fileObj[fileToFieldMap[item.id]]) {
+            fileObj[fileToFieldMap[item.id]] = [{ id: item.id, encodedId: hashedId, name: item.file_name }];
+        } else {
+            fileObj[fileToFieldMap[item.id]].push({ id: item.id, encodedId: hashedId, name: item.file_name });
+        }
+    });
+
+    return fileObj;
+}
+
 export async function getFilePath(id: number | BigInt) {
     const data: [FileLocation[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -40,7 +70,7 @@ export async function getFilePath(id: number | BigInt) {
             deleted = 0;`,
         [id]
     );
-    return data[0]
+    return data[0];
 }
 
 export async function postFile(file: FileUpload) {
@@ -86,5 +116,5 @@ export async function postFileMappings(fromType: string, fromIds: number[], toTy
 export async function deleteFile(id: number | BigInt) {
     await db.execute(`UPDATE files SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     await db.execute(`UPDATE file_mappings SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
-    return
+    return;
 }

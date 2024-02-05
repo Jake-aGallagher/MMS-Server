@@ -21,3 +21,8 @@ export interface FileLocation extends RowDataPacket {
     destination: string;
     location_name: string;
 }
+
+export interface FileName extends RowDataPacket {
+    id: string;
+    file_name: string;
+}
