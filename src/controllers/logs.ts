@@ -100,7 +100,17 @@ export async function getLog(req: Request, res: Response) {
         );
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
-        res.status(200).json({ log, fields, enumGroups });
+        const fileIds = fields.flatMap((field: LogFieldValues) => (field.type === 'file' && field.value?.length > 0 ? field.value.split(',') : []));
+        const fileIdToFieldIdMap: {[key:string]: number} = {};
+        fields.forEach((field: LogFieldValues) => {
+            if (field.type === 'file' && field.value?.length > 0) {
+                field.value.split(',').forEach((value: string) => {
+                    fileIdToFieldIdMap[value] = field.id;
+                });
+            }
+        })
+        const fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+        res.status(200).json({ log, fields, enumGroups, fileData });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
