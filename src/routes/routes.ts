@@ -23,6 +23,7 @@ router.get('/check-auth', checkAuth);
 
 // Files
 router.get('/getfile/:fileid', filesController.getFile);
+router.get('/getimage/:imageid', filesController.getImage);
 router.get('/files/:model/:id', authorised, filesController.getFilesForModel);
 router.post('/file', authorised, fileUpload.array('files'), filesController.postFile);
 router.post('/file/field-file', authorised, fileUpload.array('files'), filesController.postFieldFile);

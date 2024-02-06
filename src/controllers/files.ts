@@ -19,6 +19,19 @@ export async function getFile(req: Request, res: Response) {
     }
 }
 
+export async function getImage(req: Request, res: Response) {
+    try {
+        const hashIds = new Hashids('file', 8);
+        const imageId = hashIds.decode(req.params.imageid)[0];
+        const imageDetails = await Files.getFilePath(imageId);
+        const filePath = path.join(__dirname, '..', '..', imageDetails[0].destination, imageDetails[0].location_name);
+        res.status(200).sendFile(filePath);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send();
+    }
+}
+
 export async function getFilesForModel(req: Request, res: Response) {
     try {
         const model = req.params.model;

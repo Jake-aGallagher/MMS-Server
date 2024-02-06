@@ -100,15 +100,17 @@ export async function getLog(req: Request, res: Response) {
         );
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
-        const fileIds = fields.flatMap((field: LogFieldValues) => (field.type === 'file' && field.value?.length > 0 ? field.value.split(',') : []));
-        const fileIdToFieldIdMap: {[key:string]: number} = {};
+        const fileIds = fields.flatMap((field: LogFieldValues) =>
+            (field.type === 'file' || field.type === 'image') && field.value?.length > 0 ? field.value.split(',') : []
+        );
+        const fileIdToFieldIdMap: { [key: string]: number } = {};
         fields.forEach((field: LogFieldValues) => {
-            if (field.type === 'file' && field.value?.length > 0) {
+            if ((field.type === 'file' || field.type === 'image') && field.value?.length > 0) {
                 field.value.split(',').forEach((value: string) => {
                     fileIdToFieldIdMap[value] = field.id;
                 });
             }
-        })
+        });
         const fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
         res.status(200).json({ log, fields, enumGroups, fileData });
     } catch (err) {
@@ -155,15 +157,17 @@ export async function getLogFields(req: Request, res: Response) {
         );
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
-        const fileIds = logFields.flatMap((field: LogFieldValues) => (field.type === 'file' && field.value?.length > 0 ? field.value.split(',') : []));
-        const fileIdToFieldIdMap: {[key:string]: number} = {};
+        const fileIds = logFields.flatMap((field: LogFieldValues) =>
+            (field.type === 'file' || field.type === 'image') && field.value?.length > 0 ? field.value.split(',') : []
+        );
+        const fileIdToFieldIdMap: { [key: string]: number } = {};
         logFields.forEach((field: LogFieldValues) => {
-            if (field.type === 'file' && field.value?.length > 0) {
+            if ((field.type === 'file' || field.type === 'image') && field.value?.length > 0) {
                 field.value.split(',').forEach((value: string) => {
                     fileIdToFieldIdMap[value] = field.id;
                 });
             }
-        })
+        });
         const fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
         res.status(200).json({ logFields, logDates, enumGroups, fileData });
     } catch (err) {
