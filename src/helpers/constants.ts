@@ -1,0 +1,1 @@
+export const FileTypes = ['file', 'image', 'signature'];

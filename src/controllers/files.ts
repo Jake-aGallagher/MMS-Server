@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import * as Files from '../models/files';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import Hashids from 'hashids';
 import fs from 'fs/promises';
 import { insertFiles } from '../helpers/files/insertFiles';
 import { getFileIds } from '../helpers/files/getFileIds';
+import { FileUpload } from '../types/files';
 
 export async function getFile(req: Request, res: Response) {
     try {
@@ -66,6 +68,23 @@ export async function postFieldFile(req: Request, res: Response) {
         } else {
             res.status(400).json({ message: 'Invalid file' });
         }
+    } catch (err) {
+        console.log(err);
+        res.status(500).send();
+    }
+}
+
+export async function postSignature(req: Request, res: Response) {
+    try {
+        const data = req.body.signature;
+        const splitDataURL = data.split(',');
+        const decodedData = Buffer.from(splitDataURL[1], 'base64');
+        const fileName = uuidv4() + '__signature.jpg';
+        const filePath = path.join(__dirname, '..', '..', 'uploads', fileName);
+        await fs.writeFile(filePath, decodedData);
+        const response = await Files.postFile({ originalname: 'signature.jpg', mimetype: 'image/jpeg', destination: 'uploads', filename: fileName, size: decodedData.length } as FileUpload);
+        const hashIds = new Hashids('file', 8);
+        res.status(201).json({ fileId: response.insertId, encodedId: hashIds.encode(response.insertId), fileName: 'signature.jpg' });
     } catch (err) {
         console.log(err);
         res.status(500).send();

@@ -5,6 +5,7 @@ import { LogFieldValues, LogTemplateFields } from '../types/logs';
 import { getEnumsByGroupIds } from '../models/enums';
 import { enumObjForSelect } from '../helpers/enums/enumObjForSelect';
 import { getFieldFileData } from '../models/files';
+import { FileTypes } from '../helpers/constants';
 
 // Templates
 
@@ -101,11 +102,11 @@ export async function getLog(req: Request, res: Response) {
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
         const fileIds = fields.flatMap((field: LogFieldValues) =>
-            (field.type === 'file' || field.type === 'image') && field.value?.length > 0 ? field.value.split(',') : []
+            FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []
         );
         const fileIdToFieldIdMap: { [key: string]: number } = {};
         fields.forEach((field: LogFieldValues) => {
-            if ((field.type === 'file' || field.type === 'image') && field.value?.length > 0) {
+            if (FileTypes.includes(field.type) && field.value?.length > 0) {
                 field.value.split(',').forEach((value: string) => {
                     fileIdToFieldIdMap[value] = field.id;
                 });
@@ -158,11 +159,11 @@ export async function getLogFields(req: Request, res: Response) {
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
         const fileIds = logFields.flatMap((field: LogFieldValues) =>
-            (field.type === 'file' || field.type === 'image') && field.value?.length > 0 ? field.value.split(',') : []
+            FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []
         );
         const fileIdToFieldIdMap: { [key: string]: number } = {};
         logFields.forEach((field: LogFieldValues) => {
-            if ((field.type === 'file' || field.type === 'image') && field.value?.length > 0) {
+            if (FileTypes.includes(field.type) && field.value?.length > 0) {
                 field.value.split(',').forEach((value: string) => {
                     fileIdToFieldIdMap[value] = field.id;
                 });

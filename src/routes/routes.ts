@@ -27,6 +27,7 @@ router.get('/getimage/:imageid', filesController.getImage);
 router.get('/files/:model/:id', authorised, filesController.getFilesForModel);
 router.post('/file', authorised, fileUpload.array('files'), filesController.postFile);
 router.post('/file/field-file', authorised, fileUpload.array('files'), filesController.postFieldFile);
+router.post('/file/signature', authorised, filesController.postSignature);
 router.delete('/file/:id', authorised, filesController.deleteFile);
 
 // Users
