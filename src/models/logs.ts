@@ -196,7 +196,7 @@ export async function deleteLogTemplate(id: number) {
 
 // Logs
 
-export async function getLogs(propertyId: number) {
+export async function getLogs(propertyId: number, incompleteOnly?: boolean) {
     const data: [AllLogs[], FieldPacket[]] = await db.execute(
         `SELECT
             logs.id,
@@ -223,6 +223,9 @@ export async function getLogs(propertyId: number) {
             log_templates.id = logs.template_id
         WHERE
             logs.property_id = ?
+        
+        ${incompleteOnly ? 'AND logs.completed = 0' : ''}
+        
         GROUP BY
             logs.id
         ORDER BY

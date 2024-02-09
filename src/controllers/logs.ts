@@ -84,7 +84,7 @@ export async function deleteLogTemplate(req: Request, res: Response) {
 export async function getAllLogs(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
-        const logs = await Logs.getLogs(propertyId);
+        const logs = await Logs.getLogs(propertyId, true);
         res.status(200).json({ logs });
     } catch (err) {
         console.log(err);
@@ -101,9 +101,7 @@ export async function getLog(req: Request, res: Response) {
         );
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
-        const fileIds = fields.flatMap((field: LogFieldValues) =>
-            FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []
-        );
+        const fileIds = fields.flatMap((field: LogFieldValues) => (FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []));
         const fileIdToFieldIdMap: { [key: string]: number } = {};
         fields.forEach((field: LogFieldValues) => {
             if (FileTypes.includes(field.type) && field.value?.length > 0) {
@@ -112,7 +110,10 @@ export async function getLog(req: Request, res: Response) {
                 });
             }
         });
-        const fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+        let fileData: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
+        if (fileIds.length > 0) {
+            fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+        }
         res.status(200).json({ log, fields, enumGroups, fileData });
     } catch (err) {
         console.log(err);
@@ -158,9 +159,7 @@ export async function getLogFields(req: Request, res: Response) {
         );
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
-        const fileIds = logFields.flatMap((field: LogFieldValues) =>
-            FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []
-        );
+        const fileIds = logFields.flatMap((field: LogFieldValues) => (FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []));
         const fileIdToFieldIdMap: { [key: string]: number } = {};
         logFields.forEach((field: LogFieldValues) => {
             if (FileTypes.includes(field.type) && field.value?.length > 0) {
@@ -169,7 +168,10 @@ export async function getLogFields(req: Request, res: Response) {
                 });
             }
         });
-        const fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+        let fileData: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
+        if (fileIds.length > 0) {
+            fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+        }
         const logTitleDescription = await Logs.getLogTemplateTitle(logId, 'log');
         res.status(200).json({ logFields, logDates, enumGroups, fileData, logTitleDescription });
     } catch (err) {
