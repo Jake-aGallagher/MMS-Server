@@ -57,17 +57,25 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
     return data[0];
 }
 
-export async function getLogTemplateTitle(logTemplateId: number) {
+export async function getLogTemplateTitle(id: number, logOrTemplate?: string) {
     const data: [LogTemplateTitle[], FieldPacket[]] = await db.execute(
         `SELECT
-            log_templates.title
+            log_templates.title,
+            log_templates.description
         FROM
             log_templates
+    ${logOrTemplate === 'log' ? `
+        INNER JOIN logs ON
+            logs.template_id = log_templates.id
         WHERE
-            log_templates.id = ?`,
-        [logTemplateId]
+            logs.id = ?`
+    : 
+        `WHERE
+            log_templates.id = ?`
+    }`,
+        [id]
     );
-    return data[0][0]['title'];
+    return data[0][0];
 }
 
 export async function getLogTemplateForEdit(logTemplateId: number) {

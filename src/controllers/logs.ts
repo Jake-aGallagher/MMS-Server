@@ -170,7 +170,8 @@ export async function getLogFields(req: Request, res: Response) {
             }
         });
         const fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
-        res.status(200).json({ logFields, logDates, enumGroups, fileData });
+        const logTitleDescription = await Logs.getLogTemplateTitle(logId, 'log');
+        res.status(200).json({ logFields, logDates, enumGroups, fileData, logTitleDescription });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -180,14 +181,14 @@ export async function getLogFields(req: Request, res: Response) {
 export async function getLogFieldsPreview(req: Request, res: Response) {
     try {
         const logTemplateId = parseInt(req.params.logtemplateid);
-        const logTitle = await Logs.getLogTemplateTitle(logTemplateId);
+        const logTitleDescription = await Logs.getLogTemplateTitle(logTemplateId);
         const logFields = await Logs.getLogFieldsPreview(logTemplateId);
         const enumGroupIds: number[] = logFields.flatMap((field: LogTemplateFields) =>
             field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
         );
         const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
         const enumGroups = enumObjForSelect(enumGroupsRaw);
-        res.status(200).json({ logFields, logTitle, enumGroups });
+        res.status(200).json({ logFields, logTitleDescription, enumGroups });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

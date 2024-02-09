@@ -6,6 +6,7 @@ export interface LogTemplateId extends RowDataPacket {
 
 export interface LogTemplateTitle extends RowDataPacket {
     title: string;
+    description: string;
 }
 
 export interface LogTemplate extends LogTemplateTitle {
