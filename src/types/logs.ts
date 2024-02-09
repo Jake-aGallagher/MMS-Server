@@ -49,7 +49,6 @@ export interface LogTemplateFields extends RowDataPacket {
     enumGroupId: number | null;
     name: string;
     required: boolean;
-    guidance: string;
     sort_order: number;
 }
 

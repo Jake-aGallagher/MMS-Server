@@ -351,7 +351,6 @@ export async function getLogFieldsPreview(logTemplateId: number) {
             enum_group_id AS enumGroupId,
             field_name AS name,
             IF(required = 1, true, false) AS required,
-            guidance,
             sort_order
         FROM
             log_fields
@@ -372,7 +371,6 @@ export async function getLogFieldForEdit(id: number) {
             type,
             field_name AS name,
             required,
-            guidance,
             sort_order
         FROM
             log_fields
@@ -391,11 +389,10 @@ export async function addLogField(body: any) {
             field_name,
             field_label,
             required,
-            guidance,
             sort_order,
             created
         ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-        [body.templateId, body.type, body.name, body.name.replace(/ /g, '_'), body.required, body.guidance, body.order]
+        [body.templateId, body.type, body.name, body.name.replace(/ /g, '_'), body.required, body.order]
     );
     return data[0];
 }
@@ -406,11 +403,10 @@ export async function editLogField(body: any) {
             type = ?,
             field_name = ?,
             required = ?,
-            guidance = ?,
             sort_order = ?
         WHERE
             id = ?`,
-        [body.type, body.name, body.required, body.guidance, body.order, body.id]
+        [body.type, body.name, body.required, body.order, body.id]
     );
     return data[0];
 }
