@@ -161,6 +161,7 @@ router.delete('/urgencytypes/:id', authorised, urgencyTypesController.deleteUrge
 
 // Fields
 router.get('/fields/:model', authorised, customFieldsController.getFieldsForModel);
+router.get('/field/:id', authorised, customFieldsController.getFieldById);
 router.post('/fields', authorised, customFieldsController.addEditField);
 
 export default router;
