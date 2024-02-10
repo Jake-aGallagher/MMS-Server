@@ -2,7 +2,7 @@ import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
 import { AddField, EditField, GetFields } from '../types/customFields';
 
-export async function getFieldsForModel(model: string, id?: number) {
+export async function getFieldsForModel(model: string) {
     const data: [GetFields[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -15,10 +15,9 @@ export async function getFieldsForModel(model: string, id?: number) {
             fields
         WHERE
             model = ?
-        ${id ? 'AND id = ?' : ''}
         ORDER BY
             sort_order`,
-        [model, id ? id : null]
+        [model]
     );
     return data[0];
 }
