@@ -15,6 +15,8 @@ export async function getFieldsForModel(model: string) {
             fields
         WHERE
             model = ?
+        AND
+            deleted = 0
         ORDER BY
             sort_order`,
         [model]
