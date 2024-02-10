@@ -389,13 +389,14 @@ export async function addLogField(body: any) {
         `INSERT INTO log_fields (
             template_id,
             type,
+            enum_group_id,
             field_name,
             field_label,
             required,
             sort_order,
             created
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-        [body.templateId, body.type, body.name, body.name.replace(/ /g, '_'), body.required, body.order]
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [body.templateId, body.type, body.enumGroupId ? body.enumGroupId : null, body.name, body.name.replace(/ /g, '_'), body.required, body.order]
     );
     return data[0];
 }
