@@ -28,3 +28,8 @@ export interface ValuesByGroupIds extends RowDataPacket {
     value: string;
     list_priority: number;
 }
+
+export interface EnumGroups extends RowDataPacket {
+    id: number;
+    value: string;
+}

@@ -1,9 +1,9 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { ValuesByGroupIds } from '../types/enums';
+import { EnumGroups, ValuesByGroupIds } from '../types/enums';
 
 export async function getEnumGroups() {
-    const data = await db.execute(
+    const data: [EnumGroups[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
             value
