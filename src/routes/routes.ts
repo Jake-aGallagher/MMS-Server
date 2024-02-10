@@ -16,6 +16,7 @@ import * as permissionsController from '../controllers/permissions';
 import * as taskTypesController from '../controllers/jobTypes';
 import * as statusTypesController from '../controllers/statusTypes';
 import * as urgencyTypesController from '../controllers/urgencyTypes';
+import * as customFieldsController from '../controllers/customFields';
 import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
@@ -157,5 +158,9 @@ router.get('/urgencytypes', authorised, urgencyTypesController.getUrgencyTypes);
 router.get('/urgencytypes/:id', authorised, urgencyTypesController.getUrgencyTypeById);
 router.put('/urgencytypes', authorised, urgencyTypesController.addEditUrgencyType);
 router.delete('/urgencytypes/:id', authorised, urgencyTypesController.deleteUrgencyType);
+
+// Fields
+router.get('/fields/:model', authorised, customFieldsController.getFieldsForModel);
+router.post('/fields', authorised, customFieldsController.addEditField);
 
 export default router;
