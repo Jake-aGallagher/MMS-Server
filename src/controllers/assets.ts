@@ -5,6 +5,7 @@ import * as Jobs from '../models/jobs';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import makeAssetTree from '../helpers/assets/makeAssetTree';
 import makeIdList from '../helpers/makeIdList';
+import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getAssetTree(req: Request, res: Response) {
     try {
@@ -32,7 +33,9 @@ export async function getAsset(req: Request, res: Response) {
             // Todo - batch graph calls
             const jobsOfComponents6M = await DefaultGraphs.jobsOfComponents6M([...idsForRecents, assetId]);
             const incompleteForAsset = await DefaultGraphs.incompleteForAsset([...idsForRecents, assetId]);
-            res.status(200).json({ assetDetails, recentJobs, tree, jobsOfComponents6M, incompleteForAsset });
+            // Custom Fields
+            const customFields = await getCustomFieldData('asset', assetId);
+            res.status(200).json({ assetDetails, customFields, recentJobs, tree, jobsOfComponents6M, incompleteForAsset });
         } else {
             res.status(500).json({ message: 'Request failed' });
         }
@@ -47,6 +50,7 @@ export async function insertAsset(req: Request, res: Response) {
     if (type == 'edit') {
         try {
             const edited = await Assets.editAsset(parseInt(req.body.id), req.body.name, req.body.note);
+            await updateFieldData(req.body.id, req.body.fieldData);
             if (edited.affectedRows == 1) {
                 res.status(201).json({ created: true });
             } else {
@@ -63,6 +67,7 @@ export async function insertAsset(req: Request, res: Response) {
 
         try {
             const asset = await Assets.insertAsset(parentId, propertyId, name, req.body.note);
+            await updateFieldData(asset.insertId, req.body.fieldData);
             if (asset.affectedRows == 1) {
                 const assetId = asset.insertId;
                 if (parentId != 0) {

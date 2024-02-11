@@ -4,9 +4,7 @@ import { getEnumGroups } from '../models/enums';
 
 export async function getFieldsForModel(req: Request, res: Response) {
     try {
-        const model = req.params.model;
-        const fields = await CustomFields.getFieldsForModel(model);
-        res.status(200).json({ fields });
+        res.status(200).json(await CustomFields.getCustomFieldData(req.params.model, 0));
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
