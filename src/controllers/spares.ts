@@ -33,12 +33,13 @@ export async function getSpare(req: Request, res: Response) {
         let recentJobs: RowDataPacket[] = [];
         const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
         const used6M = await DefaultGraphs.sparesUsed6M(spareId);
+        const deliveryInfo = await Spares.getDeliveryInfoOfSpare(spareId, propertyId);
         if (recentJobNumbers.length > 0) {
             const jobIdList = makeIdList(recentJobNumbers, 'model_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
         }
         const customFields = await getCustomFieldData('spare', spareId);
-        res.status(200).json({ spares, customFields, recentJobs, used6M });
+        res.status(200).json({ spares, customFields, recentJobs, used6M, deliveryInfo });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

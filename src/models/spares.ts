@@ -213,6 +213,31 @@ export async function getSparesRemainingToBeDelivered(deliveryId: number) {
     return data[0];
 }
 
+export async function getDeliveryInfoOfSpare(spareId: number, propertyId: number) {
+    const data = await db.execute(
+        `SELECT
+            deliveries.due,
+            delivery_items.quantity
+        FROM
+            deliveries
+        INNER JOIN delivery_items ON
+        (
+            delivery_items.delivery_id = deliveries.id
+        )
+        WHERE
+            delivery_items.spare_id = ?
+        AND
+            deliveries.property_id = ?
+        AND
+            deliveries.arrived = 0
+        ORDER BY
+            deliveries.due
+        LIMIT 1;`,
+        [spareId, propertyId]
+    );
+    return data[0];
+}
+
 export async function getSuppliers(propertyId: number) {
     const data = await db.execute(
         `SELECT
