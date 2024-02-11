@@ -1,6 +1,86 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { AddField, EditField, GetFields } from '../types/customFields';
+import { AddField, EditField, FieldValue, GetFields } from '../types/customFields';
+import { getFieldFileData } from './files';
+import { getEnumsByGroupIds } from './enums';
+import { enumObjForSelect } from '../helpers/enums/enumObjForSelect';
+import { FileTypes } from '../helpers/constants';
+import { isInteger } from '../helpers/isInteger';
+
+export async function getCustomFieldData(model: string, modelId: number) {
+    const fields = await getFieldsForRecord(model, modelId);
+    const enumGroupIds: number[] = fields.flatMap((field: FieldValue) => (field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []));
+    const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
+    let enumGroups = {};
+    if (enumGroupsRaw.length > 0) {
+        enumGroups = enumObjForSelect(enumGroupsRaw);
+    }
+    const fileIds = fields.flatMap((field: FieldValue) => (FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []));
+    const fileIdToFieldIdMap: { [key: string]: number } = {};
+    fields.forEach((field: FieldValue) => {
+        if (FileTypes.includes(field.type) && field.value?.length > 0) {
+            field.value.split(',').forEach((value: string) => {
+                fileIdToFieldIdMap[value] = field.id;
+            });
+        }
+    });
+    let fileData: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
+    if (fileIds.length > 0) {
+        fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+    }
+    return { fields, enumGroups, fileData };
+}
+
+export async function updateFieldData(modelId: number, fieldData: { [key: string]: string | number | boolean | undefined }) {
+    const fieldKeys = Object.keys(fieldData).filter((key) => isInteger(key));
+    const valuesString = fieldKeys.map((fieldKey) => `(${fieldKey}, ${modelId}, '${fieldData[fieldKey] ? fieldData[fieldKey] : ''}')`).join(',');
+
+    const sql = `
+        INSERT INTO field_values (
+            field_id,
+            model_id,
+            value
+        ) VALUES
+        ${valuesString}
+        ON DUPLICATE KEY UPDATE
+            value = VALUES(value);`;
+
+    if (valuesString.length === 0) {
+        return { affectedRows: 0 };
+    } else {
+        const data: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
+        return data[0];
+    }
+}
+
+export async function getFieldsForRecord(model: string, modelId: number) {
+    const data: [FieldValue[], FieldPacket[]] = await db.execute(
+        `SELECT
+            fields.id,
+            fields.type,
+            fields.enum_group_id AS enumGroupId,
+            fields.field_name AS name,
+            fields.required,
+            fields.sort_order,
+            field_values.value
+        FROM
+            fields
+        LEFT JOIN
+            field_values
+        ON
+            fields.id = field_values.field_id
+        AND
+            field_values.model_id = ?
+        WHERE
+            fields.model = ?
+        AND
+            fields.deleted = 0
+        ORDER BY
+            fields.sort_order`,
+        [modelId, model]
+    );
+    return data[0];
+}
 
 export async function getFieldsForModel(model: string) {
     const data: [GetFields[], FieldPacket[]] = await db.execute(

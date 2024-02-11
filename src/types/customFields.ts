@@ -21,3 +21,10 @@ export interface AddField extends EditField{
     model: string;
     modelId?: number;
 }
+
+export interface FieldValue extends RowDataPacket {
+    id: number;
+    enumGroupId: number | null;
+    type: string;
+    value: string;
+}
