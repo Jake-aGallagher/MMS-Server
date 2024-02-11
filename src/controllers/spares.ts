@@ -9,6 +9,7 @@ import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
 import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
 import makeIdList from '../helpers/makeIdList';
 import { RowDataPacket } from 'mysql2';
+import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getallSpares(req: Request, res: Response) {
     try {
@@ -36,7 +37,8 @@ export async function getSpare(req: Request, res: Response) {
             const jobIdList = makeIdList(recentJobNumbers, 'model_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
         }
-        res.status(200).json({ spares, recentJobs, used6M });
+        const customFields = await getCustomFieldData('spare', spareId);
+        res.status(200).json({ spares, customFields, recentJobs, used6M });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -211,8 +213,10 @@ export async function addEditSpare(req: Request, res: Response) {
         let response;
         if (spareId === 0) {
             response = await Spares.addSpare(req.body);
+            await updateFieldData(response.insertId, req.body.fieldData);
         } else {
             response = await Spares.editSpare(req.body);
+            await updateFieldData(spareId, req.body.fieldData);
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
