@@ -9,6 +9,7 @@ import assignedUsersList from '../helpers/assignedIdsList';
 import propertyUsersList from '../helpers/properties/propertyUsersList';
 import lastPropMapping from '../helpers/properties/lastPropMapping';
 import makeIdList from '../helpers/makeIdList';
+import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getAllProperties(req: Request, res: Response) {
     try {
@@ -35,7 +36,9 @@ export async function getPropertyDetails(req: Request, res: Response) {
         const sparesUsed6M = await DefaultGraphs.getSparesUsed6M(propertyId);
         const mostUsed6M = await DefaultGraphs.mostUsedSpares6M(propertyId);
         const sparesCost6M = await DefaultGraphs.sparesCost6M(propertyId);
-        res.status(200).json({ propDetails, assignedUsers, recentJobs, incompleteJobs, raised6M, sparesUsed6M, mostUsed6M, sparesCost6M });
+        // Extra field stuff
+        const customFields = await getCustomFieldData('property', propertyId);
+        res.status(200).json({ propDetails, customFields, assignedUsers, recentJobs, incompleteJobs, raised6M, sparesUsed6M, mostUsed6M, sparesCost6M });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -91,8 +94,10 @@ export async function addEditProperty(req: Request, res: Response) {
         if (req.body.id > 0) {
             response = await Properties.editProperty(req.body);
             Assets.renameRootAsset(req.body.name, req.body.id);
+            await updateFieldData(req.body.id, req.body.fieldData);
         } else {
             response = await Properties.postProperty(req.body);
+            await updateFieldData(response.insertId, req.body.fieldData);
             const asset = await Assets.insertAsset(0, response.insertId, req.body.name, '');
             await AssetRelations.insertRoot(asset.insertId, response.insertId);
             await AssetRelations.insertSelf(asset.insertId, response.insertId);
