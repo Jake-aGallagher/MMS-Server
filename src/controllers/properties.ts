@@ -11,6 +11,25 @@ import lastPropMapping from '../helpers/properties/lastPropMapping';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
+export async function getPropertiesForUser(req: Request, res: Response) {
+    try {
+        // @ts-ignore
+        const userId = req.userId;
+        const user_group_id = await Users.getUserLevel(userId);
+        let allProps = [];
+        if (user_group_id == 1) {
+            allProps = await Properties.getAllProperties();
+        } else {
+            allProps = await Properties.getAllPropertiesForUser(userId);
+        }
+        res.status(200).json({allProps});
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+
+}
+
 export async function getAllProperties(req: Request, res: Response) {
     try {
         const allProperties = await Properties.getAllProperties();
