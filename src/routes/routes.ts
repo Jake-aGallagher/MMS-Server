@@ -104,7 +104,7 @@ router.delete('/logs/log-fields/:id', authorised, logsController.deleteLogField)
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
-router.post('/asset', authorised, assetsController.insertAsset);
+router.post('/asset', authorised, assetsController.addEditAsset);
 router.delete('/asset/:id', authorised, assetsController.deleteAsset);
 
 // Spares

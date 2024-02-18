@@ -45,9 +45,8 @@ export async function getAsset(req: Request, res: Response) {
     }
 }
 
-export async function insertAsset(req: Request, res: Response) {
-    const type = req.body.type;
-    if (type == 'edit') {
+export async function addEditAsset(req: Request, res: Response) {
+    if (req.body.id > 0) {
         try {
             const edited = await Assets.editAsset(parseInt(req.body.id), req.body.name, req.body.note);
             await updateFieldData(req.body.id, req.body.fieldData);
@@ -61,7 +60,7 @@ export async function insertAsset(req: Request, res: Response) {
             res.status(500).json({ created: false });
         }
     } else {
-        const parentId = parseInt(req.body.id);
+        const parentId = parseInt(req.body.parentId);
         const propertyId = parseInt(req.body.propertyId);
         const name = req.body.name;
 
