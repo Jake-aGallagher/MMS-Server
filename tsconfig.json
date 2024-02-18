@@ -1,4 +1,7 @@
 {
+  "ts-node": {
+    "files": true
+  },
   "compilerOptions": {
     "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "lib": ["ES6", "ESNext.BigInt"],                     /* Specify a set of bundled library declaration files that describe the target runtime environment. */

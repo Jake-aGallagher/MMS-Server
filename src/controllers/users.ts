@@ -58,7 +58,7 @@ export async function login(req: Request, res: Response) {
             const user = await Users.findByUsername(name);
             const match = await bcrypt.compare(password, user[0].password);
             if (match) {
-                const token = jwt.sign({ userId: user[0].id }, process.env.SECRET!, { expiresIn: '1h' });
+                const token = jwt.sign({ userId: user[0].id }, process.env.SECRET!, { expiresIn: 60 * 60 * 1000 });
                 const isAdmin = user[0].user_group_id == 1; // user group 1 is always SuperAdmin
                 let permissions = <{ [key: string]: { [key: string]: boolean } }>{};
                 if (!isAdmin) {

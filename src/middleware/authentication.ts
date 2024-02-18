@@ -1,17 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-//import { AuthType } from '../types/requestTypings';
 import * as jwt from 'jsonwebtoken';
 import * as Users from '../models/users';
 import * as Permissions from '../models/permissions';
+import { JwtPayload } from '../types/requestTypings';
 
 //Checks Authorisation for routing
 export function authorised(req: Request, res: Response, next: NextFunction) {
     const token = req.get('authorisation')!.split(' ')[1];
-    let decoded: any;
     try {
-        decoded = jwt.verify(token, process.env.SECRET!);
+        const decoded = jwt.verify(token, process.env.SECRET!) as JwtPayload;
         if (decoded) {
-            // @ts-ignore
             req.userId = decoded.userId;
             next();
         } else {
@@ -24,16 +22,13 @@ export function authorised(req: Request, res: Response, next: NextFunction) {
 }
 
 //Checks authentication when page is refreshed
-export async function checkAuth(req: Request, res: Response, next: NextFunction) {
+export async function checkAuth(req: Request, res: Response) {
     const token = req.get('authorisation')!.split(' ')[1];
-    let decoded: any;
     try {
-        decoded = jwt.verify(token, process.env.SECRET!);
+        const decoded = jwt.verify(token, process.env.SECRET!) as JwtPayload;
         if (decoded) {
-            // @ts-ignore
-            req.userId = decoded.userId;
-            // @ts-ignore
-            const user = await Users.findById(req.userId);
+            const user = await Users.findById(decoded.userId);
+            const token = jwt.sign({ userId: user[0].id }, process.env.SECRET!, { expiresIn: 60 * 60 * 1000 });
             let permissions = <{ [key: string]: { [key: string]: boolean } }>{};
                 if (user[0].user_group_id != 1) {
                     permissions = await Permissions.getPermissionObj(user[0].user_group_id);
@@ -47,7 +42,8 @@ export async function checkAuth(req: Request, res: Response, next: NextFunction)
                     user_group_id: user[0].user_group_id,
                     isAdmin: user[0].user_group_id == 1,
                 },
-                permissions
+                permissions,
+                token: token
             });
         } else {
             res.status(401).json({ message: 'Authorisation failed' });

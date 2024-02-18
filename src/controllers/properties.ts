@@ -13,16 +13,18 @@ import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getPropertiesForUser(req: Request, res: Response) {
     try {
-        // @ts-ignore
-        const userId = req.userId;
-        const user_group_id = await Users.getUserLevel(userId);
-        let allProps = [];
-        if (user_group_id == 1) {
-            allProps = await Properties.getAllProperties();
+        if (req.userId) {
+            const user_group_id = await Users.getUserLevel(req.userId);
+            let allProps = [];
+            if (user_group_id == 1) {
+                allProps = await Properties.getAllProperties();
+            } else {
+                allProps = await Properties.getAllPropertiesForUser(req.userId);
+            }
+            res.status(200).json({allProps});
         } else {
-            allProps = await Properties.getAllPropertiesForUser(userId);
+            res.status(500).json({ message: 'Request failed' });
         }
-        res.status(200).json({allProps});
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -122,8 +124,9 @@ export async function addEditProperty(req: Request, res: Response) {
             await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
         const propertyId = req.body.id ? req.body.id : response.insertId;
-        // @ts-ignore
-        Properties.postLastProperty({ userId: req.userId, propertyId: propertyId });
+        if (req.userId) {
+            Properties.postLastProperty({ userId: req.userId.toString(), propertyId: propertyId });
+        }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true, newPropId: propertyId });
         } else {
