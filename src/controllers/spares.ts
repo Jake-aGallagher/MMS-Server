@@ -157,7 +157,7 @@ export async function getDeliveries(req: Request, res: Response) {
             deliveries = await Spares.getDeliveries(propertyId);
         }
         if (deliveries.length === 0) {
-            res.status(200).json({});
+            res.status(200).json({deliveries: []});
         } else {
             const data = deliveryMaps(deliveries);
             const deliveryMap = data.deliveryMap;
@@ -167,9 +167,9 @@ export async function getDeliveries(req: Request, res: Response) {
             const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap);
             if (deliveryToFind > 0) {
                 const suppliers = await Spares.getSuppliers(propertyId);
-                res.status(200).json({ deliverywithContents, suppliers });
+                res.status(200).json({ deliveries: deliverywithContents, suppliers });
             } else {
-                res.status(200).json(deliverywithContents);
+                res.status(200).json({deliveries: deliverywithContents});
             }
         }
     } catch (err) {
