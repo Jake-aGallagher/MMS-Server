@@ -7,8 +7,8 @@ import * as jwt from 'jsonwebtoken';
 
 export async function getAllUsers(req: Request, res: Response) {
     try {
-        const allUsers = await Users.getAllUsers();
-        res.status(200).json(allUsers);
+        const users = await Users.getAllUsers();
+        res.status(200).json({ users });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

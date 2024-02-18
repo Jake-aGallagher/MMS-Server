@@ -32,7 +32,7 @@ router.post('/file/signature', authorised, filesController.postSignature);
 router.delete('/file/:id', authorised, filesController.deleteFile);
 
 // Users
-router.get('/all-users', usersController.getAllUsers); // should this route be controlled???
+router.get('/all-users', authorised, usersController.getAllUsers);
 router.get('/users/all/:propertyid', authorised, usersController.getAllUsersForProperty);
 router.get('/users/byuserid/:userid', authorised, usersController.getUserById);
 router.post('/users/login', usersController.login);
