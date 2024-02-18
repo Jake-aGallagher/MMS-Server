@@ -11,7 +11,6 @@ export interface PropertyBasics extends PropertyId {
 }
 
 export interface Property extends PropertyBasics {
-    type: string;
     address: string;
     city: string;
     county: string;

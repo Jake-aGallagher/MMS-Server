@@ -20,7 +20,6 @@ export async function getAllProperties() {
         `SELECT
              id,
              name,
-             type,
              address,
              city,
              county,
@@ -80,7 +79,6 @@ export async function getPropertyDetails(propertyId: number) {
         `SELECT 
             id,
             name,
-            type,
             address,
             city,
             county,
@@ -161,9 +159,8 @@ export async function getAssignedUserIds(propertyId: number) {
     return data[0];
 }
 
-export async function postProperty(body: { name: string; type: string; address: string; city: string; county: string; postcode: string }) {
+export async function postProperty(body: { name: string; address: string; city: string; county: string; postcode: string }) {
     const name = body.name;
-    const type = body.type;
     const address = body.address;
     const city = body.city;
     const county = body.county;
@@ -174,7 +171,6 @@ export async function postProperty(body: { name: string; type: string; address: 
           properties
           (
               name,
-              type,
               address,
               city,
               county,
@@ -182,15 +178,14 @@ export async function postProperty(body: { name: string; type: string; address: 
           )
       VALUES
           (?,?,?,?,?,?);`,
-        [name, type, address, city, county, postcode]
+        [name, address, city, county, postcode]
     );
     return response[0];
 }
 
-export async function editProperty(body: { id: string; name: string; type: string; address: string; city: string; county: string; postcode: string }) {
+export async function editProperty(body: { id: string; name: string; address: string; city: string; county: string; postcode: string }) {
     const id = parseInt(body.id);
     const name = body.name;
-    const type = body.type;
     const address = body.address;
     const city = body.city;
     const county = body.county;
@@ -201,14 +196,13 @@ export async function editProperty(body: { id: string; name: string; type: strin
             properties
         SET
             name = ?,
-            type = ?,
             address = ?,
             city = ?,
             county = ?,
             postcode = ?
         WHERE
             id = ?;`,
-        [name, type, address, city, county, postcode, id]
+        [name, address, city, county, postcode, id]
     );
     return response[0];
 }
