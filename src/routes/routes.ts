@@ -7,7 +7,7 @@ import * as filesController from '../controllers/files';
 import * as dashboardsController from '../controllers/dashboards';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
-import * as schedulesController from '../controllers/schedules';
+import * as PmsController from '../controllers/pms';
 import * as logsController from '../controllers/logs';
 import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
@@ -72,19 +72,20 @@ router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
-// PM Schedules
-router.get('/pm-schedules/all-schedules/:propertyid', authorised, schedulesController.getAllPMSchedules);
-router.get('/pm-schedules/:propertyid/:scheduleid', authorised, schedulesController.getPMSchedule);
-router.get('/pm-schedules/add-schedule', authorised, schedulesController.getAddSchedule);
-router.get('/pm-schedule/edit-schedule/:scheduleid', authorised, schedulesController.getEditSchedule);
-router.post('/pm-schedules', authorised, schedulesController.addPMSchedule);
-router.put('/pm-schedules', authorised, schedulesController.editPMSchedule);
-router.delete('/pm-schedules/:id', authorised, schedulesController.deletePMSchedule);
-
 // PMs
-router.get('/pms/:scheduleid', authorised, schedulesController.getPMDetails);
-router.get('/pms/edit/:propertyid/:scheduleid', authorised, schedulesController.getEditPM);
-router.put('/pms/edit', authorised, fileUpload.array('files'), schedulesController.editPM);
+router.get('/pms/:propertyid', authorised, PmsController.getAllPMs)
+router.get('/pms/pm/:pmid', authorised, PmsController.getPMDetails)
+router.get('/pms/edit/:propertyid/:scheduleid', authorised, PmsController.getEditPM);
+router.put('/pms/edit', authorised, fileUpload.array('files'), PmsController.editPM);
+
+// PM Schedules
+router.get('/pms/schedules/all-schedules/:propertyid', authorised, PmsController.getAllPMSchedules);
+router.get('/pms/schedules/:propertyid/:scheduleid', authorised, PmsController.getPMSchedule);
+router.get('/pms/schedules/add-schedule', authorised, PmsController.getAddSchedule);
+router.get('/pms/schedule/edit-schedule/:scheduleid', authorised, PmsController.getEditSchedule);
+router.post('/pms/schedules', authorised, PmsController.addPMSchedule);
+router.put('/pms/schedules', authorised, PmsController.editPMSchedule);
+router.delete('/pms/schedules/:id', authorised, PmsController.deletePMSchedule);
 
 // Logs
 router.get('/logs/all-log-templates/:propertyid', authorised, logsController.getAllLogTemplates);
