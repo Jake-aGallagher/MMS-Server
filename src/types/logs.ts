@@ -11,9 +11,11 @@ export interface LogTemplateTitle extends RowDataPacket {
 
 export interface LogTemplate extends LogTemplateTitle {
     id: number;
-    description: string;
-    frequency_time: number;
-    frequency_unit: string;
+    created: string;
+    frequency: string;
+    last_comp_date: string;
+    next_due_date: string;
+    up_to_date: number;
 }
 
 export interface LogDates extends RowDataPacket {

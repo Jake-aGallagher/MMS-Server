@@ -25,7 +25,8 @@ export async function getLogTemplate(req: Request, res: Response) {
         const propertyId = parseInt(req.params.propertyid);
         const logTemplateId = parseInt(req.params.logtemplateid);
         const logTemplate = await Logs.getLogTemplates(propertyId, logTemplateId);
-        res.status(200).json({ logTemplate: logTemplate[0] });
+        const logs = await Logs.getLogsByTemplate(logTemplateId);
+        res.status(200).json({ logTemplate: logTemplate[0], logs });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

@@ -22,9 +22,14 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
                     WHEN log_templates.frequency_unit = 'MONTH' THEN 'Month(s)'
                     WHEN log_templates.frequency_unit = 'YEAR' THEN 'Year(s)'
                 END
-            ) AS frequency
+            ) AS frequency,
+            MAX(DATE_FORMAT(logs.comp_date, "%d/%m/%y")) AS 'last_comp_date',
+            MAX(DATE_FORMAT(logs.required_comp_date, "%d/%m/%y")) AS 'next_due_date',
+            CONVERT(IF (MAX(logs.required_comp_date) > CURDATE(), '1', '0'), UNSIGNED) AS 'up_to_date'
         FROM 
             log_templates
+        LEFT JOIN logs ON
+            logs.template_id = log_templates.id
         WHERE
             log_templates.property_id = ?
         `;
@@ -43,10 +48,6 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
         ORDER BY
             log_templates.id
         DESC;`;
-
-    /* MAX(DATE_FORMAT(pms.comp_date, "%d/%m/%y")) AS 'last_comp_date',
-    MAX(DATE_FORMAT(pms.required_comp_date, "%d/%m/%y")) AS 'next_due_date',
-    CONVERT(IF (MAX(pms.required_comp_date) > CURDATE(), '1', '0'), UNSIGNED) AS 'up_to_date' */
 
     let sqlArr = [propertyId];
     if (LogId) {
@@ -232,6 +233,23 @@ export async function getLogs(propertyId: number, incompleteOnly?: boolean) {
             logs.id
         DESC;`,
         [propertyId]
+    );
+    return data[0];
+}
+
+export async function getLogsByTemplate(templateId: number) {
+    const data = await db.execute(
+        `SELECT
+            logs.id,
+            DATE_FORMAT(logs.created, "%d/%m/%y") AS 'created',
+            DATE_FORMAT(logs.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
+            logs.completed,
+            DATE_FORMAT(logs.comp_date, "%d/%m/%y") AS 'comp_date'
+        FROM
+            logs
+        WHERE
+            template_id = ?;`,
+        [templateId]
     );
     return data[0];
 }
