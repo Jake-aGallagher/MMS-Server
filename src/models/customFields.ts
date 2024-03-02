@@ -57,6 +57,7 @@ export async function getFieldsForRecord(model: string, modelId: number, modelTy
     let sql = `
         SELECT
             fields.id,
+            fields.model_id,
             fields.type,
             fields.enum_group_id AS enumGroupId,
             fields.field_name AS name,

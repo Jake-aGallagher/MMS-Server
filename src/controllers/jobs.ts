@@ -31,7 +31,7 @@ export async function getJobDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const jobDetails = await Jobs.getJobDetails(id);
-        const customFields = await getCustomFieldData('job', id);
+        const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
         const files = await getFileIds('job', id);
         const usedSpares = await Spares.getUsedSpares('job', id);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
@@ -53,8 +53,7 @@ export async function getEnumsForCreateJob(req: Request, res: Response) {
     try {
         const urgency = await UrgencyEnums.getAllUrgencyTypes();
         const types = await TypeEnums.getAllJobTypes();
-        const customFields = await getCustomFieldData('job', 0);
-        res.status(200).json({ types, urgency, customFields });
+        res.status(200).json({ types, urgency });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -68,7 +67,7 @@ export async function getJobUpdate(req: Request, res: Response) {
         const statusOptions = await StatusEnums.getAllStatusTypes();
         const completableStatus = statusOptions.filter((item) => item.can_complete).map((item) => item.id);
         const jobDetails = await Jobs.getJobDetails(id);
-        const customFields = await getCustomFieldData('job', id);
+        const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
         const users = await Properties.getAssignedUsers(propertyId);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
         const usedSpares = await Spares.getUsedSpares('job', id);

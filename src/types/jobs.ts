@@ -7,6 +7,7 @@ export interface JobDetails extends RowDataPacket {
     property_id: number;
     asset_id: number;
     asset_name: string;
+    type_id: number;
     type: string;
     title: string;
     description: string;

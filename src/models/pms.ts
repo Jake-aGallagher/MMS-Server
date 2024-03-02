@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { ScheduleDates, ScheduleId } from '../types/PMs';
+import { PMDetails, PMStatusNotesType, ScheduleDates, ScheduleId } from '../types/PMs';
 import { Frequency, InitialStatus } from '../types/jobs';
 
 // --------------- PMs ---------------
@@ -64,12 +64,13 @@ export async function getPMsBySchedule(scheduleId: number) {
 }
 
 export async function getPMDetails(id: number) {
-    const data = await db.execute(
+    const data: [PMDetails[], FieldPacket[]] = await db.execute(
         `SELECT
             pms.id,
             pms.schedule_id AS schedule_id,
             pm_schedules.title,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset,
+            pm_schedules.type AS type_id,
             task_types.value AS type,
             pm_schedules.description,
             pms.notes,
@@ -97,12 +98,15 @@ export async function getPMDetails(id: number) {
 }
 
 export async function getPMforEdit(id: number) {
-    const data = await db.execute(
+    const data: [PMStatusNotesType[], FieldPacket[]] = await db.execute(
         `SELECT
-            status,
-            notes
+            pms.status,
+            pms.notes,
+            pm_schedules.type AS type_id
         FROM
             pms
+        INNER JOIN pm_schedules ON
+            pm_schedules.id = pms.schedule_id
         WHERE
             pms.id = ?;`,
         [id]

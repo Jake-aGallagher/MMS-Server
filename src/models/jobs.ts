@@ -55,6 +55,7 @@ export async function getJobDetails(id: number) {
             jobs.id,
             properties.name AS property_name,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
+            jobs.type AS type_id,
             task_types.value AS type,
             jobs.title,
             jobs.description,
