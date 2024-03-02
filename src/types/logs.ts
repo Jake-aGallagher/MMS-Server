@@ -35,6 +35,7 @@ export interface AllLogs extends RowDataPacket {
 
 export interface Log extends AllLogs {
     description: string;
+    type_id: number;
 }
 
 export interface LogForEdit extends RowDataPacket {

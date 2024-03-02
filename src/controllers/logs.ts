@@ -1,11 +1,7 @@
 import { Request, Response } from 'express';
 import * as Logs from '../models/logs';
 import { ResultSetHeader } from 'mysql2';
-import { LogFieldValues, LogTemplateFields } from '../types/logs';
-import { getEnumsByGroupIds } from '../models/enums';
-import { enumObjForSelect } from '../helpers/enums/enumObjForSelect';
-import { getFieldFileData } from '../models/files';
-import { FileTypes } from '../helpers/constants';
+import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 // Templates
 
@@ -96,26 +92,9 @@ export async function getAllLogs(req: Request, res: Response) {
 export async function getLog(req: Request, res: Response) {
     try {
         const logId = parseInt(req.params.logid);
-        const { log, fields } = await Logs.getLog(logId);
-        const enumGroupIds: number[] = fields.flatMap((field: LogFieldValues) =>
-            field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
-        );
-        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
-        const enumGroups = enumObjForSelect(enumGroupsRaw);
-        const fileIds = fields.flatMap((field: LogFieldValues) => (FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []));
-        const fileIdToFieldIdMap: { [key: string]: number } = {};
-        fields.forEach((field: LogFieldValues) => {
-            if (FileTypes.includes(field.type) && field.value?.length > 0) {
-                field.value.split(',').forEach((value: string) => {
-                    fileIdToFieldIdMap[value] = field.id;
-                });
-            }
-        });
-        let fileData: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
-        if (fileIds.length > 0) {
-            fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
-        }
-        res.status(200).json({ log, fields, enumGroups, fileData });
+        const log = await Logs.getLog(logId);
+        const customFields = await getCustomFieldData('log', logId, log[0].type_id);
+        res.status(200).json({ log, customFields });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -125,7 +104,7 @@ export async function getLog(req: Request, res: Response) {
 export async function updateLog(req: Request, res: Response) {
     try {
         const response = await Logs.updateLog(req.body);
-        const fieldsResponse = await Logs.updateFieldData(req.body.logId, req.body.fieldData);
+        await updateFieldData(req.body.logId, req.body.fieldData);
 
         if (req.body.fieldData.completed) {
             const logDates = await Logs.getLogDates(req.body.logId, true);
@@ -137,7 +116,7 @@ export async function updateLog(req: Request, res: Response) {
             );
         }
 
-        if (response.affectedRows === 1 && fieldsResponse.affectedRows > 0) {
+        if (response.affectedRows === 1) {
             res.status(200).json({ updated: true });
         } else {
             res.status(500).json({ updated: false });
@@ -153,92 +132,13 @@ export async function updateLog(req: Request, res: Response) {
 export async function getLogFields(req: Request, res: Response) {
     try {
         const logId = parseInt(req.params.logid);
-        const logFields = await Logs.getLogFields(logId);
+        const type_id = await Logs.getTemplateId(logId);
+        const customFields = await getCustomFieldData('log', logId, type_id);
         const logDates = await Logs.getLogDates(logId);
-        const enumGroupIds: number[] = logFields.flatMap((field: LogFieldValues) =>
-            field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
-        );
-        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
-        const enumGroups = enumObjForSelect(enumGroupsRaw);
-        const fileIds = logFields.flatMap((field: LogFieldValues) => (FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []));
-        const fileIdToFieldIdMap: { [key: string]: number } = {};
-        logFields.forEach((field: LogFieldValues) => {
-            if (FileTypes.includes(field.type) && field.value?.length > 0) {
-                field.value.split(',').forEach((value: string) => {
-                    fileIdToFieldIdMap[value] = field.id;
-                });
-            }
-        });
-        let fileData: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
-        if (fileIds.length > 0) {
-            fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
-        }
         const logTitleDescription = await Logs.getLogTemplateTitle(logId, 'log');
-        res.status(200).json({ logFields, logDates, enumGroups, fileData, logTitleDescription });
+        res.status(200).json({ logDates, customFields, logTitleDescription });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
-    }
-}
-
-export async function getLogFieldsPreview(req: Request, res: Response) {
-    try {
-        const logTemplateId = parseInt(req.params.logtemplateid);
-        const logTitleDescription = await Logs.getLogTemplateTitle(logTemplateId);
-        const logFields = await Logs.getLogFieldsPreview(logTemplateId);
-        const enumGroupIds: number[] = logFields.flatMap((field: LogTemplateFields) =>
-            field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []
-        );
-        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
-        const enumGroups = enumObjForSelect(enumGroupsRaw);
-        res.status(200).json({ logFields, logTitleDescription, enumGroups });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Request failed' });
-    }
-}
-
-export async function getEditLogField(req: Request, res: Response) {
-    try {
-        const logFieldId = parseInt(req.params.logfieldid);
-        const logField = await Logs.getLogFieldForEdit(logFieldId);
-        res.status(200).json({ logField });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Request failed' });
-    }
-}
-
-export async function addEditLogField(req: Request, res: Response) {
-    try {
-        let response: ResultSetHeader;
-        if (req.body.id > 0) {
-            response = await Logs.editLogField(req.body);
-        } else {
-            response = await Logs.addLogField(req.body);
-        }
-        if (response.affectedRows === 1) {
-            res.status(201).json({ created: true });
-        } else {
-            res.status(500).json({ created: false });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ created: false });
-    }
-}
-
-export async function deleteLogField(req: Request, res: Response) {
-    try {
-        const id = parseInt(req.params.id);
-        const response = await Logs.deleteLogField(id);
-        if (response.affectedRows === 1) {
-            res.status(200).json({ deleted: true });
-        } else {
-            res.status(500).json({ deleted: false });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ deleted: false });
     }
 }
