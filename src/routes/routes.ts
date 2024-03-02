@@ -162,7 +162,7 @@ router.put('/urgencytypes', authorised, urgencyTypesController.addEditUrgencyTyp
 router.delete('/urgencytypes/:id', authorised, urgencyTypesController.deleteUrgencyType);
 
 // Fields
-router.get('/fields/:model', authorised, customFieldsController.getFieldsForModel);
+router.get('/fields/:model/:modeltypeid', authorised, customFieldsController.getFieldsForModel);
 router.get('/field/:id', authorised, customFieldsController.getFieldById);
 router.post('/fields', authorised, customFieldsController.addEditField);
 router.delete('/fields/:id', authorised, customFieldsController.deleteField);

@@ -7,8 +7,8 @@ import { enumObjForSelect } from '../helpers/enums/enumObjForSelect';
 import { FileTypes } from '../helpers/constants';
 import { isInteger } from '../helpers/isInteger';
 
-export async function getCustomFieldData(model: string, modelId: number) {
-    const fields = await getFieldsForRecord(model, modelId);
+export async function getCustomFieldData(model: string, modelId: number, modelTypeId?: number) {
+    const fields = await getFieldsForRecord(model, modelId, modelTypeId);
     const enumGroupIds: number[] = fields.flatMap((field: FieldValue) => (field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []));
     const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
     let enumGroups = {};
@@ -53,9 +53,9 @@ export async function updateFieldData(modelId: number, fieldData: { [key: string
     }
 }
 
-export async function getFieldsForRecord(model: string, modelId: number) {
-    const data: [FieldValue[], FieldPacket[]] = await db.execute(
-        `SELECT
+export async function getFieldsForRecord(model: string, modelId: number, modelTypeId?: number) {
+    let sql = `
+        SELECT
             fields.id,
             fields.type,
             fields.enum_group_id AS enumGroupId,
@@ -73,12 +73,18 @@ export async function getFieldsForRecord(model: string, modelId: number) {
             field_values.model_id = ?
         WHERE
             fields.model = ?
+        ${modelTypeId ? ' AND fields.model_id = ? ' : ''}
         AND
             fields.deleted = 0
         ORDER BY
-            fields.sort_order`,
-        [modelId, model]
-    );
+            fields.sort_order;`;
+
+    let sqlParams = [modelId, model];
+    if (modelTypeId) {
+        sqlParams.push(modelTypeId);
+    }
+
+    const data: [FieldValue[], FieldPacket[]] = await db.execute(sql, sqlParams);
     return data[0];
 }
 
@@ -126,6 +132,7 @@ export async function addField(field: AddField) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO fields (
             model,
+            model_id,
             type,
             enum_group_id,
             field_name,
@@ -134,8 +141,8 @@ export async function addField(field: AddField) {
             created
         )
         VALUES
-            (?, ?, ?, ?, ?, ?, NOW())`,
-        [field.model, field.type, field.enumGroupId, field.name, field.required, field.order]
+            (?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [field.model, field.modelId ? field.modelId : null, field.type, field.enumGroupId, field.name, field.required, field.order]
     );
     return data[0].insertId;
 }
