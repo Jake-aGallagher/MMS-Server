@@ -6,9 +6,14 @@ import { JwtPayload } from '../types/requestTypings';
 import { addVoidToken, checkVoidToken } from '../models/void_tokens';
 
 //Checks Authorisation for routing
-export function authorised(req: Request, res: Response, next: NextFunction) {
+export async function authorised(req: Request, res: Response, next: NextFunction) {
     const token = req.get('authorisation')!.split(' ')[1];
     try {
+        const voidToken = await checkVoidToken(token);
+        if (voidToken) {
+            res.status(401).json({ message: 'Authorisation failed' });
+            return;
+        }
         const decoded = jwt.verify(token, process.env.SECRET!) as JwtPayload;
         if (decoded) {
             req.userId = decoded.userId;
