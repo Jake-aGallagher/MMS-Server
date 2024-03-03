@@ -1,6 +1,6 @@
 import db from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
-import { DefaultGraph6M, IncompleteJobs, NameValue } from '../../types/defaultGraphs';
+import { DefaultGraph6M, IncompleteJobs, NameValue, StringGraph } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
 export async function getIncompleteJobs(propertyId: number) {
@@ -188,7 +188,7 @@ export async function sparesCost6M(propertyId: number) {
     const endNum = d.getMonth();
     let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
 
-    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
+    const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), (spares_used.quantity * spares.cost), NULL)) AS month_1,
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), (spares_used.quantity * spares.cost), NULL)) AS month_2,
@@ -207,12 +207,46 @@ export async function sparesCost6M(propertyId: number) {
         [propertyId]
     );
     const returnObj = [
-        { month: monthsLooped[startNum], value: data[0][0].month_1 },
-        { month: monthsLooped[startNum + 1], value: data[0][0].month_2 },
-        { month: monthsLooped[startNum + 2], value: data[0][0].month_3 },
-        { month: monthsLooped[startNum + 3], value: data[0][0].month_4 },
-        { month: monthsLooped[startNum + 4], value: data[0][0].month_5 },
-        { month: monthsLooped[startNum + 5], value: data[0][0].month_6 },
+        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
+        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
+        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
+        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
+        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
+        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
+    ];
+    return returnObj;
+}
+
+export async function sparesDeliveredCost6M(propertyId: number) {
+    const d = new Date();
+    const endNum = d.getMonth();
+    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+
+    const data: [StringGraph[], FieldPacket[]] = await db.execute(
+        `SELECT
+            SUM(IF(MONTHNAME(placed) = "${monthsLooped[startNum]}" && placed > DATE_SUB(NOW(), INTERVAL 7 MONTH), (delivery_items.quantity * delivery_items.value), NULL)) AS month_1,
+            SUM(IF(MONTHNAME(placed) = "${monthsLooped[startNum + 1]}" && placed > DATE_SUB(NOW(), INTERVAL 7 MONTH), (delivery_items.quantity * delivery_items.value), NULL)) AS month_2,
+            SUM(IF(MONTHNAME(placed) = "${monthsLooped[startNum + 2]}" && placed > DATE_SUB(NOW(), INTERVAL 7 MONTH), (delivery_items.quantity * delivery_items.value), NULL)) AS month_3,
+            SUM(IF(MONTHNAME(placed) = "${monthsLooped[startNum + 3]}" && placed > DATE_SUB(NOW(), INTERVAL 7 MONTH), (delivery_items.quantity * delivery_items.value), NULL)) AS month_4,
+            SUM(IF(MONTHNAME(placed) = "${monthsLooped[startNum + 4]}" && placed > DATE_SUB(NOW(), INTERVAL 7 MONTH), (delivery_items.quantity * delivery_items.value), NULL)) AS month_5,
+            SUM(IF(MONTHNAME(placed) = "${monthsLooped[startNum + 5]}" && placed > DATE_SUB(NOW(), INTERVAL 7 MONTH), (delivery_items.quantity * delivery_items.value), NULL)) AS month_6
+        FROM
+            delivery_items
+        INNER JOIN deliveries ON
+        (
+            deliveries.id = delivery_items.delivery_id
+        )
+        WHERE
+            deliveries.property_id = ?;`,
+        [propertyId]
+    );
+    const returnObj = [
+        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
+        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
+        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
+        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
+        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
+        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
     ];
     return returnObj;
 }

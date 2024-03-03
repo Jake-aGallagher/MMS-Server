@@ -50,6 +50,7 @@ router.put('/permissions/group/:groupid', authorised, permissionsController.setP
 
 // Dashboard
 router.get('/dashboard/jobs/:propertyid', authorised, dashboardsController.getDashboardJobs)
+router.get('/dashboard/spares/:propertyid', authorised, dashboardsController.getDashboardSpares)
 
 // Properties
 router.get('/properties/availabletouser', authorised, propertiesController.getPropertiesForUser);

@@ -1,6 +1,6 @@
 import { FieldPacket } from 'mysql2';
 import db from '../database/database';
-import { getIncompleteJobs, getJobsCompleted6M, getJobsRaised6M } from '../helpers/graphs/defaultGraphs';
+import { getIncompleteJobs, getJobsCompleted6M, getJobsRaised6M, sparesDeliveredCost6M } from '../helpers/graphs/defaultGraphs';
 import { BreakdownPlanned } from '../types/dashboard';
 
 export async function getRaisedJobs(propertyId: number) {
@@ -76,4 +76,20 @@ export async function getBreakdownVsPlanned(propertyId: number) {
         { label: 'Planned', value: data[0][1].result },
     ]
     return { mainData: dataArr };
+}
+
+export async function getSparesCost(propertyId: number) {
+    const data = await sparesDeliveredCost6M(propertyId);
+    const thisMonth = data[5].value;
+    let total = 0;
+    const formattedArr = [];
+    for (let i = 0; i < 6; i++) {
+        if (i != 6) {
+            total += data[i].value;
+        }
+        formattedArr.push({ label: data[i].month, value: data[i].value });
+    }
+    const avgData = { value: Math.round((((thisMonth / (total / 5)) * 100 - 100) + Number.EPSILON) * 100) / 100, flipped: false };
+
+    return { thisMonth, mainData: formattedArr, avgData };    
 }

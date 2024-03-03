@@ -30,9 +30,9 @@ export async function getDashboardRevenue(req: Request, res: Response) {
 
 export async function getDashboardSpares(req: Request, res: Response) {
     try {
-        //const propertyId = req.params.propertyid;
-
-        res.status(200).json({});
+        const propertyId = parseInt(req.params.propertyid);
+        const sparesCost = await Dashboard.getSparesCost(propertyId);
+        res.status(200).json({ sparesCost });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
