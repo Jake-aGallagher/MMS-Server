@@ -13,6 +13,7 @@ import {
     SparesDetails,
     jobsOfRecentlyUsed,
     UsedSparesIdQuantity,
+    CostMapping,
 } from '../types/spares';
 import db from '../database/database';
 
@@ -532,20 +533,21 @@ export async function addDelivery(d: Delivery) {
     return response[0];
 }
 
-export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[]) {
+export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: {[key: number]: number}) {
     let sql = `
     INSERT INTO
         delivery_items
         (
             delivery_id,
             spare_id,
-            quantity
+            quantity,
+            value
         )
     VALUES`;
 
     let values = [];
     for (let i = 0; i < items.length; i++) {
-        values.push(`(${deliveryId}, ${items[i].id}, ${items[i].quantity})`);
+        values.push(`(${deliveryId}, ${items[i].id}, ${items[i].quantity}, ${costMap[items[i].id] * items[i].quantity})`);
     }
     sql += values.join(',') + `;`;
 
@@ -553,7 +555,7 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
     return response[0];
 }
 
-export async function updateDeliveryItems(deliveryId: number, items: DeliveryItems[]) {
+export async function updateDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: {[key: number]: number}) {
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();
@@ -570,13 +572,14 @@ export async function updateDeliveryItems(deliveryId: number, items: DeliveryIte
                 (
                     delivery_id,
                     spare_id,
-                    quantity
+                    quantity,
+                    value
                 )
             VALUES`;
 
             let values = [];
             for (let i = 0; i < items.length; i++) {
-                values.push(`(${deliveryId}, ${items[i].id}, ${items[i].quantity})`);
+                values.push(`(${deliveryId}, ${items[i].id}, ${items[i].quantity}, ${costMap[items[i].id] * items[i].quantity})`);
             }
             sql += values.join(',') + `;`;
             await conn.execute(sql);
@@ -588,6 +591,26 @@ export async function updateDeliveryItems(deliveryId: number, items: DeliveryIte
         return false;
     }
     return true;
+}
+
+export async function getCostMapping(propertyId: number) {
+    const data: [CostMapping[], FieldPacket[]] = await db.execute(
+        `SELECT
+            id,
+            cost
+        FROM
+            spares
+        WHERE
+            property_id = ?
+        AND
+            deleted = 0;`,
+        [propertyId]
+    );
+    const map: {[key: number]: number} = {}
+    data[0].forEach((item) => {
+        map[item.id] = item.cost 
+    });
+    return map
 }
 
 export async function editDelivery(d: Delivery) {

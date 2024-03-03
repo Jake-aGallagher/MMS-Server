@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import { RowDataPacket } from 'mysql2';
 
 // Spares //
 
@@ -87,6 +87,12 @@ export interface WarningArrays {
     quant_remain: number;
     monthly_usage: number | string;
 }
+
+export interface CostMapping extends RowDataPacket {
+    id: number;
+    cost: number;
+}
+
 // Deliveries //
 
 export interface Delivery extends RowDataPacket {
@@ -96,7 +102,7 @@ export interface Delivery extends RowDataPacket {
     placed: string;
     due: string;
     id: number;
-    contents: object[]
+    contents: object[];
 }
 
 export interface DeliveryItem extends RowDataPacket {
@@ -130,4 +136,3 @@ export interface AddEditSupplier {
     postcode: string;
     supplies: string;
 }
-

@@ -181,14 +181,16 @@ export async function getDeliveries(req: Request, res: Response) {
 export async function addEditDelivery(req: Request, res: Response) {
     try {
         const deliveryId = parseInt(req.body.id);
+        const propertyId = parseInt(req.body.propertyId);
+        const costMap = await Spares.getCostMapping(propertyId);
         let response;
         if (deliveryId === 0) {
             response = await Spares.addDelivery(req.body);
-            await Spares.addDeliveryItems(response.insertId, req.body.contents);
+            await Spares.addDeliveryItems(response.insertId, req.body.contents, costMap);
         } else {
             response = await Spares.editDelivery(req.body);
             // update deliveryItems
-            await Spares.updateDeliveryItems(deliveryId, req.body.contents);
+            await Spares.updateDeliveryItems(deliveryId, req.body.contents, costMap);
         }
         if (req.body.arrived) {
             // add the items to stock
