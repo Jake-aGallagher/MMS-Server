@@ -100,12 +100,12 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
         FROM
             spares
         WHERE
-            id IN (${stockChangeIds})
+            id IN (?)
         AND
             property_id = ?
         AND
             deleted = 0;`,
-        [propertyId]
+        [stockChangeIds.join(','), propertyId]
     );
     return data[0];
 }
@@ -403,14 +403,14 @@ export async function updateStock(stockArray: { id: number; property_id: number;
 
     stockArray.forEach(async (item) => {
         const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`
-        UPDATE
-            spares
-        SET
-            quant_remain = ${item.quant_remain}
-        WHERE
-            id = ${item.id}
-        AND
-            property_id = ${item.property_id};`);
+            UPDATE
+                spares
+            SET
+                quant_remain = ${item.quant_remain}
+            WHERE
+                id = ${item.id}
+            AND
+                property_id = ${item.property_id};`);
         if (response[0].affectedRows != 1) {
             errors = true;
         }
@@ -515,8 +515,8 @@ export async function getDeliveryItems(deliveryIds: number[]) {
             spares.deleted = 0
         )
         WHERE
-            delivery_items.delivery_id IN (${deliveryIds});`,
-        [deliveryIds]
+            delivery_items.delivery_id IN (?);`,
+        [deliveryIds.join(',')]
     );
     return data[0];
 }

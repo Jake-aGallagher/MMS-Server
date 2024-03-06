@@ -73,9 +73,10 @@ export async function getUsersByIds(userIds: number[]) {
         FROM
             users
         WHERE
-            id IN (${userIds})
+            id IN (?)
         AND
-            deleted = 0;`
+            deleted = 0;`,
+        [userIds.join(',')]
     );
     return data[0];
 }

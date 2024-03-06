@@ -1,13 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import {
-    UpdateNotes,
-    UpdateAndComplete,
-    PostJob,
-    RecentJobs,
-    InitialStatus,
-    JobDetails,
-} from '../types/jobs';
+import { UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus, JobDetails } from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
 export async function getAllJobs(propertyId: number) {
@@ -108,14 +101,15 @@ export async function getRecentJobs(idsForAssets: number[]) {
         LEFT JOIN task_types ON
             jobs.type = task_types.id
         WHERE
-            asset IN (${idsForAssets})
+            asset IN (?)
         AND
             jobs.deleted = 0 
         ORDER BY
             jobs.created
         DESC
         LIMIT
-            5;`
+            5;`,
+        [idsForAssets.join(',')]
     );
     return data[0];
 }
@@ -136,14 +130,14 @@ export async function getRecentJobsByIds(ids: number[]) {
         LEFT JOIN task_types ON
             jobs.type = task_types.id
         WHERE
-            jobs.id IN (${ids})
+            jobs.id IN (?)
         AND
             jobs.deleted = 0
         ORDER BY
             jobs.created DESC
         LIMIT
-            5;`
-    );
+            5;`,
+        [ids.join(',')]);
     return data[0];
 }
 
@@ -222,6 +216,6 @@ export async function updateNotes(body: UpdateNotes) {
 }
 
 export async function deleteJobs(idsForDelete: number[]) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE jobs SET deleted = 1, deleted_date = NOW() WHERE asset IN (${idsForDelete});`);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE jobs SET deleted = 1, deleted_date = NOW() WHERE asset IN (?);`, [idsForDelete.join(',')]);
     return response[0];
 }

@@ -33,17 +33,28 @@ export async function getCustomFieldData(model: string, modelId: number, modelTy
 
 export async function updateFieldData(modelId: number, fieldData: { [key: string]: string | number | boolean | undefined }) {
     const fieldKeys = Object.keys(fieldData).filter((key) => isInteger(key));
-    const valuesString = fieldKeys.map((fieldKey) => `(${fieldKey}, ${modelId}, '${fieldData[fieldKey] ? fieldData[fieldKey] : ''}')`).join(',');
+    const valuesString = fieldKeys
+        .map((fieldKey) => {
+            const data = fieldData[fieldKey];
+            if (typeof data === 'string') {
+                return `(${fieldKey}, ${modelId}, ${db.escape(data)})`;
+            } else if (typeof data === 'number' || typeof data === 'boolean') {
+                return `(${fieldKey}, ${modelId}, ${data})`;
+            }
+            return `(${fieldKey}, ${modelId}, '')`;
+        })
+        .join(',');
 
-    const sql = `
-        INSERT INTO field_values (
+    const sql = db.format(
+        `INSERT INTO field_values (
             field_id,
             model_id,
             value
         ) VALUES
         ${valuesString}
         ON DUPLICATE KEY UPDATE
-            value = VALUES(value);`;
+            value = VALUES(value);`
+    );
 
     if (valuesString.length === 0) {
         return { affectedRows: 0 };
