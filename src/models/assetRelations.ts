@@ -89,6 +89,7 @@ export async function deleteAssetRelations(assetIds: number[]) {
     if (assetIds.length == 0) {
         return;
     }
-    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`DELETE FROM assets_relations WHERE descendant_id IN (?);`, [assetIds.join(',')]);
+    const sql = db.format(`DELETE FROM assets_relations WHERE descendant_id IN (?);`, [assetIds]);
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return data[0];
 }

@@ -93,7 +93,7 @@ export async function getSpares(id: number) {
 }
 
 export async function getCurrentSpecificStock(stockChangeIds: number[], propertyId: number) {
-    const data: [CurrentStock[], FieldPacket[]] = await db.execute(
+    const sql = db.format(
         `SELECT
             id,
             quant_remain
@@ -105,8 +105,9 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
             property_id = ?
         AND
             deleted = 0;`,
-        [stockChangeIds.join(','), propertyId]
+        [stockChangeIds, propertyId]
     );
+    const data: [CurrentStock[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 
@@ -499,7 +500,7 @@ export async function getDeliveryById(deliveryId: number) {
 }
 
 export async function getDeliveryItems(deliveryIds: number[]) {
-    const data: [DeliveryItem[], FieldPacket[]] = await db.execute(
+    const sql = db.format(
         `SELECT
             delivery_items.delivery_id,
             delivery_items.spare_id,
@@ -516,8 +517,9 @@ export async function getDeliveryItems(deliveryIds: number[]) {
         )
         WHERE
             delivery_items.delivery_id IN (?);`,
-        [deliveryIds.join(',')]
+        [deliveryIds]
     );
+    const data: [DeliveryItem[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 
@@ -533,7 +535,7 @@ export async function addDelivery(d: Delivery) {
     return response[0];
 }
 
-export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: {[key: number]: number}) {
+export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: { [key: number]: number }) {
     let sql = `
     INSERT INTO
         delivery_items
@@ -555,7 +557,7 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
     return response[0];
 }
 
-export async function updateDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: {[key: number]: number}) {
+export async function updateDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: { [key: number]: number }) {
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();
@@ -606,11 +608,11 @@ export async function getCostMapping(propertyId: number) {
             deleted = 0;`,
         [propertyId]
     );
-    const map: {[key: number]: number} = {}
+    const map: { [key: number]: number } = {};
     data[0].forEach((item) => {
-        map[item.id] = item.cost 
+        map[item.id] = item.cost;
     });
-    return map
+    return map;
 }
 
 export async function editDelivery(d: Delivery) {

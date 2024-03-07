@@ -63,7 +63,7 @@ export async function findById(id: number) {
 }
 
 export async function getUsersByIds(userIds: number[]) {
-    const data: [UserShortName[], FieldPacket[]] = await db.execute(
+    const sql = db.format(
         `SELECT
              id,
              username,
@@ -76,8 +76,9 @@ export async function getUsersByIds(userIds: number[]) {
             id IN (?)
         AND
             deleted = 0;`,
-        [userIds.join(',')]
+        [userIds]
     );
+    const data: [UserShortName[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 
@@ -120,7 +121,6 @@ export async function postUser(body: { username: string; first: string; last: st
     return response[0];
 }
 
-
 export async function editUser(body: { id: string; username: string; first: string; last: string; user_group_id: number }) {
     const id = parseInt(body.id);
     const username = body.username;
@@ -142,8 +142,6 @@ export async function editUser(body: { id: string; username: string; first: stri
     );
     return response[0];
 }
-
-
 
 export async function postUserGroup(body: { name: string }) {
     const name = body.name;

@@ -10,10 +10,12 @@ import { isInteger } from '../helpers/isInteger';
 export async function getCustomFieldData(model: string, modelId: number, modelTypeId?: number) {
     const fields = await getFieldsForRecord(model, modelId, modelTypeId);
     const enumGroupIds: number[] = fields.flatMap((field: FieldValue) => (field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []));
-    const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
     let enumGroups = {};
-    if (enumGroupsRaw.length > 0) {
-        enumGroups = enumObjForSelect(enumGroupsRaw);
+    if (enumGroupIds.length > 0) {
+        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
+        if (enumGroupsRaw.length > 0) {
+            enumGroups = enumObjForSelect(enumGroupsRaw);
+        }
     }
     const fileIds = fields.flatMap((field: FieldValue) => (FileTypes.includes(field.type) && field.value?.length > 0 ? field.value.split(',') : []));
     const fileIdToFieldIdMap: { [key: string]: number } = {};

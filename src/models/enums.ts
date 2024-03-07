@@ -52,7 +52,7 @@ export async function getEnumsByGroupId(enumGroupId: number) {
 }
 
 export async function getEnumsByGroupIds(enumGroupIds: number[]) {
-    const data: [ValuesByGroupIds[], FieldPacket[]] = await db.execute(
+    const sql = db.format(
         `SELECT
             enum_values.enum_group_id,
             enum_values.id,
@@ -66,8 +66,9 @@ export async function getEnumsByGroupIds(enumGroupIds: number[]) {
             enum_values.deleted = 0
         ORDER BY
             enum_values.list_priority;`,
-        [enumGroupIds.join(',')]
+        [enumGroupIds]
     );
+    const data: [ValuesByGroupIds[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 

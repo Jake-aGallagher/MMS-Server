@@ -6,6 +6,7 @@ import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import makeAssetTree from '../helpers/assets/makeAssetTree';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
+import { RecentJobs } from '../types/jobs';
 
 export async function getAssetTree(req: Request, res: Response) {
     try {
@@ -27,7 +28,10 @@ export async function getAsset(req: Request, res: Response) {
             const propertyId = assetDetails[0].property_id;
             const getChildren = await AssetRelations.getChildren(assetId);
             const idsForRecents = makeIdList(getChildren, 'descendant_id');
-            const recentJobs = await Jobs.getRecentJobs(idsForRecents);
+            let recentJobs: RecentJobs[] = [];
+            if (idsForRecents.length > 0) {
+                recentJobs = await Jobs.getRecentJobs(idsForRecents);
+            }
             const children = await Assets.getAssetTree(propertyId, assetId);
             const tree = makeAssetTree(children, assetId);
             // Todo - batch graph calls
@@ -107,6 +111,9 @@ export async function deleteAsset(req: Request, res: Response) {
         // get all relations for the id to be deleted to find children
         const getChildren = await AssetRelations.getChildren(id);
         const idsForDelete = makeIdList(getChildren, 'descendant_id');
+        if (idsForDelete.length === 0) {
+            idsForDelete.push(id);
+        }
 
         // delete all relations
         await AssetRelations.deleteAssetRelations(idsForDelete);

@@ -8,8 +8,8 @@ import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
 import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
 import makeIdList from '../helpers/makeIdList';
-import { RowDataPacket } from 'mysql2';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
+import { RecentJobs } from '../types/jobs';
 
 export async function getallSpares(req: Request, res: Response) {
     try {
@@ -30,7 +30,7 @@ export async function getSpare(req: Request, res: Response) {
         const spareId = parseInt(req.params.spareid);
         const propertyId = parseInt(req.params.propertyid);
         const spares = await Spares.getSpares(spareId);
-        let recentJobs: RowDataPacket[] = [];
+        let recentJobs: RecentJobs[] = [];
         const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
         const used6M = await DefaultGraphs.sparesUsed6M(spareId);
         const deliveryInfo = await Spares.getDeliveryInfoOfSpare(spareId, propertyId);

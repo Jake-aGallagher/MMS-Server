@@ -144,6 +144,7 @@ export async function renameRootAsset(name: string, propertyId: number) {
 }
 
 export async function deleteAsset(assetIds: number[]) {
-    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE assets SET deleted = 1, deleted_date = NOW() WHERE id IN (?);`, [assetIds.join(',')]);
+    const sql = db.format(`UPDATE assets SET deleted = 1, deleted_date = NOW() WHERE id IN (?);`, [assetIds]);
+    const data: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return data[0];
 }

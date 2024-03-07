@@ -86,7 +86,7 @@ export async function getJobDetails(id: number) {
 }
 
 export async function getRecentJobs(idsForAssets: number[]) {
-    const data = await db.execute(
+    const sql = db.format(
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
@@ -109,13 +109,14 @@ export async function getRecentJobs(idsForAssets: number[]) {
         DESC
         LIMIT
             5;`,
-        [idsForAssets.join(',')]
+        [idsForAssets]
     );
+    const data: [RecentJobs[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 
 export async function getRecentJobsByIds(ids: number[]) {
-    const data: [RecentJobs[], FieldPacket[]] = await db.execute(
+    const sql = db.format(
         `SELECT
             jobs.id,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
@@ -137,7 +138,9 @@ export async function getRecentJobsByIds(ids: number[]) {
             jobs.created DESC
         LIMIT
             5;`,
-        [ids.join(',')]);
+        [ids]
+    );
+    const data: [RecentJobs[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 
@@ -216,6 +219,7 @@ export async function updateNotes(body: UpdateNotes) {
 }
 
 export async function deleteJobs(idsForDelete: number[]) {
-    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE jobs SET deleted = 1, deleted_date = NOW() WHERE asset IN (?);`, [idsForDelete.join(',')]);
+    const sql = db.format(`UPDATE jobs SET deleted = 1, deleted_date = NOW() WHERE asset IN (?);`, [idsForDelete]);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];
 }

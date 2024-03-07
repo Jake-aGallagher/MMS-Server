@@ -38,7 +38,8 @@ export async function getFieldFileData(fileIds: string[], fileToFieldMap: {[key:
             id IN (?)
         AND
             deleted = 0;`,
-        [fileIds]);
+        [fileIds]
+    );
     const data: [FileName[], FieldPacket[]] = await db.execute(sql);
 
     const hashIds = new Hashids('file', 8);

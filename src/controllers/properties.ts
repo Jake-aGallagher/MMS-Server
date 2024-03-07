@@ -10,6 +10,7 @@ import propertyUsersList from '../helpers/properties/propertyUsersList';
 import lastPropMapping from '../helpers/properties/lastPropMapping';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
+import { RecentJobs } from '../types/jobs';
 
 export async function getPropertiesForUser(req: Request, res: Response) {
     try {
@@ -50,7 +51,10 @@ export async function getPropertyDetails(req: Request, res: Response) {
         const assetId = await Assets.getAssetRoot(propertyId);
         const getChildren = await AssetRelations.getChildren(assetId[0].id);
         const idsForRecents = makeIdList(getChildren, 'descendant_id');
-        const recentJobs = await Jobs.getRecentJobs(idsForRecents);
+        let recentJobs: RecentJobs[] = [];
+        if (idsForRecents.length > 0) {
+            recentJobs = await Jobs.getRecentJobs(idsForRecents);
+        }
         // Todo - batch all these default graph calls together
         const incompleteJobs = await DefaultGraphs.getIncompleteJobs(propertyId);
         const raised6M = await DefaultGraphs.getJobsRaised6M(propertyId);
