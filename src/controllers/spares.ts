@@ -4,12 +4,14 @@ import deliveryMaps from '../helpers/spares/deliveryMaps';
 import deliveryContents from '../helpers/spares/deliveryContents';
 import * as Spares from '../models/spares';
 import * as Jobs from '../models/jobs';
+import * as Pms from '../models/pms';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
 import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
 import { RecentJobs } from '../types/jobs';
+import { RecentPms } from '../types/PMs';
 
 export async function getallSpares(req: Request, res: Response) {
     try {
@@ -31,15 +33,21 @@ export async function getSpare(req: Request, res: Response) {
         const propertyId = parseInt(req.params.propertyid);
         const spares = await Spares.getSpares(spareId);
         let recentJobs: RecentJobs[] = [];
-        const recentJobNumbers = await Spares.getRecentJobsForSpare(propertyId, spareId);
+        let recentPms: RecentPms[] = [];
+        const recentJobNumbers = await Spares.getRecentTasksForSpare(propertyId, spareId, 'job');
+        const recentPmNumbers = await Spares.getRecentTasksForSpare(propertyId, spareId, 'pm');
         const used6M = await DefaultGraphs.sparesUsed6M(spareId);
         const deliveryInfo = await Spares.getDeliveryInfoOfSpare(spareId, propertyId);
         if (recentJobNumbers.length > 0) {
             const jobIdList = makeIdList(recentJobNumbers, 'model_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
         }
+        if (recentPmNumbers.length > 0) {
+            const pmIdList = makeIdList(recentPmNumbers, 'model_id');
+            recentPms = await Pms.getRecentPmsById(pmIdList);
+        }
         const customFields = await getCustomFieldData('spare', spareId);
-        res.status(200).json({ spares, customFields, recentJobs, used6M, deliveryInfo });
+        res.status(200).json({ spares, customFields, recentJobs, recentPms, used6M, deliveryInfo });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

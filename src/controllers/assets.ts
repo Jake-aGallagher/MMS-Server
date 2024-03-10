@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
 import * as Jobs from '../models/jobs';
+import * as Pms from '../models/pms';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import makeAssetTree from '../helpers/assets/makeAssetTree';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
 import { RecentJobs } from '../types/jobs';
+import { RecentPms } from '../types/PMs';
 
 export async function getAssetTree(req: Request, res: Response) {
     try {
@@ -29,17 +31,18 @@ export async function getAsset(req: Request, res: Response) {
             const getChildren = await AssetRelations.getChildren(assetId);
             const idsForRecents = makeIdList(getChildren, 'descendant_id');
             let recentJobs: RecentJobs[] = [];
+            let recentPms: RecentPms[] = [];
             if (idsForRecents.length > 0) {
                 recentJobs = await Jobs.getRecentJobs(idsForRecents);
+                recentPms = await Pms.getRecentPmsForAsset(idsForRecents);
             }
             const children = await Assets.getAssetTree(propertyId, assetId);
             const tree = makeAssetTree(children, assetId);
             // Todo - batch graph calls
             const jobsOfComponents6M = await DefaultGraphs.jobsOfComponents6M([...idsForRecents, assetId]);
             const incompleteForAsset = await DefaultGraphs.incompleteForAsset([...idsForRecents, assetId]);
-            // Custom Fields
             const customFields = await getCustomFieldData('asset', assetId);
-            res.status(200).json({ assetDetails, customFields, recentJobs, tree, jobsOfComponents6M, incompleteForAsset });
+            res.status(200).json({ assetDetails, customFields, recentJobs, recentPms, tree, jobsOfComponents6M, incompleteForAsset });
         } else {
             res.status(500).json({ message: 'Request failed' });
         }

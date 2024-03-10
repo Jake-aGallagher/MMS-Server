@@ -155,7 +155,7 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
     return data[0];
 }
 
-export async function getRecentJobsForSpare(propertyId: number, spareId: number) {
+export async function getRecentTasksForSpare(propertyId: number, spareId: number, model: string) {
     const data: [jobsOfRecentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
             model_id
@@ -166,12 +166,12 @@ export async function getRecentJobsForSpare(propertyId: number, spareId: number)
         AND
             spare_id = ?
         AND
-            model = 'job'
+            model = ?
         ORDER BY 
             date_used DESC    
         LIMIT
             5`,
-        [propertyId, spareId]
+        [propertyId, spareId, model]
     );
     return data[0];
 }

@@ -31,3 +31,13 @@ export interface PMStatusNotesType extends RowDataPacket {
     notes: string;
     type: number;
 }
+
+export interface RecentPms extends RowDataPacket {
+    id: number;
+    asset_name: string;
+    type: string;
+    title: string;
+    required_comp_date: string;
+    completed: number;
+    frequency: string;
+}

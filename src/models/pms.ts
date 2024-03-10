@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import db from '../database/database';
-import { PMDetails, PMStatusNotesType, ScheduleDates, ScheduleId } from '../types/PMs';
+import { PMDetails, PMStatusNotesType, RecentPms, ScheduleDates, ScheduleId } from '../types/PMs';
 import { Frequency, InitialStatus } from '../types/jobs';
 
 // --------------- PMs ---------------
@@ -94,6 +94,90 @@ export async function getPMDetails(id: number) {
             pms.id = ?;`,
         [id]
     );
+    return data[0];
+}
+
+export async function getRecentPmsForAsset(idsForAssets: number[]) {
+    const sql = db.format(
+        `SELECT
+            pms.id,
+            IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
+            task_types.value AS type,
+            pm_schedules.title,
+            DATE_FORMAT(pms.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
+            pms.completed,
+            CONCAT(
+                pm_schedules.frequency_time,
+                ' ',
+                CASE
+                    WHEN pm_schedules.frequency_unit = 'DAY' THEN 'Day(s)'
+                    WHEN pm_schedules.frequency_unit = 'WEEK' THEN 'Week(s)'
+                    WHEN pm_schedules.frequency_unit = 'MONTH' THEN 'Month(s)'
+                    WHEN pm_schedules.frequency_unit = 'YEAR' THEN 'Year(s)'
+                END
+            ) AS frequency
+        FROM
+            pms
+        INNER JOIN pm_schedules ON
+            pm_schedules.id = pms.schedule_id
+        LEFT JOIN assets ON
+            assets.id = pm_schedules.asset_id
+        LEFT JOIN task_types ON
+            pm_schedules.type = task_types.id
+        WHERE
+            pm_schedules.asset_id IN (?)
+        AND
+            pm_schedules.deleted = 0 
+        ORDER BY
+            pms.created
+        DESC
+        LIMIT
+            5;`,
+        [idsForAssets]
+    );
+    const data: [RecentPms[], FieldPacket[]] = await db.execute(sql);
+    return data[0];
+}
+
+export async function getRecentPmsById(ids: number[]) {
+    const sql = db.format(
+        `SELECT
+            pms.id,
+            IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
+            task_types.value AS type,
+            pm_schedules.title,
+            DATE_FORMAT(pms.required_comp_date, "%d/%m/%y") AS 'required_comp_date',
+            pms.completed,
+            CONCAT(
+                pm_schedules.frequency_time,
+                ' ',
+                CASE
+                    WHEN pm_schedules.frequency_unit = 'DAY' THEN 'Day(s)'
+                    WHEN pm_schedules.frequency_unit = 'WEEK' THEN 'Week(s)'
+                    WHEN pm_schedules.frequency_unit = 'MONTH' THEN 'Month(s)'
+                    WHEN pm_schedules.frequency_unit = 'YEAR' THEN 'Year(s)'
+                END
+            ) AS frequency
+        FROM
+            pms
+        INNER JOIN pm_schedules ON
+            pm_schedules.id = pms.schedule_id
+        LEFT JOIN assets ON
+            assets.id = pm_schedules.asset_id
+        LEFT JOIN task_types ON
+            pm_schedules.type = task_types.id
+        WHERE
+            pms.id IN (?)
+        AND
+            pm_schedules.deleted = 0 
+        ORDER BY
+            pms.created
+        DESC
+        LIMIT
+            5;`,
+        [ids]
+    );
+    const data: [RecentPms[], FieldPacket[]] = await db.execute(sql);
     return data[0];
 }
 
