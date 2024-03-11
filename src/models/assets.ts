@@ -92,7 +92,8 @@ export async function getAssetById(id: number) {
     return data[0];
 }
 
-export async function insertAsset(parentId: number, propertyId: number, name: string, note: string) {
+export async function insertAsset(parentId: number, propertyId: number, name: string, note: string, revenue: number | null) {
+    const revenuePerMin = revenue && revenue > 0 ? revenue : null;
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets
@@ -100,30 +101,28 @@ export async function insertAsset(parentId: number, propertyId: number, name: st
                 parent_id,
                 property_id,
                 name,
-                notes
+                notes,
+                revenue
             )
         VALUES
-            (
-                ?,
-                ?,
-                ?,
-                ?
-            );`,
-        [parentId, propertyId, name, note]
+            ( ?, ?, ?, ?, ? );`,
+        [parentId, propertyId, name, note, revenuePerMin]
     );
     return data[0];
 }
 
-export async function editAsset(id: number, name: string, note: string) {
+export async function editAsset(id: number, name: string, note: string, revenue: number | null) {
+    const revenuePerMin = revenue && revenue > 0 ? revenue : null;
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
         SET
             name = ?,
-            notes = ?
+            notes = ?,
+            revenue = ?
         WHERE
             id = ?;`,
-        [name, note, id]
+        [name, note, revenuePerMin, id]
     );
     return data[0];
 }

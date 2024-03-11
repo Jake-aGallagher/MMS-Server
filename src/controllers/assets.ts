@@ -55,7 +55,7 @@ export async function getAsset(req: Request, res: Response) {
 export async function addEditAsset(req: Request, res: Response) {
     if (req.body.id > 0) {
         try {
-            const edited = await Assets.editAsset(parseInt(req.body.id), req.body.name, req.body.note);
+            const edited = await Assets.editAsset(parseInt(req.body.id), req.body.name, req.body.note, req.body.revenue);
             await updateFieldData(req.body.id, req.body.fieldData);
             if (edited.affectedRows == 1) {
                 res.status(201).json({ created: true });
@@ -72,7 +72,7 @@ export async function addEditAsset(req: Request, res: Response) {
         const name = req.body.name;
 
         try {
-            const asset = await Assets.insertAsset(parentId, propertyId, name, req.body.note);
+            const asset = await Assets.insertAsset(parentId, propertyId, name, req.body.note, req.body.revenue);
             await updateFieldData(asset.insertId, req.body.fieldData);
             if (asset.affectedRows == 1) {
                 const assetId = asset.insertId;

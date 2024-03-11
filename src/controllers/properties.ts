@@ -123,7 +123,7 @@ export async function addEditProperty(req: Request, res: Response) {
         } else {
             response = await Properties.postProperty(req.body);
             await updateFieldData(response.insertId, req.body.fieldData);
-            const asset = await Assets.insertAsset(0, response.insertId, req.body.name, '');
+            const asset = await Assets.insertAsset(0, response.insertId, req.body.name, '', null);
             await AssetRelations.insertRoot(asset.insertId, response.insertId);
             await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
