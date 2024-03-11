@@ -72,6 +72,7 @@ export async function getAssetById(id: number) {
             assets.parent_id AS parent_id,
             assets.property_id AS property_id,
             assets.name AS name,
+            assets.revenue AS revenue,
             assets.notes AS notes,
             parent.parent_id AS grand_parent_id,
             parent.name AS parent_name
