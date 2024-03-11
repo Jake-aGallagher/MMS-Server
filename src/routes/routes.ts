@@ -5,6 +5,7 @@ import { fileUpload } from '../middleware/multer';
 import * as usersController from '../controllers/users';
 import * as filesController from '../controllers/files';
 import * as dashboardsController from '../controllers/dashboards';
+import * as revenueController from '../controllers/revenue';
 import * as propertiesController from '../controllers/properties';
 import * as jobsController from '../controllers/jobs';
 import * as PmsController from '../controllers/pms';
@@ -47,6 +48,9 @@ router.delete('/usergroups/:id', authorised, usersController.deleteUserGroup);
 // Permissions
 router.get('/permissions/group/:groupid', authorised, permissionsController.getAllPermissionsForGroup);
 router.put('/permissions/group/:groupid', authorised, permissionsController.setPermissionsForGroup);
+
+// Revenue
+router.get('/revenue/:propertyid', authorised, revenueController.getPropertyRevenue);
 
 // Dashboard
 router.get('/dashboard/jobs/:propertyid', authorised, dashboardsController.getDashboardJobs)

@@ -17,9 +17,16 @@ export interface AssetById extends RowDataPacket {
     parent_id: number;
     property_id: number;
     name: string;
+    revenue: number;
     notes: string;
     grand_parent_id: number;
     parent_name: string;
+}
+
+export interface AssetRevenues extends RowDataPacket {
+    id: number;
+    name: string;
+    revenue: number;
 }
 
 export interface AssetRelationBasic extends RowDataPacket {

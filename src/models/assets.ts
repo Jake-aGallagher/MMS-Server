@@ -1,5 +1,5 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { AssetById, Asset, AssetId } from '../types/assets';
+import { AssetById, Asset, AssetId, AssetRevenues } from '../types/assets';
 import db from '../database/database';
 
 export async function getAssetTree(propertyId: number, rootId: number) {
@@ -91,6 +91,26 @@ export async function getAssetById(id: number) {
         [id]
     );
     return data[0];
+}
+
+export async function getAssetsWithRevenues(propertyId: number) {
+    const data: [AssetRevenues[], FieldPacket[]] = await db.execute(
+        `SELECT
+            assets.id,
+            assets.name,
+            assets.revenue
+        FROM
+            assets
+        WHERE
+            assets.property_id = ?
+        AND
+            assets.deleted = 0
+        AND
+            assets.revenue IS NOT NULL;`,
+        [propertyId]
+    );
+    return data[0];
+
 }
 
 export async function insertAsset(parentId: number, propertyId: number, name: string, note: string, revenue: number | null) {
