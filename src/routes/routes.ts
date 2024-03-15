@@ -106,6 +106,7 @@ router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTem
 // Assets
 router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
+router.get('/assets/revenues/:propertyid', authorised, assetsController.getAssetsWithRevenues);
 router.post('/asset', authorised, assetsController.addEditAsset);
 router.delete('/asset/:id', authorised, assetsController.deleteAsset);
 

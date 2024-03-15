@@ -22,6 +22,18 @@ export async function getAssetTree(req: Request, res: Response) {
     }
 }
 
+export async function getAssetsWithRevenues(req: Request, res: Response) {
+    try {
+        const propertyId = parseInt(req.params.propertyid);
+        const assets = await Assets.getAssetsWithRevenues(propertyId);
+        res.status(200).json({ assets });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+
+}
+
 export async function getAsset(req: Request, res: Response) {
     const assetId = parseInt(req.params.assetid);
     try {
