@@ -177,7 +177,7 @@ export async function postProperty(body: { name: string; address: string; city: 
               postcode
           )
       VALUES
-          (?,?,?,?,?,?);`,
+          (?,?,?,?,?);`,
         [name, address, city, county, postcode]
     );
     return response[0];
