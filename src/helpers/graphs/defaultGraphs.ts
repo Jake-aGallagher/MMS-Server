@@ -340,3 +340,35 @@ export async function sparesUsed6M(spareId: number) {
     ];
     return returnObj;
 }
+
+export async function sparesMisssing6M(propertyId: number) {
+    const d = new Date();
+    const endNum = d.getMonth();
+    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+
+    const data: [StringGraph[], FieldPacket[]] = await db.execute(
+        `SELECT
+            SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_1,
+            SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_2,
+            SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 2]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_3,
+            SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 3]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_4,
+            SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 4]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_5,
+            SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 5]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_6
+        FROM
+            spares_used
+        WHERE
+            property_id = ?
+        AND
+            record_type = 'missing';`,
+        [propertyId]
+    );
+    const returnObj = [
+        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
+        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
+        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
+        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
+        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
+        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
+    ];
+    return returnObj;
+}

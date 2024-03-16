@@ -5,9 +5,9 @@ export async function getDashboardJobs(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
         // raised completed open
-        const raised = await Dashboard.getRaisedJobs(propertyId);
+        const raised = await Dashboard.get6MPropertyGraph(propertyId, 'raisedJobs');
         const open = await Dashboard.getIncomplete(propertyId);
-        const completed = await Dashboard.getCompletedJobs(propertyId);
+        const completed = await Dashboard.get6MPropertyGraph(propertyId, 'completeJobs', true);
         const breakdownVsPlanned = await Dashboard.getBreakdownVsPlanned(propertyId);
 
         res.status(200).json({ raised, open, completed, breakdownVsPlanned });
@@ -31,8 +31,9 @@ export async function getDashboardRevenue(req: Request, res: Response) {
 export async function getDashboardSpares(req: Request, res: Response) {
     try {
         const propertyId = parseInt(req.params.propertyid);
-        const sparesCost = await Dashboard.getSparesCost(propertyId);
-        res.status(200).json({ sparesCost });
+        const sparesCost = await Dashboard.get6MPropertyGraph(propertyId, 'sparesCost');
+        const missingSpares = await Dashboard.get6MPropertyGraph(propertyId, 'sparesMissing');
+        res.status(200).json({ sparesCost, missingSpares });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
