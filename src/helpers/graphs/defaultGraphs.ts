@@ -358,3 +358,26 @@ export async function downtime6M(propertyId: number) {
     
     return makeReturnObj(startNum, data[0][0]);
 }
+
+export async function lostRevenue6M(propertyId: number) {
+    let startNum = makeStartNum();
+
+    const data: [StringGraph[], FieldPacket[]] = await db.execute(
+        `SELECT
+            SUM(IF(MONTHNAME(downtime.date) = "${monthsLooped[startNum]}" && downtime.date > DATE_SUB(NOW(), INTERVAL 7 MONTH), (downtime.time * assets.revenue), NULL)) AS month_1,
+            SUM(IF(MONTHNAME(downtime.date) = "${monthsLooped[startNum + 1]}" && downtime.date > DATE_SUB(NOW(), INTERVAL 7 MONTH), (downtime.time * assets.revenue), NULL)) AS month_2,
+            SUM(IF(MONTHNAME(downtime.date) = "${monthsLooped[startNum + 2]}" && downtime.date > DATE_SUB(NOW(), INTERVAL 7 MONTH), (downtime.time * assets.revenue), NULL)) AS month_3,
+            SUM(IF(MONTHNAME(downtime.date) = "${monthsLooped[startNum + 3]}" && downtime.date > DATE_SUB(NOW(), INTERVAL 7 MONTH), (downtime.time * assets.revenue), NULL)) AS month_4,
+            SUM(IF(MONTHNAME(downtime.date) = "${monthsLooped[startNum + 4]}" && downtime.date > DATE_SUB(NOW(), INTERVAL 7 MONTH), (downtime.time * assets.revenue), NULL)) AS month_5,
+            SUM(IF(MONTHNAME(downtime.date) = "${monthsLooped[startNum + 5]}" && downtime.date > DATE_SUB(NOW(), INTERVAL 7 MONTH), (downtime.time * assets.revenue), NULL)) AS month_6
+        FROM
+            downtime
+        INNER JOIN assets ON
+            assets.id = downtime.asset
+        WHERE
+            downtime.property_id = ?;`,
+        [propertyId]
+    );
+    
+    return makeReturnObj(startNum, data[0][0]);
+}

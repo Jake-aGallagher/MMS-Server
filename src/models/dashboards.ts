@@ -1,11 +1,19 @@
 import { FieldPacket } from 'mysql2';
 import db from '../database/database';
-import { downtime6M, getIncompleteJobs, getJobsCompleted6M, getJobsRaised6M, sparesDeliveredCost6M, sparesMisssing6M } from '../helpers/graphs/defaultGraphs';
+import {
+    downtime6M,
+    getIncompleteJobs,
+    getJobsCompleted6M,
+    getJobsRaised6M,
+    lostRevenue6M,
+    sparesDeliveredCost6M,
+    sparesMisssing6M,
+} from '../helpers/graphs/defaultGraphs';
 import { BreakdownPlanned } from '../types/dashboard';
 
 export async function get6MPropertyGraph(
     propertyId: number,
-    type: 'raisedJobs' | 'completeJobs' | 'sparesCost' | 'sparesMissing' | 'downtime',
+    type: 'raisedJobs' | 'completeJobs' | 'sparesCost' | 'sparesMissing' | 'revenue' | 'downtime',
     flipped: boolean = false
 ) {
     let data: { month: string; value: number }[] = [];
@@ -21,6 +29,9 @@ export async function get6MPropertyGraph(
             break;
         case 'sparesMissing':
             data = await sparesMisssing6M(propertyId);
+            break;
+        case 'revenue':
+            data = await lostRevenue6M(propertyId);
             break;
         default:
             data = await downtime6M(propertyId);
