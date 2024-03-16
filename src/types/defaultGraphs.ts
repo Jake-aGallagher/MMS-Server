@@ -29,6 +29,24 @@ export interface StringGraph extends RowDataPacket {
     month_6: string | null;
 }
 
+export interface MonthData {
+    month_1: string | null;
+    month_2: string | null;
+    month_3: string | null;
+    month_4: string | null;
+    month_5: string | null;
+    month_6: string | null;
+}
+
+export interface MonthDataNumber {
+    month_1: number;
+    month_2: number;
+    month_3: number;
+    month_4: number;
+    month_5: number;
+    month_6: number;
+}
+
 export interface NameValue extends RowDataPacket {
     name: string;
     value: number;

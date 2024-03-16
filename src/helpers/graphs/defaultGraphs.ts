@@ -1,12 +1,34 @@
 import db from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
-import { DefaultGraph6M, IncompleteJobs, NameValue, StringGraph } from '../../types/defaultGraphs';
+import { DefaultGraph6M, IncompleteJobs, MonthData, MonthDataNumber, NameValue, StringGraph } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
 function makeStartNum() {
     const d = new Date();
     const endNum = d.getMonth();
     return endNum >= 5 ? endNum - 5 : 7 + endNum;
+}
+
+function makeReturnObj(startNum: number, data: MonthData) {
+    return [
+        { month: monthsLooped[startNum], value: parseFloat(data.month_1 || '0') },
+        { month: monthsLooped[startNum + 1], value: parseFloat(data.month_2 || '0') },
+        { month: monthsLooped[startNum + 2], value: parseFloat(data.month_3 || '0') },
+        { month: monthsLooped[startNum + 3], value: parseFloat(data.month_4 || '0') },
+        { month: monthsLooped[startNum + 4], value: parseFloat(data.month_5 || '0') },
+        { month: monthsLooped[startNum + 5], value: parseFloat(data.month_6 || '0') },
+    ];
+}
+
+function makeUnionReturnObj(startNum: number, a: MonthDataNumber, b: MonthDataNumber) {
+    return [
+        { month: monthsLooped[startNum], value: a.month_1 + b.month_1 },
+        { month: monthsLooped[startNum + 1], value: a.month_2 + b.month_2 },
+        { month: monthsLooped[startNum + 2], value: a.month_3 + b.month_3 },
+        { month: monthsLooped[startNum + 3], value: a.month_4 + b.month_4 },
+        { month: monthsLooped[startNum + 4], value: a.month_5 + b.month_5 },
+        { month: monthsLooped[startNum + 5], value: a.month_6 + b.month_6 },
+    ];
 }
 
 export async function getIncompleteJobs(propertyId: number) {
@@ -72,15 +94,8 @@ export async function getJobsRaised6M(propertyId: number) {
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: data[0][0].month_1 + data[0][1].month_1 },
-        { month: monthsLooped[startNum + 1], value: data[0][0].month_2 + data[0][1].month_2 },
-        { month: monthsLooped[startNum + 2], value: data[0][0].month_3 + data[0][1].month_3 },
-        { month: monthsLooped[startNum + 3], value: data[0][0].month_4 + data[0][1].month_4 },
-        { month: monthsLooped[startNum + 4], value: data[0][0].month_5 + data[0][1].month_5 },
-        { month: monthsLooped[startNum + 5], value: data[0][0].month_6 + data[0][1].month_6 },
-    ];
-    return returnObj;
+
+    return makeUnionReturnObj(startNum, data[0][0], data[0][1]);
 }
 
 export async function getJobsCompleted6M(propertyId: number) {
@@ -118,21 +133,14 @@ export async function getJobsCompleted6M(propertyId: number) {
             pm_schedules.property_id = ?;`,
         [propertyId, propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: data[0][0].month_1 + data[0][1].month_1 },
-        { month: monthsLooped[startNum + 1], value: data[0][0].month_2 + data[0][1].month_2 },
-        { month: monthsLooped[startNum + 2], value: data[0][0].month_3 + data[0][1].month_3 },
-        { month: monthsLooped[startNum + 3], value: data[0][0].month_4 + data[0][1].month_4 },
-        { month: monthsLooped[startNum + 4], value: data[0][0].month_5 + data[0][1].month_5 },
-        { month: monthsLooped[startNum + 5], value: data[0][0].month_6 + data[0][1].month_6 },
-    ];
-    return returnObj;
+    
+    return makeUnionReturnObj(startNum, data[0][0], data[0][1]);
 }
 
 export async function getSparesUsed6M(propertyId: number) {
     let startNum = makeStartNum();
 
-    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
+    const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_1,
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_2,
@@ -148,15 +156,8 @@ export async function getSparesUsed6M(propertyId: number) {
             record_type = 'used';`,
         [propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: data[0][0].month_1 },
-        { month: monthsLooped[startNum + 1], value: data[0][0].month_2 },
-        { month: monthsLooped[startNum + 2], value: data[0][0].month_3 },
-        { month: monthsLooped[startNum + 3], value: data[0][0].month_4 },
-        { month: monthsLooped[startNum + 4], value: data[0][0].month_5 },
-        { month: monthsLooped[startNum + 5], value: data[0][0].month_6 },
-    ];
-    return returnObj;
+    
+    return makeReturnObj(startNum, data[0][0]);
 }
 
 export async function mostUsedSpares6M(propertyId: number) {
@@ -210,15 +211,8 @@ export async function sparesCost6M(propertyId: number) {
             spares_used.record_type = 'used';`,
         [propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
-        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
-        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
-        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
-        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
-        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
-    ];
-    return returnObj;
+    
+    return makeReturnObj(startNum, data[0][0]);
 }
 
 export async function sparesDeliveredCost6M(propertyId: number) {
@@ -242,15 +236,8 @@ export async function sparesDeliveredCost6M(propertyId: number) {
             deliveries.property_id = ?;`,
         [propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
-        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
-        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
-        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
-        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
-        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
-    ];
-    return returnObj;
+    
+    return makeReturnObj(startNum, data[0][0]);
 }
 
 export async function jobsOfComponents6M(assetIds: number[]) {
@@ -308,7 +295,7 @@ export async function incompleteForAsset(assetIds: number[]) {
 export async function sparesUsed6M(spareId: number) {
     let startNum = makeStartNum();
 
-    const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
+    const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_1,
             SUM(IF(MONTHNAME(date_used) = "${monthsLooped[startNum + 1]}" && date_used > DATE_SUB(NOW(), INTERVAL 7 MONTH), quantity, NULL)) AS month_2,
@@ -324,15 +311,8 @@ export async function sparesUsed6M(spareId: number) {
             record_type = 'used';`,
         [spareId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: data[0][0].month_1 },
-        { month: monthsLooped[startNum + 1], value: data[0][0].month_2 },
-        { month: monthsLooped[startNum + 2], value: data[0][0].month_3 },
-        { month: monthsLooped[startNum + 3], value: data[0][0].month_4 },
-        { month: monthsLooped[startNum + 4], value: data[0][0].month_5 },
-        { month: monthsLooped[startNum + 5], value: data[0][0].month_6 },
-    ];
-    return returnObj;
+    
+    return makeReturnObj(startNum, data[0][0]);
 }
 
 export async function sparesMisssing6M(propertyId: number) {
@@ -354,15 +334,8 @@ export async function sparesMisssing6M(propertyId: number) {
             record_type = 'missing';`,
         [propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
-        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
-        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
-        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
-        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
-        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
-    ];
-    return returnObj;
+    
+    return makeReturnObj(startNum, data[0][0]);
 }
 
 export async function downtime6M(propertyId: number) {
@@ -382,13 +355,6 @@ export async function downtime6M(propertyId: number) {
             property_id = ?;`,
         [propertyId]
     );
-    const returnObj = [
-        { month: monthsLooped[startNum], value: parseFloat(data[0][0].month_1 || '0') },
-        { month: monthsLooped[startNum + 1], value: parseFloat(data[0][0].month_2 || '0') },
-        { month: monthsLooped[startNum + 2], value: parseFloat(data[0][0].month_3 || '0') },
-        { month: monthsLooped[startNum + 3], value: parseFloat(data[0][0].month_4 || '0') },
-        { month: monthsLooped[startNum + 4], value: parseFloat(data[0][0].month_5 || '0') },
-        { month: monthsLooped[startNum + 5], value: parseFloat(data[0][0].month_6 || '0') },
-    ];
-    return returnObj;
+    
+    return makeReturnObj(startNum, data[0][0]);
 }
