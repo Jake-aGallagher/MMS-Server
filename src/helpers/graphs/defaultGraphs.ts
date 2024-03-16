@@ -3,6 +3,12 @@ import { FieldPacket } from 'mysql2/typings/mysql';
 import { DefaultGraph6M, IncompleteJobs, NameValue, StringGraph } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
 
+function makeStartNum() {
+    const d = new Date();
+    const endNum = d.getMonth();
+    return endNum >= 5 ? endNum - 5 : 7 + endNum;
+}
+
 export async function getIncompleteJobs(propertyId: number) {
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -32,9 +38,7 @@ export async function getIncompleteJobs(propertyId: number) {
 }
 
 export async function getJobsRaised6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -80,9 +84,7 @@ export async function getJobsRaised6M(propertyId: number) {
 }
 
 export async function getJobsCompleted6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -128,9 +130,7 @@ export async function getJobsCompleted6M(propertyId: number) {
 }
 
 export async function getSparesUsed6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -188,9 +188,7 @@ export async function mostUsedSpares6M(propertyId: number) {
 }
 
 export async function sparesCost6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -224,9 +222,7 @@ export async function sparesCost6M(propertyId: number) {
 }
 
 export async function sparesDeliveredCost6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -310,9 +306,7 @@ export async function incompleteForAsset(assetIds: number[]) {
 }
 
 export async function sparesUsed6M(spareId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -342,9 +336,7 @@ export async function sparesUsed6M(spareId: number) {
 }
 
 export async function sparesMisssing6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
@@ -374,9 +366,7 @@ export async function sparesMisssing6M(propertyId: number) {
 }
 
 export async function downtime6M(propertyId: number) {
-    const d = new Date();
-    const endNum = d.getMonth();
-    let startNum = endNum >= 5 ? endNum - 5 : 7 + endNum;
+    let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
         `SELECT
