@@ -94,6 +94,14 @@ export interface InitialStatus extends RowDataPacket {
     id: number;
 }
 
+// Downtime //
+
+export interface Downtime extends RowDataPacket {
+    id: number;
+    name: string;
+    time: number;
+}
+
 // Logged Time //
 
 export interface TimeDetails extends RowDataPacket {
