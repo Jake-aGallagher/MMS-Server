@@ -55,6 +55,7 @@ router.get('/revenue/:propertyid', authorised, revenueController.getPropertyReve
 // Dashboard
 router.get('/dashboard/jobs/:propertyid', authorised, dashboardsController.getDashboardJobs)
 router.get('/dashboard/spares/:propertyid', authorised, dashboardsController.getDashboardSpares)
+router.get('/dashboard/revenue/:propertyid', authorised, dashboardsController.getDashboardRevenue)
 
 // Properties
 router.get('/properties/availabletouser', authorised, propertiesController.getPropertiesForUser);

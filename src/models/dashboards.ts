@@ -1,9 +1,13 @@
 import { FieldPacket } from 'mysql2';
 import db from '../database/database';
-import { getIncompleteJobs, getJobsCompleted6M, getJobsRaised6M, sparesDeliveredCost6M, sparesMisssing6M } from '../helpers/graphs/defaultGraphs';
+import { downtime6M, getIncompleteJobs, getJobsCompleted6M, getJobsRaised6M, sparesDeliveredCost6M, sparesMisssing6M } from '../helpers/graphs/defaultGraphs';
 import { BreakdownPlanned } from '../types/dashboard';
 
-export async function get6MPropertyGraph(propertyId: number, type: 'raisedJobs' | 'completeJobs' | 'sparesCost' | 'sparesMissing', flipped: boolean = false) {
+export async function get6MPropertyGraph(
+    propertyId: number,
+    type: 'raisedJobs' | 'completeJobs' | 'sparesCost' | 'sparesMissing' | 'downtime',
+    flipped: boolean = false
+) {
     let data: { month: string; value: number }[] = [];
     switch (type) {
         case 'raisedJobs':
@@ -19,7 +23,7 @@ export async function get6MPropertyGraph(propertyId: number, type: 'raisedJobs' 
             data = await sparesMisssing6M(propertyId);
             break;
         default:
-            data = await getJobsRaised6M(propertyId);
+            data = await downtime6M(propertyId);
             break;
     }
 
