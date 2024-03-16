@@ -6,6 +6,7 @@ import {
     getJobsCompleted6M,
     getJobsRaised6M,
     lostRevenue6M,
+    lostRevenueByAsset,
     sparesDeliveredCost6M,
     sparesMisssing6M,
 } from '../helpers/graphs/defaultGraphs';
@@ -50,6 +51,17 @@ export async function get6MPropertyGraph(
     const avgData = { value: Math.round(((thisMonth / (total / 5)) * 100 - 100 + Number.EPSILON) * 100) / 100, flipped };
 
     return { thisMonth, mainData: formattedArr, avgData };
+}
+
+export async function getAssetLostRevenue(propertyId: number) {
+    const data = await lostRevenueByAsset(propertyId);
+    const formattedArr: { label: string; value: number}[] = [];
+    
+    for (let i = 0; i < data.length; i++) {
+        formattedArr.push({ label: data[i].name, value: data[i].value });
+    }
+
+    return { mainData: formattedArr };
 }
 
 export async function getIncomplete(propertyId: number) {

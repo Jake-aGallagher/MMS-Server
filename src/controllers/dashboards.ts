@@ -22,7 +22,8 @@ export async function getDashboardRevenue(req: Request, res: Response) {
         const propertyId = parseInt(req.params.propertyid);
         const revenue = await Dashboard.get6MPropertyGraph(propertyId, 'revenue');
         const downtime = await Dashboard.get6MPropertyGraph(propertyId, 'downtime');
-        res.status(200).json({ revenue, downtime });
+        const assetRevenue = await Dashboard.getAssetLostRevenue(propertyId);
+        res.status(200).json({ revenue, downtime, assetRevenue });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });

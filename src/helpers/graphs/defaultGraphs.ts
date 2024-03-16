@@ -381,3 +381,27 @@ export async function lostRevenue6M(propertyId: number) {
     
     return makeReturnObj(startNum, data[0][0]);
 }
+
+export async function lostRevenueByAsset(propertyId: number) {
+    const data: [NameValue[], FieldPacket[]] = await db.execute(
+        `SELECT
+            SUM(downtime.time * assets.revenue) as value,
+            assets.name
+        FROM
+            downtime
+        INNER JOIN assets ON
+            assets.id = downtime.asset
+        WHERE
+            downtime.property_id = ?
+        AND
+            downtime.date > DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY
+            assets.name
+        ORDER BY
+            value DESC
+        LIMIT
+            5;`,
+        [propertyId]
+    );
+    return data[0];
+}
