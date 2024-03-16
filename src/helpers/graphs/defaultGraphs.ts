@@ -143,7 +143,9 @@ export async function getSparesUsed6M(propertyId: number) {
         FROM
             spares_used
         WHERE
-            property_id = ?;`,
+            property_id = ?
+        AND
+            record_type = 'used';`,
         [propertyId]
     );
     const returnObj = [
@@ -170,6 +172,8 @@ export async function mostUsedSpares6M(propertyId: number) {
         )
         WHERE
             spares_used.property_id = ?
+        AND
+            spares_used.record_type = 'used'
         AND
             spares_used.date_used > DATE_SUB(NOW(), INTERVAL 6 MONTH)
         GROUP BY
@@ -203,7 +207,9 @@ export async function sparesCost6M(propertyId: number) {
             spares.id = spares_used.spare_id
         )
         WHERE
-            spares_used.property_id = ?;`,
+            spares_used.property_id = ?
+        AND
+            spares_used.record_type = 'used';`,
         [propertyId]
     );
     const returnObj = [
@@ -319,7 +325,9 @@ export async function sparesUsed6M(spareId: number) {
         FROM
             spares_used
         WHERE
-            spare_id = ?;`,
+            spare_id = ?
+        AND
+            record_type = 'used';`,
         [spareId]
     );
     const returnObj = [

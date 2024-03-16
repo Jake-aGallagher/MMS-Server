@@ -42,7 +42,7 @@ export async function getPMDetails(req: Request, res: Response) {
         const id = parseInt(req.params.pmid);
         const pm = await PMs.getPMDetails(id);
         const customFields = await getCustomFieldData('pm', id, pm[0].type_id);
-        const usedSpares = await Spares.getUsedSpares('pm', id);
+        const usedSpares = await Spares.getUsedSpares('pm', id, 'used');
         const timeDetails = await LoggedTime.getLoggedTimeDetails('pm', id);
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
@@ -69,7 +69,7 @@ export async function getEditPM(req: Request, res: Response) {
         const scheduleDates = await PMs.getScheduleDates(id);
         const users = await Properties.getAssignedUsers(propertyId);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('pm', id);
-        const usedSpares = await Spares.getUsedSpares('pm', id);
+        const usedSpares = await Spares.getUsedSpares('pm', id, 'used');
         if (timeDetails.length > 0) {
             res.status(200).json({ statusOptions, PMDetails, customFields, users, usedSpares, completableStatus, scheduleDates, timeDetails });
         } else {
@@ -89,7 +89,7 @@ export async function editPM(req: Request, res: Response) {
         await updateFieldData(req.body.id, req.body.fieldData);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(req.body.id, req.body.propertyId, newSpares, 'pm');
+            updateSparesForJob(req.body.id, req.body.propertyId, newSpares, 'pm', 'used');
         }
         if (req.body.loggedTimeDetails.length > 0) {
             LoggedTime.setTimeDetails(req.body.loggedTimeDetails, 'pm', req.body.id);

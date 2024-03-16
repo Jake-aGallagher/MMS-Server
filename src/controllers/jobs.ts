@@ -7,6 +7,7 @@ import * as TypeEnums from '../models/taskTypes';
 import * as StatusEnums from '../models/statusTypes';
 import * as UrgencyEnums from '../models/urgencyTypes';
 import * as LoggedTime from '../models/loggedTime';
+import * as Downtime from '../models/downtime';
 import makeIdList from '../helpers/makeIdList';
 import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
 import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
@@ -33,15 +34,17 @@ export async function getJobDetails(req: Request, res: Response) {
         const jobDetails = await Jobs.getJobDetails(id);
         const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
         const files = await getFileIds('job', id);
-        const usedSpares = await Spares.getUsedSpares('job', id);
+        const usedSpares = await Spares.getUsedSpares('job', id, 'used');
+        const missingSpares = await Spares.getUsedSpares('job', id, 'missing');
         const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
+        const downtime = await Downtime.getDowntimeDetails('job', id);
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(userIds);
             const timeDetailsFull = timeDetailsArray(timeDetails, users);
-            res.status(200).json({ jobDetails, customFields, files, timeDetails: timeDetailsFull, usedSpares });
+            res.status(200).json({ jobDetails, customFields, files, timeDetails: timeDetailsFull, usedSpares, missingSpares, downtime });
         } else {
-            res.status(200).json({ jobDetails, customFields, files, usedSpares });
+            res.status(200).json({ jobDetails, customFields, files, usedSpares, missingSpares, downtime});
         }
     } catch (err) {
         console.log(err);
@@ -70,11 +73,13 @@ export async function getJobUpdate(req: Request, res: Response) {
         const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
         const users = await Properties.getAssignedUsers(propertyId);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
-        const usedSpares = await Spares.getUsedSpares('job', id);
+        const usedSpares = await Spares.getUsedSpares('job', id, 'used');
+        const missingSpares = await Spares.getUsedSpares('job', id, 'missing');
+        const downtime = await Downtime.getDowntimeDetails('job', id);
         if (timeDetails.length > 0) {
-            res.status(200).json({ statusOptions, jobDetails, customFields, users, usedSpares, completableStatus, timeDetails });
+            res.status(200).json({ statusOptions, jobDetails, customFields, users, usedSpares, missingSpares, downtime, completableStatus, timeDetails });
         } else {
-            res.status(200).json({ statusOptions, jobDetails, customFields, users, usedSpares, completableStatus });
+            res.status(200).json({ statusOptions, jobDetails, customFields, users, usedSpares, missingSpares, downtime, completableStatus });
         }
     } catch (err) {
         console.log(err);
@@ -109,10 +114,17 @@ export async function updateAndComplete(req: Request, res: Response) {
         await updateFieldData(req.body.id, req.body.fieldData);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(jobId, propertyId, newSpares, 'job');
+            updateSparesForJob(jobId, propertyId, newSpares, 'job', 'used');
+        }
+        const missingSpares = <NewSpares[]>req.body.sparesMissing;
+        if (missingSpares.length > 0) {
+            updateSparesForJob(jobId, propertyId, missingSpares, 'job', 'missing');
         }
         if (req.body.logged_time_details.length > 0) {
             LoggedTime.setTimeDetails(req.body.logged_time_details, 'job', jobId);
+        }
+        if (req.body.downtime.length > 0) {
+            Downtime.setDowntimeDetails(req.body.downtime, 'job', jobId, propertyId);
         }
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
             insertFiles(req.files, 'job', jobId);

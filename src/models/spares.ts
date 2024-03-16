@@ -111,7 +111,7 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
     return data[0];
 }
 
-export async function getUsedSpares(model: string, modelId: number) {
+export async function getUsedSpares(model: string, modelId: number, type: 'used' | 'missing') {
     const data: [UsedSpares[], FieldPacket[]] = await db.execute(
         `SELECT 
             spares.id,
@@ -127,12 +127,14 @@ export async function getUsedSpares(model: string, modelId: number) {
                 spares.deleted = 0
             )
         WHERE
-            model = ?
-            AND
-            model_id = ?
+            spares_used.model = ?
+        AND
+            spares_used.model_id = ?
+        AND
+            spares_used.record_type = ?
         GROUP BY
             spares_used.spare_id;`,
-        [model, modelId]
+        [model, modelId, type]
     );
     return data[0];
 }
@@ -146,6 +148,8 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
             spares_used
         WHERE
             property_id = ?
+        AND
+            record_type = 'used'
         AND
             date_used > DATE_SUB(NOW(), INTERVAL ? MONTH)
         GROUP BY
@@ -167,6 +171,8 @@ export async function getRecentTasksForSpare(propertyId: number, spareId: number
             spare_id = ?
         AND
             model = ?
+        AND
+            record_type = 'used'
         ORDER BY 
             date_used DESC    
         LIMIT
@@ -329,12 +335,13 @@ export async function getNote(noteId: number) {
     return data[0];
 }
 
-export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number) {
+export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number, type: 'used' | 'missing') {
     let sql = `
     INSERT INTO
         spares_used
         (
             spare_id,
+            record_type,
             model,
             model_id,
             quantity,
@@ -345,7 +352,7 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, m
 
     let values = [];
     for (let i = 0; i < sparesUsed.length; i++) {
-        values.push(`(${sparesUsed[i].id}, '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+        values.push(`(${sparesUsed[i].id}, '${type}', '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
     }
     sql += values.join(',') + `;`;
 
@@ -353,12 +360,13 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, m
     return response[0];
 }
 
-export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number) {
+export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number, type: 'used' | 'missing') {
     let insertSql = `
     INSERT INTO
         spares_used
         (
             spare_id,
+            record_type,
             model,
             model_id,
             quantity,
@@ -370,7 +378,7 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string,
     let insertVals = [];
     for (let i = 0; i < sparesUsed.length; i++) {
         if (sparesUsed[i].quantity > 0) {
-            insertVals.push(`(${sparesUsed[i].id}, '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+            insertVals.push(`(${sparesUsed[i].id}, '${type}', '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
         }
     }
     insertSql += insertVals.join(',');
@@ -381,12 +389,12 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string,
     return;
 }
 
-export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number) {
+export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number, type: 'used' | 'missing') {
     sparesUsed.forEach(async (item) => {
         while (item.quantity > 0) {
             const data: [UsedSparesIdQuantity[], FieldPacket[]] = await db.execute(
-                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND model = ? AND model_id = ? AND property_id = ? ORDER BY date_used DESC LIMIT 1;`,
-                [item.id, model, modelId, property_id]
+                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND model = ? AND model_id = ? AND property_id = ? AND record_type = ? ORDER BY date_used DESC LIMIT 1;`,
+                [item.id, model, modelId, property_id, type]
             );
             if (data[0][0].quantity > item.quantity) {
                 await db.execute(`UPDATE spares_used SET quantity = quantity - ? WHERE id = ?;`, [item.quantity, data[0][0].id]);
