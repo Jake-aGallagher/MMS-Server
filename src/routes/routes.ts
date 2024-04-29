@@ -6,7 +6,7 @@ import * as usersController from '../controllers/users';
 import * as filesController from '../controllers/files';
 import * as dashboardsController from '../controllers/dashboards';
 import * as revenueController from '../controllers/revenue';
-import * as propertiesController from '../controllers/properties';
+import * as facilitiesController from '../controllers/facilities';
 import * as jobsController from '../controllers/jobs';
 import * as PmsController from '../controllers/pms';
 import * as logsController from '../controllers/logs';
@@ -34,7 +34,7 @@ router.delete('/file/:id', authorised, filesController.deleteFile);
 
 // Users
 router.get('/all-users', authorised, usersController.getAllUsers);
-router.get('/users/all/:propertyid', authorised, usersController.getAllUsersForProperty);
+router.get('/users/all/:facilityid', authorised, usersController.getAllUsersForFacility);
 router.get('/users/byuserid/:userid', authorised, usersController.getUserById);
 router.post('/users/login', usersController.login);
 router.post('/users', authorised, usersController.postUser);
@@ -50,43 +50,43 @@ router.get('/permissions/group/:groupid', authorised, permissionsController.getA
 router.put('/permissions/group/:groupid', authorised, permissionsController.setPermissionsForGroup);
 
 // Revenue
-router.get('/revenue/:propertyid', authorised, revenueController.getPropertyRevenue);
+router.get('/revenue/:facilityid', authorised, revenueController.getFacilityRevenue);
 
 // Dashboard
-router.get('/dashboard/jobs/:propertyid', authorised, dashboardsController.getDashboardJobs)
-router.get('/dashboard/spares/:propertyid', authorised, dashboardsController.getDashboardSpares)
-router.get('/dashboard/revenue/:propertyid', authorised, dashboardsController.getDashboardRevenue)
+router.get('/dashboard/jobs/:facilityid', authorised, dashboardsController.getDashboardJobs)
+router.get('/dashboard/spares/:facilityid', authorised, dashboardsController.getDashboardSpares)
+router.get('/dashboard/revenue/:facilityid', authorised, dashboardsController.getDashboardRevenue)
 
-// Properties
-router.get('/properties/availabletouser', authorised, propertiesController.getPropertiesForUser);
-router.get('/properties/all-properties', authorised, propertiesController.getAllProperties);
-router.get('/properties/:propertyid', authorised, propertiesController.getPropertyDetails);
-router.put('/properties', authorised, propertiesController.addEditProperty);
-//// Property Users
-router.get('/properties/users-for-assigning/:propertyid', authorised, propertiesController.getUsersForAssign);
-router.put('/properties/assign-users', authorised, propertiesController.setAssignedUsers);
-//// Last Property
-router.get('/properties/last-property/:userid', propertiesController.getLastProperty);
-router.put('/properties/Last-property', authorised, propertiesController.setLastProperty);
+// Facilities
+router.get('/facilities/availabletouser', authorised, facilitiesController.getFacilitiesForUser);
+router.get('/facilities/all-facilities', authorised, facilitiesController.getAllFacilities);
+router.get('/facilities/:facilityid', authorised, facilitiesController.getFacilityDetails);
+router.put('/facilities', authorised, facilitiesController.addEditFacility);
+//// Facilty Users
+router.get('/facilities/users-for-assigning/:facilityid', authorised, facilitiesController.getUsersForAssign);
+router.put('/facilities/assign-users', authorised, facilitiesController.setAssignedUsers);
+//// Last Facility
+router.get('/facilities/last-facility/:userid', facilitiesController.getLastFacility);
+router.put('/facilities/Last-facility', authorised, facilitiesController.setLastFacility);
 
 // Jobs
-router.get('/jobs/all-jobs/:propertyid', authorised, jobsController.getAllJobs);
+router.get('/jobs/all-jobs/:facilityid', authorised, jobsController.getAllJobs);
 router.get('/jobs/create-job', authorised, jobsController.getEnumsForCreateJob);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
-router.get('/jobs/update/:propertyid/:jobid', authorised, jobsController.getJobUpdate);//
+router.get('/jobs/update/:facilityid/:jobid', authorised, jobsController.getJobUpdate);//
 router.post('/jobs', authorised, jobsController.postJob);
 router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
 // PMs
-router.get('/pms/:propertyid', authorised, PmsController.getAllPMs)
+router.get('/pms/:facilityid', authorised, PmsController.getAllPMs)
 router.get('/pms/pm/:pmid', authorised, PmsController.getPMDetails)
-router.get('/pms/edit/:propertyid/:scheduleid', authorised, PmsController.getEditPM);
+router.get('/pms/edit/:facilityid/:scheduleid', authorised, PmsController.getEditPM);
 router.put('/pms/edit', authorised, fileUpload.array('files'), PmsController.editPM);
 
 // PM Schedules
-router.get('/pms/schedules/all-schedules/:propertyid', authorised, PmsController.getAllPMSchedules);
-router.get('/pms/schedules/:propertyid/:scheduleid', authorised, PmsController.getPMSchedule);
+router.get('/pms/schedules/all-schedules/:facilityid', authorised, PmsController.getAllPMSchedules);
+router.get('/pms/schedules/:facilityid/:scheduleid', authorised, PmsController.getPMSchedule);
 router.get('/pms/schedules/add-schedule', authorised, PmsController.getAddSchedule);
 router.get('/pms/schedule/edit-schedule/:scheduleid', authorised, PmsController.getEditSchedule);
 router.post('/pms/schedules', authorised, PmsController.addPMSchedule);
@@ -94,9 +94,9 @@ router.put('/pms/schedules', authorised, PmsController.editPMSchedule);
 router.delete('/pms/schedules/:id', authorised, PmsController.deletePMSchedule);
 
 // Logs
-router.get('/logs/all-log-templates/:propertyid', authorised, logsController.getAllLogTemplates);
-router.get('/logs/log-templates/:propertyid/:logtemplateid', authorised, logsController.getLogTemplate);
-router.get('/logs/all-logs/:propertyid', authorised, logsController.getAllLogs);
+router.get('/logs/all-log-templates/:facilityid', authorised, logsController.getAllLogTemplates);
+router.get('/logs/log-templates/:facilityid/:logtemplateid', authorised, logsController.getLogTemplate);
+router.get('/logs/all-logs/:facilityid', authorised, logsController.getAllLogs);
 router.get('/logs/log/:logid', authorised, logsController.getLog);
 router.get('/logs/edit-log-template/:logtemplateid', authorised, logsController.getEditLogTemplate);
 router.get('/logs/log-fields/:logid', authorised, logsController.getLogFields);
@@ -105,33 +105,33 @@ router.put('/logs/log', authorised, logsController.updateLog);
 router.delete('/logs/log-templates/:id', authorised, logsController.deleteLogTemplate);
 
 // Assets
-router.get('/asset-tree/:propertyid', authorised, assetsController.getAssetTree);
+router.get('/asset-tree/:facilityid', authorised, assetsController.getAssetTree);
 router.get('/asset/:assetid', authorised, assetsController.getAsset);
-router.get('/assets/revenues/:propertyid', authorised, assetsController.getAssetsWithRevenues);
+router.get('/assets/revenues/:facilityid', authorised, assetsController.getAssetsWithRevenues);
 router.post('/asset', authorised, assetsController.addEditAsset);
 router.delete('/asset/:id', authorised, assetsController.deleteAsset);
 
 // Spares
-router.get('/all-spares/:propertyid', authorised, sparesController.getallSpares);
-router.get('/spare/:spareid/:propertyid', authorised, sparesController.getSpare);
-router.get('/spares-for-use/:propertyid', authorised, sparesController.getSparesForUse);
+router.get('/all-spares/:facilityid', authorised, sparesController.getallSpares);
+router.get('/spare/:spareid/:facilityid', authorised, sparesController.getSpare);
+router.get('/spares-for-use/:facilityid', authorised, sparesController.getSparesForUse);
 router.get('/spares/instock/:spareid', authorised, sparesController.getSpareStock);
 router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/adjust-stock', authorised, sparesController.adjustSpareStock);
 router.delete('/spares/item/:id', authorised, sparesController.deleteSparesItem);
 //// Spares Suppliers
-router.get('/spares/suppliers/:propertyid', authorised, sparesController.getSuppliers);
+router.get('/spares/suppliers/:facilityid', authorised, sparesController.getSuppliers);
 router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
 router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
 router.delete('/spares/supplier/:id', authorised, sparesController.deleteSupplier);
 //// Spares Deliveries
-router.get('/spares/deliveries/:propertyid/:deliveryid', authorised, sparesController.getDeliveries);
+router.get('/spares/deliveries/:facilityid/:deliveryid', authorised, sparesController.getDeliveries);
 router.put('/spares/delivery/add-edit', authorised, sparesController.addEditDelivery);
 router.delete('/spares/delivery/:id', authorised, sparesController.deleteDelivery);
 //// Spares Warnings
-router.get('/spares/warnings/:propertyid', authorised, sparesController.getSparesWarnings);
+router.get('/spares/warnings/:facilityid', authorised, sparesController.getSparesWarnings);
 //// Spares Notes
-router.get('/spares/notes/:propertyid', authorised, sparesController.getSparesNotes);
+router.get('/spares/notes/:facilityid', authorised, sparesController.getSparesNotes);
 router.get('/spares/note/:noteid', authorised, sparesController.getNote);
 router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note/:id', authorised, sparesController.deleteNote);

@@ -12,30 +12,30 @@ import {
 } from '../helpers/graphs/defaultGraphs';
 import { BreakdownPlanned } from '../types/dashboard';
 
-export async function get6MPropertyGraph(
-    propertyId: number,
+export async function get6MFacilityGraph(
+    facilityId: number,
     type: 'raisedJobs' | 'completeJobs' | 'sparesCost' | 'sparesMissing' | 'revenue' | 'downtime',
     flipped: boolean = false
 ) {
     let data: { month: string; value: number }[] = [];
     switch (type) {
         case 'raisedJobs':
-            data = await getJobsRaised6M(propertyId);
+            data = await getJobsRaised6M(facilityId);
             break;
         case 'completeJobs':
-            data = await getJobsCompleted6M(propertyId);
+            data = await getJobsCompleted6M(facilityId);
             break;
         case 'sparesCost':
-            data = await sparesDeliveredCost6M(propertyId);
+            data = await sparesDeliveredCost6M(facilityId);
             break;
         case 'sparesMissing':
-            data = await sparesMisssing6M(propertyId);
+            data = await sparesMisssing6M(facilityId);
             break;
         case 'revenue':
-            data = await lostRevenue6M(propertyId);
+            data = await lostRevenue6M(facilityId);
             break;
         default:
-            data = await downtime6M(propertyId);
+            data = await downtime6M(facilityId);
             break;
     }
 
@@ -53,8 +53,8 @@ export async function get6MPropertyGraph(
     return { thisMonth, mainData: formattedArr, avgData };
 }
 
-export async function getAssetLostRevenue(propertyId: number) {
-    const data = await lostRevenueByAsset(propertyId);
+export async function getAssetLostRevenue(facilityId: number) {
+    const data = await lostRevenueByAsset(facilityId);
     const formattedArr: { label: string; value: number}[] = [];
     
     for (let i = 0; i < data.length; i++) {
@@ -64,8 +64,8 @@ export async function getAssetLostRevenue(propertyId: number) {
     return { mainData: formattedArr };
 }
 
-export async function getIncomplete(propertyId: number) {
-    const data = await getIncompleteJobs(propertyId);
+export async function getIncomplete(facilityId: number) {
+    const data = await getIncompleteJobs(facilityId);
     const formattedArr = [
         { label: 'Non-overdue Job', value: data[0].incomplete },
         { label: 'Overdue Job', value: data[0].overdue },
@@ -76,7 +76,7 @@ export async function getIncomplete(propertyId: number) {
     return { thisMonth: data[0].overdue + data[0].incomplete + data[1].overdue + data[1].incomplete, mainData: formattedArr };
 }
 
-export async function getBreakdownVsPlanned(propertyId: number) {
+export async function getBreakdownVsPlanned(facilityId: number) {
     const data: [BreakdownPlanned[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0, 1, NULL)) AS result,
@@ -84,7 +84,7 @@ export async function getBreakdownVsPlanned(propertyId: number) {
         FROM
             jobs
         WHERE
-            property_id = ?
+            facility_id = ?
                     
         UNION
                     
@@ -96,8 +96,8 @@ export async function getBreakdownVsPlanned(propertyId: number) {
         INNER JOIN pm_schedules ON
             pms.schedule_id = pm_schedules.id
         WHERE
-            pm_schedules.property_id = ?;`,
-        [propertyId, propertyId]
+            pm_schedules.facility_id = ?;`,
+        [facilityId, facilityId]
     );
 
     const dataArr = [

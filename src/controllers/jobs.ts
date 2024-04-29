@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as Jobs from '../models/jobs';
-import * as Properties from '../models/properties';
+import * as Facilities from '../models/facilities';
 import * as Users from '../models/users';
 import * as Spares from '../models/spares';
 import * as TypeEnums from '../models/taskTypes';
@@ -19,8 +19,8 @@ import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const allJobs = await Jobs.getAllJobs(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const allJobs = await Jobs.getAllJobs(facilityId);
         res.status(200).json(allJobs);
     } catch (err) {
         console.log(err);
@@ -66,12 +66,12 @@ export async function getEnumsForCreateJob(req: Request, res: Response) {
 export async function getJobUpdate(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const statusOptions = await StatusEnums.getAllStatusTypes();
         const completableStatus = statusOptions.filter((item) => item.can_complete).map((item) => item.id);
         const jobDetails = await Jobs.getJobDetails(id);
         const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
-        const users = await Properties.getAssignedUsers(propertyId);
+        const users = await Facilities.getAssignedUsers(facilityId);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
         const usedSpares = await Spares.getUsedSpares('job', id, 'used');
         const missingSpares = await Spares.getUsedSpares('job', id, 'missing');
@@ -108,23 +108,23 @@ export async function updateAndComplete(req: Request, res: Response) {
     try {
         req.body = JSON.parse(req.body.data);
         const jobId = parseInt(req.body.id);
-        const propertyId = parseInt(req.body.propertyId);
+        const facilityId = parseInt(req.body.facilityId);
         const totalTime = calcTotalLoggedTime(req.body.logged_time_details);
         const response = await Jobs.updateAndComplete(req.body, totalTime);
         await updateFieldData(req.body.id, req.body.fieldData);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(jobId, propertyId, newSpares, 'job', 'used');
+            updateSparesForJob(jobId, facilityId, newSpares, 'job', 'used');
         }
         const missingSpares = <NewSpares[]>req.body.sparesMissing;
         if (missingSpares.length > 0) {
-            updateSparesForJob(jobId, propertyId, missingSpares, 'job', 'missing');
+            updateSparesForJob(jobId, facilityId, missingSpares, 'job', 'missing');
         }
         if (req.body.logged_time_details.length > 0) {
             LoggedTime.setTimeDetails(req.body.logged_time_details, 'job', jobId);
         }
         if (req.body.downtime.length > 0) {
-            Downtime.setDowntimeDetails(req.body.downtime, 'job', jobId, propertyId);
+            Downtime.setDowntimeDetails(req.body.downtime, 'job', jobId, facilityId);
         }
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
             insertFiles(req.files, 'job', jobId);

@@ -3,11 +3,11 @@ import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus, JobDetails } from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
-export async function getAllJobs(propertyId: number) {
+export async function getAllJobs(facilityId: number) {
     const data = await db.execute(
         `SELECT 
                 jobs.id,
-                jobs.property_id,
+                jobs.facility_id,
                 IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
                 task_types.value AS type,
                 jobs.title,
@@ -31,13 +31,13 @@ export async function getAllJobs(propertyId: number) {
             LEFT JOIN status_types AS statusEnum ON
                 jobs.status = statusEnum.id
             WHERE
-                jobs.property_id = ?
+                jobs.facility_id = ?
             AND
                 jobs.deleted = 0
             ORDER BY
                 jobs.id
             DESC;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -46,7 +46,7 @@ export async function getJobDetails(id: number) {
     const data: [JobDetails[], FieldPacket[]] = await db.execute(
         `SELECT 
             jobs.id,
-            properties.name AS property_name,
+            facilities.name AS facility_name,
             IF (LENGTH(assets.name) > 0, assets.name, 'No Asset') AS asset_name,
             jobs.type AS type_id,
             task_types.value AS type,
@@ -66,8 +66,8 @@ export async function getJobDetails(id: number) {
             jobs
         LEFT JOIN users ON
             users.id = jobs.reported_by
-        LEFT JOIN properties ON
-            properties.id = jobs.property_id
+        LEFT JOIN facilities ON
+            facilities.id = jobs.facility_id
         LEFT JOIN assets ON
             assets.id = jobs.asset
         LEFT JOIN urgency_types AS urgencyEnum ON
@@ -145,7 +145,7 @@ export async function getRecentJobsByIds(ids: number[]) {
 }
 
 export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
-    const property_id = body.propertyNumber;
+    const facility_id = body.facilityNumber;
     const asset = body.assetNumber;
     const type = body.type;
     const title = body.title;
@@ -159,7 +159,7 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
         `INSERT INTO
                 jobs
                 (
-                    property_id,
+                    facility_id,
                     asset,
                     type,
                     title,
@@ -172,7 +172,7 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
                 )
             VALUES
                 (?,?,?,?,?, NOW() ,?, DATE_ADD(NOW(), INTERVAL ${numOfUrg} ${lengthOfUrg}) ,?,?);`,
-        [property_id, asset, type, title, description, urgency, reported_by, initialStatus[0][0].id]
+        [facility_id, asset, type, title, description, urgency, reported_by, initialStatus[0][0].id]
     );
     return response[0];
 }

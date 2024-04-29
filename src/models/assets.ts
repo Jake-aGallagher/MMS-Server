@@ -2,7 +2,7 @@ import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetById, Asset, AssetId, AssetRevenues } from '../types/assets';
 import db from '../database/database';
 
-export async function getAssetTree(propertyId: number, rootId: number) {
+export async function getAssetTree(facilityId: number, rootId: number) {
     const data: [Asset[], FieldPacket[]] = await db.execute(
         `SELECT
             assets.id,
@@ -17,13 +17,13 @@ export async function getAssetTree(propertyId: number, rootId: number) {
         (
             assets.id = relations.descendant_id
             AND
-            relations.property_id = ?
+            relations.facility_id = ?
         )
         INNER JOIN assets AS find_root ON
         (
             find_root.id = relations.ancestor_id
             AND
-            find_root.property_id = ?
+            find_root.facility_id = ?
             AND
             find_root.deleted = 0
         )
@@ -31,24 +31,24 @@ export async function getAssetTree(propertyId: number, rootId: number) {
         (
             crumbs.descendant_id = relations.descendant_id
             AND
-            crumbs.property_id = ?
+            crumbs.facility_id = ?
         )
         WHERE
             find_root.parent_id = ?
         AND
-            assets.property_id = ?
+            assets.facility_id = ?
         AND
             assets.deleted = 0
         GROUP BY
             assets.id
         ORDER BY
             breadcrumbs;`,
-        [propertyId, propertyId, propertyId, rootId, propertyId]
+        [facilityId, facilityId, facilityId, rootId, facilityId]
     );
     return data[0];
 }
 
-export async function getAssetRoot(propertyId: number) {
+export async function getAssetRoot(facilityId: number) {
     const data: [AssetId[], FieldPacket[]] = await db.execute(
         `SELECT
             id
@@ -59,8 +59,8 @@ export async function getAssetRoot(propertyId: number) {
         AND
             deleted = 0
         AND
-            property_id = ?;`,
-        [propertyId]
+            facility_id = ?;`,
+        [facilityId]
     );
     return data[0];
 }
@@ -70,7 +70,7 @@ export async function getAssetById(id: number) {
         `SELECT
             assets.id AS id,
             assets.parent_id AS parent_id,
-            assets.property_id AS property_id,
+            assets.facility_id AS facility_id,
             assets.name AS name,
             assets.revenue AS revenue,
             assets.notes AS notes,
@@ -93,7 +93,7 @@ export async function getAssetById(id: number) {
     return data[0];
 }
 
-export async function getAssetsWithRevenues(propertyId: number) {
+export async function getAssetsWithRevenues(facilityId: number) {
     const data: [AssetRevenues[], FieldPacket[]] = await db.execute(
         `SELECT
             assets.id,
@@ -102,32 +102,32 @@ export async function getAssetsWithRevenues(propertyId: number) {
         FROM
             assets
         WHERE
-            assets.property_id = ?
+            assets.facility_id = ?
         AND
             assets.deleted = 0
         AND
             assets.revenue IS NOT NULL;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 
 }
 
-export async function insertAsset(parentId: number, propertyId: number, name: string, note: string, revenue: number | null) {
+export async function insertAsset(parentId: number, facilityId: number, name: string, note: string, revenue: number | null) {
     const revenuePerMin = revenue && revenue > 0 ? revenue : null;
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets
             (
                 parent_id,
-                property_id,
+                facility_id,
                 name,
                 notes,
                 revenue
             )
         VALUES
             ( ?, ?, ?, ?, ? );`,
-        [parentId, propertyId, name, note, revenuePerMin]
+        [parentId, facilityId, name, note, revenuePerMin]
     );
     return data[0];
 }
@@ -148,17 +148,17 @@ export async function editAsset(id: number, name: string, note: string, revenue:
     return data[0];
 }
 
-export async function renameRootAsset(name: string, propertyId: number) {
+export async function renameRootAsset(name: string, facilityId: number) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
         SET
             name = ?
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             parent_id = 0;`,
-        [name, propertyId]
+        [name, facilityId]
     );
     return data[0];
 }

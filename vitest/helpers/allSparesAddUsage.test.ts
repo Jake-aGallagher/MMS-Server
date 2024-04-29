@@ -5,7 +5,7 @@ import allSparesAddUsage from '../../src/helpers/spares/allSparesAddUsage'
 
 const spares: SparesDetails[] = [{ id:1 }]
 
-it('should return data with avg used property attached', () => {
+it('should return data with avg used facility attached', () => {
     const sparesUsed: recentlyUsed[] = [{spare_id: 1, total_used: 15}]
 
     const result = allSparesAddUsage(spares, sparesUsed, 3)

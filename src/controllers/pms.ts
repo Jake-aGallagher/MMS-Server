@@ -4,7 +4,7 @@ import * as Users from '../models/users';
 import * as Spares from '../models/spares';
 import * as LoggedTime from '../models/loggedTime';
 import * as StatusEnums from '../models/statusTypes';
-import * as Properties from '../models/properties';
+import * as Facilities from '../models/facilities';
 import * as TypeEnums from '../models/taskTypes';
 import makeIdList from '../helpers/makeIdList';
 import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
@@ -17,8 +17,8 @@ import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getAllPMs(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const pms = await PMs.getPMs(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const pms = await PMs.getPMs(facilityId);
         res.status(200).json({ pms });
     } catch (err) {
         console.log(err);
@@ -28,8 +28,8 @@ export async function getAllPMs(req: Request, res: Response) {
 
 export async function getAllPMSchedules(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const schedules = await PMs.getPMSchedules(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const schedules = await PMs.getPMSchedules(facilityId);
         res.status(200).json(schedules);
     } catch (err) {
         console.log(err);
@@ -61,13 +61,13 @@ export async function getPMDetails(req: Request, res: Response) {
 export async function getEditPM(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.scheduleid);
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const statusOptions = await StatusEnums.getAllStatusTypes();
         const completableStatus = statusOptions.filter((item) => item.can_complete).map((item) => item.id);
         const PMDetails = await PMs.getPMforEdit(id);
         const customFields = await getCustomFieldData('pm', id, PMDetails[0].type_id);
         const scheduleDates = await PMs.getScheduleDates(id);
-        const users = await Properties.getAssignedUsers(propertyId);
+        const users = await Facilities.getAssignedUsers(facilityId);
         const timeDetails = await LoggedTime.getLoggedTimeDetails('pm', id);
         const usedSpares = await Spares.getUsedSpares('pm', id, 'used');
         if (timeDetails.length > 0) {
@@ -89,7 +89,7 @@ export async function editPM(req: Request, res: Response) {
         await updateFieldData(req.body.id, req.body.fieldData);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(req.body.id, req.body.propertyId, newSpares, 'pm', 'used');
+            updateSparesForJob(req.body.id, req.body.facilityId, newSpares, 'pm', 'used');
         }
         if (req.body.loggedTimeDetails.length > 0) {
             LoggedTime.setTimeDetails(req.body.loggedTimeDetails, 'pm', req.body.id);
@@ -117,9 +117,9 @@ export async function editPM(req: Request, res: Response) {
 
 export async function getPMSchedule(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const id = parseInt(req.params.scheduleid);
-        const scheduleDetails = await PMs.getPMSchedules(propertyId, id);
+        const scheduleDetails = await PMs.getPMSchedules(facilityId, id);
         const schedulePMs = await PMs.getPMsBySchedule(id);
         res.status(200).json({ scheduleDetails, schedulePMs });
     } catch (err) {

@@ -1,28 +1,28 @@
 import { Request, Response } from 'express';
-import * as Properties from '../models/properties';
+import * as Facilities from '../models/facilities';
 import * as Users from '../models/users';
 import * as Assets from '../models/assets';
 import * as AssetRelations from '../models/assetRelations';
 import * as Jobs from '../models/jobs';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import assignedUsersList from '../helpers/assignedIdsList';
-import propertyUsersList from '../helpers/properties/propertyUsersList';
-import lastPropMapping from '../helpers/properties/lastPropMapping';
+import facilityUsersList from '../helpers/facilities/facilityUsersList';
+import lastFacilityMapping from '../helpers/facilities/lastFacilityMapping';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
 import { RecentJobs } from '../types/jobs';
 
-export async function getPropertiesForUser(req: Request, res: Response) {
+export async function getFacilitiesForUser(req: Request, res: Response) {
     try {
         if (req.userId) {
             const user_group_id = await Users.getUserLevel(req.userId);
-            let allProps = [];
+            let allFacilities = [];
             if (user_group_id == 1) {
-                allProps = await Properties.getAllProperties();
+                allFacilities = await Facilities.getAllFacilities();
             } else {
-                allProps = await Properties.getAllPropertiesForUser(req.userId);
+                allFacilities = await Facilities.getAllFacilitiesForUser(req.userId);
             }
-            res.status(200).json({allProps});
+            res.status(200).json({allFacilities});
         } else {
             res.status(500).json({ message: 'Request failed' });
         }
@@ -33,22 +33,22 @@ export async function getPropertiesForUser(req: Request, res: Response) {
 
 }
 
-export async function getAllProperties(req: Request, res: Response) {
+export async function getAllFacilities(req: Request, res: Response) {
     try {
-        const allProperties = await Properties.getAllProperties();
-        res.status(200).json(allProperties);
+        const allFacilities = await Facilities.getAllFacilities();
+        res.status(200).json(allFacilities);
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
     }
 }
 
-export async function getPropertyDetails(req: Request, res: Response) {
+export async function getFacilityDetails(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const propDetails = await Properties.getPropertyDetails(propertyId);
-        const assignedUsers = await Properties.getAssignedUsers(propertyId);
-        const assetId = await Assets.getAssetRoot(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const facilityDetails = await Facilities.getFacilityDetails(facilityId);
+        const assignedUsers = await Facilities.getAssignedUsers(facilityId);
+        const assetId = await Assets.getAssetRoot(facilityId);
         const getChildren = await AssetRelations.getChildren(assetId[0].id);
         const idsForRecents = makeIdList(getChildren, 'descendant_id');
         let recentJobs: RecentJobs[] = [];
@@ -56,14 +56,14 @@ export async function getPropertyDetails(req: Request, res: Response) {
             recentJobs = await Jobs.getRecentJobs(idsForRecents);
         }
         // Todo - batch all these default graph calls together
-        const incompleteJobs = await DefaultGraphs.getIncompleteJobs(propertyId);
-        const raised6M = await DefaultGraphs.getJobsRaised6M(propertyId);
-        const sparesUsed6M = await DefaultGraphs.getSparesUsed6M(propertyId);
-        const mostUsed6M = await DefaultGraphs.mostUsedSpares6M(propertyId);
-        const sparesCost6M = await DefaultGraphs.sparesCost6M(propertyId);
+        const incompleteJobs = await DefaultGraphs.getIncompleteJobs(facilityId);
+        const raised6M = await DefaultGraphs.getJobsRaised6M(facilityId);
+        const sparesUsed6M = await DefaultGraphs.getSparesUsed6M(facilityId);
+        const mostUsed6M = await DefaultGraphs.mostUsedSpares6M(facilityId);
+        const sparesCost6M = await DefaultGraphs.sparesCost6M(facilityId);
         // Extra field stuff
-        const customFields = await getCustomFieldData('property', propertyId);
-        res.status(200).json({ propDetails, customFields, assignedUsers, recentJobs, incompleteJobs, raised6M, sparesUsed6M, mostUsed6M, sparesCost6M });
+        const customFields = await getCustomFieldData('facility', facilityId);
+        res.status(200).json({ facilityDetails, customFields, assignedUsers, recentJobs, incompleteJobs, raised6M, sparesUsed6M, mostUsed6M, sparesCost6M });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -72,11 +72,11 @@ export async function getPropertyDetails(req: Request, res: Response) {
 
 export async function getUsersForAssign(req: Request, res: Response) {
     try {
-        const propertyId = req.params.propertyid;
-        const assignedUsers = await Properties.getAssignedUserIds(parseInt(propertyId));
+        const facilityId = req.params.facilityid;
+        const assignedUsers = await Facilities.getAssignedUserIds(parseInt(facilityId));
         const assignedlist = assignedUsersList(assignedUsers);
         const allUsers = await Users.getAllUsers();
-        const usersList = propertyUsersList(allUsers, assignedlist);
+        const usersList = facilityUsersList(allUsers, assignedlist);
         res.status(200).json(usersList);
     } catch (err) {
         console.log(err);
@@ -84,27 +84,27 @@ export async function getUsersForAssign(req: Request, res: Response) {
     }
 }
 
-export async function getLastProperty(req: Request, res: Response) {
+export async function getLastFacility(req: Request, res: Response) {
     try {
         const userId = req.params.userid;
         const user_group_id = await Users.getUserLevel(parseInt(userId));
-        let allProps = [];
-        let propIds = <number[]>[];
+        let allFacilities = [];
+        let facilityIds = <number[]>[];
         if (user_group_id == 1) {
-            allProps = await Properties.getAllProperties();
+            allFacilities = await Facilities.getAllFacilities();
         } else {
-            allProps = await Properties.getAllPropertiesForUser(parseInt(userId));
+            allFacilities = await Facilities.getAllFacilitiesForUser(parseInt(userId));
         }
-        propIds = makeIdList(allProps, 'id');
-        const lastProp = await Properties.getLastPropertyForUser(parseInt(userId));
-        if (lastProp[0] === undefined) {
-            res.status(200).json(allProps);
+        facilityIds = makeIdList(allFacilities, 'id');
+        const lastFacility = await Facilities.getLastFacilityForUser(parseInt(userId));
+        if (lastFacility[0] === undefined) {
+            res.status(200).json(allFacilities);
         } else {
-            if (propIds.includes(lastProp[0].property_id)) {
-                const propertiesMapped = lastPropMapping(allProps, lastProp[0].property_id);
-                res.status(200).json(propertiesMapped);
+            if (facilityIds.includes(lastFacility[0].facility_id)) {
+                const facilitiesMapped = lastFacilityMapping(allFacilities, lastFacility[0].facility_id);
+                res.status(200).json(facilitiesMapped);
             } else {
-                res.status(200).json(allProps);
+                res.status(200).json(allFacilities);
             }
         }
     } catch (err) {
@@ -113,26 +113,26 @@ export async function getLastProperty(req: Request, res: Response) {
     }
 }
 
-export async function addEditProperty(req: Request, res: Response) {
+export async function addEditFacility(req: Request, res: Response) {
     try {
         let response;
         if (req.body.id > 0) {
-            response = await Properties.editProperty(req.body);
+            response = await Facilities.editFacility(req.body);
             Assets.renameRootAsset(req.body.name, req.body.id);
             await updateFieldData(req.body.id, req.body.fieldData);
         } else {
-            response = await Properties.postProperty(req.body);
+            response = await Facilities.postFacility(req.body);
             await updateFieldData(response.insertId, req.body.fieldData);
             const asset = await Assets.insertAsset(0, response.insertId, req.body.name, '', null);
             await AssetRelations.insertRoot(asset.insertId, response.insertId);
             await AssetRelations.insertSelf(asset.insertId, response.insertId);
         }
-        const propertyId = req.body.id ? req.body.id : response.insertId;
+        const facilityId = req.body.id ? req.body.id : response.insertId;
         if (req.userId) {
-            Properties.postLastProperty({ userId: req.userId.toString(), propertyId: propertyId });
+            Facilities.postLastFacility({ userId: req.userId.toString(), facilityId: facilityId });
         }
         if (response.affectedRows === 1) {
-            res.status(201).json({ created: true, newPropId: propertyId });
+            res.status(201).json({ created: true, newFacilityId: facilityId });
         } else {
             res.status(500).json({ created: false });
         }
@@ -144,7 +144,7 @@ export async function addEditProperty(req: Request, res: Response) {
 
 export async function setAssignedUsers(req: Request, res: Response) {
     try {
-        const response = await Properties.setAssignedUsers(req.body.propertyNo, req.body.assignedUsers);
+        const response = await Facilities.setAssignedUsers(req.body.facilityNo, req.body.assignedUsers);
         if (response) {
             res.status(201).json({ created: true });
         } else {
@@ -156,9 +156,9 @@ export async function setAssignedUsers(req: Request, res: Response) {
     }
 }
 
-export async function setLastProperty(req: Request, res: Response) {
+export async function setLastFacility(req: Request, res: Response) {
     try {
-        const response = await Properties.postLastProperty(req.body);
+        const response = await Facilities.postLastFacility(req.body);
         if (response && response.affectedRows > 0) {
             res.status(201).json({ created: true });
         } else {

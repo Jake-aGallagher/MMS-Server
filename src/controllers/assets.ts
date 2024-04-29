@@ -12,8 +12,8 @@ import { RecentPms } from '../types/PMs';
 
 export async function getAssetTree(req: Request, res: Response) {
     try {
-        const propertyId = req.params.propertyid;
-        const getAssetTree = await Assets.getAssetTree(parseInt(propertyId), 0);
+        const facilityId = req.params.facilityid;
+        const getAssetTree = await Assets.getAssetTree(parseInt(facilityId), 0);
         const tree = makeAssetTree(getAssetTree);
         res.status(200).json(tree);
     } catch (err) {
@@ -24,8 +24,8 @@ export async function getAssetTree(req: Request, res: Response) {
 
 export async function getAssetsWithRevenues(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const assets = await Assets.getAssetsWithRevenues(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const assets = await Assets.getAssetsWithRevenues(facilityId);
         res.status(200).json({ assets });
     } catch (err) {
         console.log(err);
@@ -39,7 +39,7 @@ export async function getAsset(req: Request, res: Response) {
     try {
         const assetDetails = await Assets.getAssetById(assetId);
         if (assetDetails.length > 0) {
-            const propertyId = assetDetails[0].property_id;
+            const facilityId = assetDetails[0].facility_id;
             const getChildren = await AssetRelations.getChildren(assetId);
             const idsForRecents = makeIdList(getChildren, 'descendant_id');
             let recentJobs: RecentJobs[] = [];
@@ -48,7 +48,7 @@ export async function getAsset(req: Request, res: Response) {
                 recentJobs = await Jobs.getRecentJobs(idsForRecents);
                 recentPms = await Pms.getRecentPmsForAsset(idsForRecents);
             }
-            const children = await Assets.getAssetTree(propertyId, assetId);
+            const children = await Assets.getAssetTree(facilityId, assetId);
             const tree = makeAssetTree(children, assetId);
             // Todo - batch graph calls
             const jobsOfComponents6M = await DefaultGraphs.jobsOfComponents6M([...idsForRecents, assetId]);
@@ -80,20 +80,20 @@ export async function addEditAsset(req: Request, res: Response) {
         }
     } else {
         const parentId = parseInt(req.body.parentId);
-        const propertyId = parseInt(req.body.propertyId);
+        const facilityId = parseInt(req.body.facilityId);
         const name = req.body.name;
 
         try {
-            const asset = await Assets.insertAsset(parentId, propertyId, name, req.body.note, req.body.revenue);
+            const asset = await Assets.insertAsset(parentId, facilityId, name, req.body.note, req.body.revenue);
             await updateFieldData(asset.insertId, req.body.fieldData);
             if (asset.affectedRows == 1) {
                 const assetId = asset.insertId;
                 if (parentId != 0) {
-                    const assetRelations = await AssetRelations.insertChild(assetId, propertyId, parentId);
+                    const assetRelations = await AssetRelations.insertChild(assetId, facilityId, parentId);
                     if ((assetRelations.affectedRows = 0)) {
                         res.status(500).json({ created: false });
                     } else {
-                        const response = await AssetRelations.insertSelf(assetId, propertyId);
+                        const response = await AssetRelations.insertSelf(assetId, facilityId);
                         if (response.affectedRows == 1) {
                             res.status(201).json({ created: true });
                         } else {
@@ -101,7 +101,7 @@ export async function addEditAsset(req: Request, res: Response) {
                         }
                     }
                 } else {
-                    const response = await AssetRelations.insertSelf(assetId, propertyId);
+                    const response = await AssetRelations.insertSelf(assetId, facilityId);
                     if (response.affectedRows == 1) {
                         res.status(201).json({ created: true });
                     } else {

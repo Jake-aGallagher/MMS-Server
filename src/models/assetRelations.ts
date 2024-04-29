@@ -2,7 +2,7 @@ import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetRelationBasic } from '../types/assets';
 import db from '../database/database';
 
-export async function insertChild(assetId: number, propertyId: number, assetParentId: number) {
+export async function insertChild(assetId: number, facilityId: number, assetParentId: number) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
@@ -10,25 +10,25 @@ export async function insertChild(assetId: number, propertyId: number, assetPare
                 ancestor_id,
                 descendant_id,
                 depth,
-                property_id
+                facility_id
             )
         SELECT
             ancestor_id,
             ?,
             (depth + 1),
-            property_id
+            facility_id
         FROM
             assets_relations
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             descendant_id = ?;`,
-        [assetId, propertyId, assetParentId]
+        [assetId, facilityId, assetParentId]
     );
     return data[0];
 }
 
-export async function insertRoot(assetId: number, propertyId: number) {
+export async function insertRoot(assetId: number, facilityId: number) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
@@ -36,7 +36,7 @@ export async function insertRoot(assetId: number, propertyId: number) {
                 ancestor_id,
                 descendant_id,
                 depth,
-                property_id
+                facility_id
             )
         VALUES
             (
@@ -45,12 +45,12 @@ export async function insertRoot(assetId: number, propertyId: number) {
                 '1',
                 ?
             );`,
-        [assetId, propertyId]
+        [assetId, facilityId]
     );
     return data[0];
 }
 
-export async function insertSelf(assetId: number, propertyId: number) {
+export async function insertSelf(assetId: number, facilityId: number) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
@@ -58,7 +58,7 @@ export async function insertSelf(assetId: number, propertyId: number) {
                 ancestor_id,
                 descendant_id,
                 depth,
-                property_id
+                facility_id
             )
         VALUES
             (
@@ -67,7 +67,7 @@ export async function insertSelf(assetId: number, propertyId: number) {
                 '0',
                 ?
             );`,
-        [assetId, assetId, propertyId]
+        [assetId, assetId, facilityId]
     );
     return data[0];
 }

@@ -23,7 +23,7 @@ export async function getDowntimeDetails(model: string, modelId: number) {
     return data[0];
 }
 
-export async function setDowntimeDetails(details: [{ id: number; time: number }], model: string, modelId: number, propertyId: number) {
+export async function setDowntimeDetails(details: [{ id: number; time: number }], model: string, modelId: number, facilityId: number) {
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();
@@ -45,14 +45,14 @@ export async function setDowntimeDetails(details: [{ id: number; time: number }]
                     model_id,
                     time,
                     date,
-                    property_id
+                    facility_id
                 )
             VALUES`;
 
             let values = [];
             for (let i = 0; i < details.length; i++) {
                 if (details[i].time > 0) {
-                    values.push(`(${details[i].id}, '${model}', ${modelId}, ${details[i].time}, NOW(), ${propertyId})`);
+                    values.push(`(${details[i].id}, '${model}', ${modelId}, ${details[i].time}, NOW(), ${facilityId})`);
                 }
             }
             if (values.length > 0) {

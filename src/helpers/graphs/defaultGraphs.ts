@@ -31,7 +31,7 @@ function makeUnionReturnObj(startNum: number, a: MonthDataNumber, b: MonthDataNu
     ];
 }
 
-export async function getIncompleteJobs(propertyId: number) {
+export async function getIncompleteJobs(facilityId: number) {
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
@@ -40,7 +40,7 @@ export async function getIncompleteJobs(propertyId: number) {
         FROM
             jobs
         WHERE
-            property_id = ?
+            facility_id = ?
         
         UNION
         
@@ -53,13 +53,13 @@ export async function getIncompleteJobs(propertyId: number) {
         INNER JOIN pm_schedules ON
             pms.schedule_id = pm_schedules.id
         WHERE
-            pm_schedules.property_id = ?;`,
-        [propertyId, propertyId]
+            pm_schedules.facility_id = ?;`,
+        [facilityId, facilityId]
     );
     return data[0];
 }
 
-export async function getJobsRaised6M(propertyId: number) {
+export async function getJobsRaised6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
@@ -74,7 +74,7 @@ export async function getJobsRaised6M(propertyId: number) {
         FROM
             jobs
         WHERE
-            property_id = ?
+            facility_id = ?
         
         UNION
         
@@ -91,14 +91,14 @@ export async function getJobsRaised6M(propertyId: number) {
         INNER JOIN pm_schedules ON
             pms.schedule_id = pm_schedules.id
         WHERE
-            pm_schedules.property_id = ?;`,
-        [propertyId, propertyId]
+            pm_schedules.facility_id = ?;`,
+        [facilityId, facilityId]
     );
 
     return makeUnionReturnObj(startNum, data[0][0], data[0][1]);
 }
 
-export async function getJobsCompleted6M(propertyId: number) {
+export async function getJobsCompleted6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
@@ -113,7 +113,7 @@ export async function getJobsCompleted6M(propertyId: number) {
         FROM
             jobs
         WHERE
-            property_id = ?
+            facility_id = ?
             
         UNION
         
@@ -130,14 +130,14 @@ export async function getJobsCompleted6M(propertyId: number) {
         INNER JOIN pm_schedules ON
             pms.schedule_id = pm_schedules.id
         WHERE
-            pm_schedules.property_id = ?;`,
-        [propertyId, propertyId]
+            pm_schedules.facility_id = ?;`,
+        [facilityId, facilityId]
     );
     
     return makeUnionReturnObj(startNum, data[0][0], data[0][1]);
 }
 
-export async function getSparesUsed6M(propertyId: number) {
+export async function getSparesUsed6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -151,16 +151,16 @@ export async function getSparesUsed6M(propertyId: number) {
         FROM
             spares_used
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             record_type = 'used';`,
-        [propertyId]
+        [facilityId]
     );
     
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function mostUsedSpares6M(propertyId: number) {
+export async function mostUsedSpares6M(facilityId: number) {
     const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(spares_used.quantity) as value,
@@ -172,7 +172,7 @@ export async function mostUsedSpares6M(propertyId: number) {
             spares.id = spares_used.spare_id
         )
         WHERE
-            spares_used.property_id = ?
+            spares_used.facility_id = ?
         AND
             spares_used.record_type = 'used'
         AND
@@ -183,12 +183,12 @@ export async function mostUsedSpares6M(propertyId: number) {
             value DESC
         LIMIT
             5;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
 
-export async function sparesCost6M(propertyId: number) {
+export async function sparesCost6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -206,16 +206,16 @@ export async function sparesCost6M(propertyId: number) {
             spares.id = spares_used.spare_id
         )
         WHERE
-            spares_used.property_id = ?
+            spares_used.facility_id = ?
         AND
             spares_used.record_type = 'used';`,
-        [propertyId]
+        [facilityId]
     );
     
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function sparesDeliveredCost6M(propertyId: number) {
+export async function sparesDeliveredCost6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -233,8 +233,8 @@ export async function sparesDeliveredCost6M(propertyId: number) {
             deliveries.id = delivery_items.delivery_id
         )
         WHERE
-            deliveries.property_id = ?;`,
-        [propertyId]
+            deliveries.facility_id = ?;`,
+        [facilityId]
     );
     
     return makeReturnObj(startNum, data[0][0]);
@@ -315,7 +315,7 @@ export async function sparesUsed6M(spareId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function sparesMisssing6M(propertyId: number) {
+export async function sparesMisssing6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -329,16 +329,16 @@ export async function sparesMisssing6M(propertyId: number) {
         FROM
             spares_used
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             record_type = 'missing';`,
-        [propertyId]
+        [facilityId]
     );
     
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function downtime6M(propertyId: number) {
+export async function downtime6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -352,14 +352,14 @@ export async function downtime6M(propertyId: number) {
         FROM
             downtime
         WHERE
-            property_id = ?;`,
-        [propertyId]
+            facility_id = ?;`,
+        [facilityId]
     );
     
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function lostRevenue6M(propertyId: number) {
+export async function lostRevenue6M(facilityId: number) {
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -375,14 +375,14 @@ export async function lostRevenue6M(propertyId: number) {
         INNER JOIN assets ON
             assets.id = downtime.asset
         WHERE
-            downtime.property_id = ?;`,
-        [propertyId]
+            downtime.facility_id = ?;`,
+        [facilityId]
     );
     
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function lostRevenueByAsset(propertyId: number) {
+export async function lostRevenueByAsset(facilityId: number) {
     const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(downtime.time * assets.revenue) as value,
@@ -392,7 +392,7 @@ export async function lostRevenueByAsset(propertyId: number) {
         INNER JOIN assets ON
             assets.id = downtime.asset
         WHERE
-            downtime.property_id = ?
+            downtime.facility_id = ?
         AND
             downtime.date > DATE_SUB(NOW(), INTERVAL 6 MONTH)
         GROUP BY
@@ -401,7 +401,7 @@ export async function lostRevenueByAsset(propertyId: number) {
             value DESC
         LIMIT
             5;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }

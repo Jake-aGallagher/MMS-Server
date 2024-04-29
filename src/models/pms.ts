@@ -5,7 +5,7 @@ import { Frequency, InitialStatus } from '../types/jobs';
 
 // --------------- PMs ---------------
 
-export async function getPMs(propertyId: number) {
+export async function getPMs(facilityId: number) {
     const data = await db.execute(
         `SELECT
             pms.id,
@@ -33,10 +33,10 @@ export async function getPMs(propertyId: number) {
         LEFT JOIN task_types ON
             task_types.id = pm_schedules.type
         WHERE
-            pm_schedules.property_id = ?
+            pm_schedules.facility_id = ?
         AND
             pms.completed = 0;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -248,7 +248,7 @@ export async function editPMdueDate(scheduleId: number, dueDate: string) {
 
 // --------------- Schedules ---------------
 
-export async function getPMSchedules(propertyId: number, scheduleId?: number) {
+export async function getPMSchedules(facilityId: number, scheduleId?: number) {
     let sql = `
         SELECT 
             pm_schedules.id,
@@ -279,7 +279,7 @@ export async function getPMSchedules(propertyId: number, scheduleId?: number) {
         LEFT JOIN task_types AS task_types ON
             pm_schedules.type = task_types.id
         WHERE
-            pm_schedules.property_id = ?
+            pm_schedules.facility_id = ?
         `;
 
     if (scheduleId) {
@@ -297,7 +297,7 @@ export async function getPMSchedules(propertyId: number, scheduleId?: number) {
             pm_schedules.id
         DESC;`;
 
-    let sqlArr = [propertyId];
+    let sqlArr = [facilityId];
     if (scheduleId) {
         sqlArr.push(scheduleId);
     }
@@ -372,7 +372,7 @@ export async function getPMScheduleForEdit(id: number) {
 export async function addPMSchedule(body: any) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO pm_schedules (
-            property_id,
+            facility_id,
             asset_id,
             type,
             title,
@@ -381,7 +381,7 @@ export async function addPMSchedule(body: any) {
             frequency_time,
             frequency_unit
         ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?);`,
-        [body.propertyId, body.assetId, body.type, body.title, body.description, body.frequencyTime, body.frequencyUnit]
+        [body.facilityId, body.assetId, body.type, body.title, body.description, body.frequencyTime, body.frequencyUnit]
     );
     return data[0];
 }

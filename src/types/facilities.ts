@@ -1,16 +1,16 @@
 import { RowDataPacket } from "mysql2";
 
-// Property //
+// Facility //
 
-export interface PropertyId extends RowDataPacket {
+export interface FacilityId extends RowDataPacket {
     id: number;
 }
 
-export interface PropertyBasics extends PropertyId {
+export interface FacilityBasics extends FacilityId {
     name: string;
 }
 
-export interface Property extends PropertyBasics {
+export interface Facility extends FacilityBasics {
     address: string;
     city: string;
     county: string;

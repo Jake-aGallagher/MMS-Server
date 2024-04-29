@@ -49,7 +49,7 @@ export interface NewSpares {
 
 export interface NewStock {
     id: number;
-    property_id: number;
+    facility_id: number;
     quant_remain: number;
 }
 
@@ -75,7 +75,7 @@ export interface AddEditSpare {
     quantRemaining: number;
     supplier: string;
     cost: number;
-    propertyId: number;
+    facilityId: number;
     id: number;
 }
 
@@ -123,7 +123,7 @@ export interface DeliveryItems {
 // Suppliers //
 
 export interface AddEditSupplier {
-    propertyId: number;
+    facilityId: number;
     id: number;
     name: string;
     website: string;

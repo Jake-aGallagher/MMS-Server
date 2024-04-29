@@ -1,22 +1,22 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { UserIdOnly } from '../types/users';
-import { PropertyId, PropertyBasics, Property, AssignedBasic, Assigned } from '../types/properties';
+import { FacilityId, FacilityBasics, Facility, AssignedBasic, Assigned } from '../types/facilities';
 import db from '../database/database';
 
-export async function getAllPropertyIds() {
-    const data: [PropertyId[], FieldPacket[]] = await db.execute(
+export async function getAllFacilityIds() {
+    const data: [FacilityId[], FieldPacket[]] = await db.execute(
         `SELECT
              id
         FROM
-            properties
+            facilities
         WHERE
             deleted = 0;`
     );
     return data[0];
 }
 
-export async function getAllProperties() {
-    const response: [Property[], FieldPacket[]] = await db.execute(
+export async function getAllFacilities() {
+    const response: [Facility[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
              name,
@@ -25,7 +25,7 @@ export async function getAllProperties() {
              county,
              postcode
         FROM
-            properties
+            facilities
         WHERE
             deleted = 0
         ORDER BY
@@ -34,20 +34,20 @@ export async function getAllProperties() {
     return response[0];
 }
 
-export async function getAllPropertiesForUser(userId: number) {
-    const data: [PropertyBasics[], FieldPacket[]] = await db.execute(
+export async function getAllFacilitiesForUser(userId: number) {
+    const data: [FacilityBasics[], FieldPacket[]] = await db.execute(
         `SELECT 
-            properties.id,
-            properties.name
+            facilities.id,
+            facilities.name
         FROM 
-            properties
+            facilities
         INNER JOIN
-            property_users ON
+            facility_users ON
             (
-                properties.id = property_users.property_id
+                facilities.id = facility_users.facility_id
             )
         WHERE
-            property_users.user_id = ?
+            facility_users.user_id = ?
         AND
             deleted = 0;`,
         [userId]
@@ -55,17 +55,17 @@ export async function getAllPropertiesForUser(userId: number) {
     return data[0];
 }
 
-export async function getLastPropertyForUser(userId: number) {
-    const data: [PropertyBasics[], FieldPacket[]] = await db.execute(
+export async function getLastFacilityForUser(userId: number) {
+    const data: [FacilityBasics[], FieldPacket[]] = await db.execute(
         `SELECT 
-            property_id
+            facility_id
         FROM 
-            last_property
-        INNER JOIN properties ON
+            last_facility
+        INNER JOIN facilities ON
         (
-            properties.id = last_property.property_id
+            facilities.id = last_facility.facility_id
             AND
-            properties.deleted = 0
+            facilities.deleted = 0
         )
         WHERE
             user_id = ?;`,
@@ -74,7 +74,7 @@ export async function getLastPropertyForUser(userId: number) {
     return data[0];
 }
 
-export async function getPropertyDetails(propertyId: number) {
+export async function getFacilityDetails(facilityId: number) {
     const data = await db.execute(
         `SELECT 
             id,
@@ -84,17 +84,17 @@ export async function getPropertyDetails(propertyId: number) {
             county,
             postcode
         FROM 
-            properties
+            facilities
         WHERE
             id = ?
         AND
             deleted = 0;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
 
-export async function getAssignedUsers(propertyId: number) {
+export async function getAssignedUsers(facilityId: number) {
     const data = await db.execute<Assigned[]>(
         `SELECT 
             users.id AS id,
@@ -105,9 +105,9 @@ export async function getAssignedUsers(propertyId: number) {
             user_groups.name AS user_group_name
         FROM 
             users
-        LEFT JOIN property_users ON
+        LEFT JOIN facility_users ON
         (
-            users.id = property_users.user_id
+            users.id = facility_users.user_id
         )
         INNER JOIN user_groups ON
         (
@@ -115,7 +115,7 @@ export async function getAssignedUsers(propertyId: number) {
         )
         WHERE
         (
-            property_id = ?
+            facility_id = ?
             OR
             users.user_group_id = '1'
         )
@@ -126,24 +126,24 @@ export async function getAssignedUsers(propertyId: number) {
         ORDER BY
             user_group_id
         DESC;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
 
-export async function getAssignedUserIds(propertyId: number) {
+export async function getAssignedUserIds(facilityId: number) {
     const data = await db.execute<AssignedBasic[]>(
         `SELECT 
             users.id AS id
         FROM 
             users
-        LEFT JOIN property_users ON
+        LEFT JOIN facility_users ON
         (
-            users.id = property_users.user_id
+            users.id = facility_users.user_id
         )
         WHERE
         (
-            property_id = ?
+            facility_id = ?
             OR
             users.user_group_id = '1'
         )
@@ -154,12 +154,12 @@ export async function getAssignedUserIds(propertyId: number) {
         ORDER BY
             user_group_id
         DESC;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
 
-export async function postProperty(body: { name: string; address: string; city: string; county: string; postcode: string }) {
+export async function postFacility(body: { name: string; address: string; city: string; county: string; postcode: string }) {
     const name = body.name;
     const address = body.address;
     const city = body.city;
@@ -168,7 +168,7 @@ export async function postProperty(body: { name: string; address: string; city: 
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
-          properties
+          facilities
           (
               name,
               address,
@@ -183,7 +183,7 @@ export async function postProperty(body: { name: string; address: string; city: 
     return response[0];
 }
 
-export async function editProperty(body: { id: string; name: string; address: string; city: string; county: string; postcode: string }) {
+export async function editFacility(body: { id: string; name: string; address: string; city: string; county: string; postcode: string }) {
     const id = parseInt(body.id);
     const name = body.name;
     const address = body.address;
@@ -193,7 +193,7 @@ export async function editProperty(body: { id: string; name: string; address: st
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
-            properties
+            facilities
         SET
             name = ?,
             address = ?,
@@ -207,37 +207,38 @@ export async function editProperty(body: { id: string; name: string; address: st
     return response[0];
 }
 
-export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]) {
+export async function setAssignedUsers(facilityNo: number, userIds: UserIdOnly[]) {
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();
         await conn.execute(
             `DELETE
-            property_users
-        FROM
-            property_users
-        INNER JOIN users ON
-            (
-                property_users.user_id = users.id
-            )
-        WHERE
-            Property_id = ?
-        AND
-            users.user_group_id != '1';`,
-            [propertyNo]
+                facility_users
+            FROM
+                facility_users
+            INNER JOIN users ON
+                (
+                    facility_users.user_id = users.id
+                )
+            WHERE
+                facility_id = ?
+            AND
+                users.user_group_id != '1';`,
+                [facilityNo]
         );
         if (userIds.length > 0) {
-            let sql = `INSERT INTO
-                property_users
-                (
-                    property_id,
-                    user_id
-                )
-            VALUES`;
+            let sql = `
+                INSERT INTO
+                    facility_users
+                    (
+                        facility_id,
+                        user_id
+                    )
+                VALUES`;
 
             let values = [];
             for (let i = 0; i < userIds.length; i++) {
-                values.push(`(${propertyNo}, ${userIds[i]})`);
+                values.push(`(${facilityNo}, ${userIds[i]})`);
             }
             sql += values.join(',') + `;`;
             await conn.execute(sql);
@@ -251,38 +252,38 @@ export async function setAssignedUsers(propertyNo: number, userIds: UserIdOnly[]
     return true;
 }
 
-export async function postLastProperty(body: { userId: string; propertyId: string }) {
+export async function postLastFacility(body: { userId: string; facilityId: string }) {
     const userId = body.userId;
-    const propertyId = body.propertyId;
+    const facilityId = body.facilityId;
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
-            last_property
+                last_facility
             (
                 user_id,
-                property_id
+                facility_id
             )
         VALUES
             (?,?)
         ON DUPLICATE KEY UPDATE
-            property_id = ?;`,
-        [userId, propertyId, propertyId]
+            facility_id = ?;`,
+        [userId, facilityId, facilityId]
     );
     return response[0];
 }
 
-export async function postAdminAssignments(userId: number, propertyIds: { id: number }[]) {
+export async function postAdminAssignments(userId: number, facilityIds: { id: number }[]) {
     let sql = `
         INSERT INTO
-            property_users
+            facility_users
             (
-                property_id,
+                facility_id,
                 user_id
             )
         VALUES`;
 
     let values = [];
-    for (let i = 0; i < propertyIds.length; i++) {
-        values.push(`('${propertyIds[i].id}', '${userId}')`);
+    for (let i = 0; i < facilityIds.length; i++) {
+        values.push(`('${facilityIds[i].id}', '${userId}')`);
     }
     sql += values.join(',') + `;`;
 
@@ -293,7 +294,7 @@ export async function postAdminAssignments(userId: number, propertyIds: { id: nu
 export async function deleteAssignments(userId: number) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
-            property_users
+            facility_users
         WHERE
             user_id = ?;`,
         [userId]

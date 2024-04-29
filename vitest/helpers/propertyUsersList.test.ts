@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import propertyUsersList from '../../src/helpers/properties/propertyUsersList';
+import facilityUsersList from '../../src/helpers/facilities/facilityUsersList';
 
 const users = [
     { id: 1, username: 'testA', first_name: 'testA', last_name: 'testA', user_group_id: 2 },
@@ -11,7 +11,7 @@ it('should return array of assigned an unassigned Users', () => {
     const assignedList = [1,2,]
 
     // @ts-ignore
-    const result = propertyUsersList(users, assignedList)
+    const result = facilityUsersList(users, assignedList)
 
     expect(result.length).toBe(2)
     expect(result[0].assigned).toBeTruthy

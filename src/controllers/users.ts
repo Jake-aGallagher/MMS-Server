@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as Users from '../models/users';
-import * as Properties from '../models/properties';
+import * as Facilities from '../models/facilities';
 import * as Permissions from '../models/permissions';
 import bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -15,10 +15,10 @@ export async function getAllUsers(req: Request, res: Response) {
     }
 }
 
-export async function getAllUsersForProperty(req: Request, res: Response) {
+export async function getAllUsersForFacility(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const users = await Properties.getAssignedUsers(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const users = await Facilities.getAssignedUsers(facilityId);
         res.status(200).json({ users });
     } catch (err) {
         console.log(err);
@@ -87,9 +87,9 @@ export async function postUser(req: Request, res: Response) {
             userId = response.insertId;
         }
         if (req.body.user_group_id === 1) {
-            const propertyIds = await Properties.getAllPropertyIds();
-            await Properties.deleteAssignments(userId);
-            await Properties.postAdminAssignments(userId, propertyIds);
+            const facilityIds = await Facilities.getAllFacilityIds();
+            await Facilities.deleteAssignments(userId);
+            await Facilities.postAdminAssignments(userId, facilityIds);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });

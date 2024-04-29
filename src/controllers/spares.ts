@@ -15,10 +15,10 @@ import { RecentPms } from '../types/PMs';
 
 export async function getallSpares(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const spares = await Spares.getAllSpares(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const spares = await Spares.getAllSpares(facilityId);
         const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
-        const sparesUsed = await Spares.getUsedRecently(propertyId, monthsOfData);
+        const sparesUsed = await Spares.getUsedRecently(facilityId, monthsOfData);
         const sparesFullDetails = allSparesAddUsage(spares, sparesUsed, monthsOfData);
         res.status(200).json(sparesFullDetails);
     } catch (err) {
@@ -30,14 +30,14 @@ export async function getallSpares(req: Request, res: Response) {
 export async function getSpare(req: Request, res: Response) {
     try {
         const spareId = parseInt(req.params.spareid);
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const spares = await Spares.getSpares(spareId);
         let recentJobs: RecentJobs[] = [];
         let recentPms: RecentPms[] = [];
-        const recentJobNumbers = await Spares.getRecentTasksForSpare(propertyId, spareId, 'job');
-        const recentPmNumbers = await Spares.getRecentTasksForSpare(propertyId, spareId, 'pm');
+        const recentJobNumbers = await Spares.getRecentTasksForSpare(facilityId, spareId, 'job');
+        const recentPmNumbers = await Spares.getRecentTasksForSpare(facilityId, spareId, 'pm');
         const used6M = await DefaultGraphs.sparesUsed6M(spareId);
-        const deliveryInfo = await Spares.getDeliveryInfoOfSpare(spareId, propertyId);
+        const deliveryInfo = await Spares.getDeliveryInfoOfSpare(spareId, facilityId);
         if (recentJobNumbers.length > 0) {
             const jobIdList = makeIdList(recentJobNumbers, 'model_id');
             recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
@@ -78,8 +78,8 @@ export async function getSpareStock(req: Request, res: Response) {
 
 export async function getSparesForUse(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const spares = await Spares.getAllSparesBasic(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const spares = await Spares.getAllSparesBasic(facilityId);
         res.status(200).json({ spares });
     } catch (err) {
         console.log(err);
@@ -89,8 +89,8 @@ export async function getSparesForUse(req: Request, res: Response) {
 
 export async function getSparesNotes(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const sparesNotes = await Spares.getSparesNotes(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const sparesNotes = await Spares.getSparesNotes(facilityId);
         res.status(200).json(sparesNotes);
     } catch (err) {
         console.log(err);
@@ -100,10 +100,10 @@ export async function getSparesNotes(req: Request, res: Response) {
 
 export async function getSparesWarnings(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
-        const sparesUsed = await Spares.getUsedRecently(propertyId, monthsOfData);
-        const sparesCount = await Spares.getSparesRemaining(propertyId);
+        const sparesUsed = await Spares.getUsedRecently(facilityId, monthsOfData);
+        const sparesCount = await Spares.getSparesRemaining(facilityId);
         const dataArrays = sparesWarningArray(sparesCount, sparesUsed, monthsOfData);
         res.status(200).json({ outArray: dataArrays.outArray, warningsArray: dataArrays.warningsArray });
     } catch (err) {
@@ -114,8 +114,8 @@ export async function getSparesWarnings(req: Request, res: Response) {
 
 export async function getSuppliers(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const suppliers = await Spares.getSuppliers(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const suppliers = await Spares.getSuppliers(facilityId);
         res.status(200).json(suppliers);
     } catch (err) {
         console.log(err);
@@ -156,13 +156,13 @@ export async function addEditSupplier(req: Request, res: Response) {
 
 export async function getDeliveries(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const deliveryToFind = parseInt(req.params.deliveryid);
         let deliveries;
         if (deliveryToFind > 0) {
             deliveries = await Spares.getDeliveryById(deliveryToFind);
         } else {
-            deliveries = await Spares.getDeliveries(propertyId);
+            deliveries = await Spares.getDeliveries(facilityId);
         }
         if (deliveries.length === 0) {
             res.status(200).json({deliveries: []});
@@ -174,7 +174,7 @@ export async function getDeliveries(req: Request, res: Response) {
             const deliveryItems = await Spares.getDeliveryItems(deliveryIds);
             const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap);
             if (deliveryToFind > 0) {
-                const suppliers = await Spares.getSuppliers(propertyId);
+                const suppliers = await Spares.getSuppliers(facilityId);
                 res.status(200).json({ deliveries: deliverywithContents, suppliers });
             } else {
                 res.status(200).json({deliveries: deliverywithContents});
@@ -189,8 +189,8 @@ export async function getDeliveries(req: Request, res: Response) {
 export async function addEditDelivery(req: Request, res: Response) {
     try {
         const deliveryId = parseInt(req.body.id);
-        const propertyId = parseInt(req.body.propertyId);
-        const costMap = await Spares.getCostMapping(propertyId);
+        const facilityId = parseInt(req.body.facilityId);
+        const costMap = await Spares.getCostMapping(facilityId);
         let response;
         if (deliveryId === 0) {
             response = await Spares.addDelivery(req.body);

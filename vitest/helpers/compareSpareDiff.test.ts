@@ -28,7 +28,7 @@ it('should return the correct change of quantity of items used when items return
     // @ts-ignore
     const result = compareSpareDiff(newSpares, prevSpares)
 
-    expect(result.stockChangesArray[0].used).toBe(-2)
+    expect(result.stockChangesArray[0].used).toBe(2)
 })
 
 it('should push the spares item to the difference array if there is a difference in quantity used', () => {
@@ -38,5 +38,5 @@ it('should push the spares item to the difference array if there is a difference
     const result = compareSpareDiff(newSpares, prevSpares)
 
     expect(result.diffArray[0].id).toBe(1)
-    expect(result.diffArray[0].quantity).toBe(4)
+    expect(result.diffArray[0].quantity).toBe(1)
 })

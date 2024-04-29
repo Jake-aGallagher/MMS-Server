@@ -165,7 +165,7 @@ export async function editUserGroup(body: { id: string; name: string }) {
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
-            properties
+            facilities
         SET
             name = ?
         WHERE

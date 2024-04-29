@@ -4,7 +4,7 @@ import { RowDataPacket } from 'mysql2';
 
 export interface JobDetails extends RowDataPacket {
     id: number;
-    property_id: number;
+    facility_id: number;
     asset_id: number;
     asset_name: string;
     type_id: number;
@@ -24,7 +24,7 @@ export interface JobDetails extends RowDataPacket {
 }
 
 export interface JobDetailsForReentry extends RowDataPacket {
-    property_id: number;
+    facility_id: number;
     asset: number;
     type: number;
     title: string;
@@ -36,7 +36,7 @@ export interface JobDetailsForReentry extends RowDataPacket {
 }
 
 export interface PostJob {
-    propertyNumber: string;
+    facilityNumber: string;
     assetNumber: string;
     breakdownOrSchedule: string;
     type: string;
@@ -51,7 +51,7 @@ export interface PostJob {
 }
 
 export interface PostScheduledJob {
-    propertyNumber: string;
+    facilityNumber: string;
     assetNumber: string;
     type: string;
     title: string;

@@ -7,8 +7,8 @@ import { getCustomFieldData, updateFieldData } from '../models/customFields';
 
 export async function getAllLogTemplates(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const logTemplates = await Logs.getLogTemplates(propertyId);
+        const facilityId = parseInt(req.params.facilityid);
+        const logTemplates = await Logs.getLogTemplates(facilityId);
         res.status(200).json({ logTemplates });
     } catch (err) {
         console.log(err);
@@ -18,9 +18,9 @@ export async function getAllLogTemplates(req: Request, res: Response) {
 
 export async function getLogTemplate(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
+        const facilityId = parseInt(req.params.facilityid);
         const logTemplateId = parseInt(req.params.logtemplateid);
-        const logTemplate = await Logs.getLogTemplates(propertyId, logTemplateId);
+        const logTemplate = await Logs.getLogTemplates(facilityId, logTemplateId);
         const logs = await Logs.getLogsByTemplate(logTemplateId);
         res.status(200).json({ logTemplate: logTemplate[0], logs });
     } catch (err) {
@@ -48,7 +48,7 @@ export async function addEditLogTemplate(req: Request, res: Response) {
         } else {
             response = await Logs.addLogTemplate(req.body);
             const dueDate = req.body.startNow === 'Yes' ? 'CAST(CURDATE() as datetime)' : req.body.scheduleStart;
-            await Logs.addLog(response.insertId, req.body.propertyId, dueDate);
+            await Logs.addLog(response.insertId, req.body.facilityId, dueDate);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -80,8 +80,8 @@ export async function deleteLogTemplate(req: Request, res: Response) {
 
 export async function getAllLogs(req: Request, res: Response) {
     try {
-        const propertyId = parseInt(req.params.propertyid);
-        const logs = await Logs.getLogs(propertyId, true);
+        const facilityId = parseInt(req.params.facilityid);
+        const logs = await Logs.getLogs(facilityId, true);
         res.status(200).json({ logs });
     } catch (err) {
         console.log(err);
@@ -111,7 +111,7 @@ export async function updateLog(req: Request, res: Response) {
             const templateId = await Logs.getTemplateId(req.body.logId);
             await Logs.addLog(
                 templateId,
-                req.body.propertyId,
+                req.body.facilityId,
                 req.body.fieldData.continueSchedule === 'Yes' ? "'" + logDates[0].current_schedule + "'" : "'" + logDates[0].new_schedule + "'"
             );
         }

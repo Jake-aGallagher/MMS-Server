@@ -17,7 +17,7 @@ import {
 } from '../types/spares';
 import db from '../database/database';
 
-export async function getAllSpares(propertyId: number) {
+export async function getAllSpares(facilityId: number) {
     const data: [SparesDetails[], FieldPacket[]] = await db.execute(
         `SELECT 
             id,
@@ -36,15 +36,15 @@ export async function getAllSpares(propertyId: number) {
         FROM 
             spares
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             deleted = 0;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
 
-export async function getAllSparesBasic(propertyId: number) {
+export async function getAllSparesBasic(facilityId: number) {
     const data = await db.execute(
         `SELECT 
             id,
@@ -53,13 +53,13 @@ export async function getAllSparesBasic(propertyId: number) {
         FROM 
             spares
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             deleted = 0
         ORDER BY
             part_no
         DESC;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -92,7 +92,7 @@ export async function getSpares(id: number) {
     return data[0];
 }
 
-export async function getCurrentSpecificStock(stockChangeIds: number[], propertyId: number) {
+export async function getCurrentSpecificStock(stockChangeIds: number[], facilityId: number) {
     const sql = db.format(
         `SELECT
             id,
@@ -102,10 +102,10 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], property
         WHERE
             id IN (?)
         AND
-            property_id = ?
+            facility_id = ?
         AND
             deleted = 0;`,
-        [stockChangeIds, propertyId]
+        [stockChangeIds, facilityId]
     );
     const data: [CurrentStock[], FieldPacket[]] = await db.execute(sql);
     return data[0];
@@ -139,7 +139,7 @@ export async function getUsedSpares(model: string, modelId: number, type: 'used'
     return data[0];
 }
 
-export async function getUsedRecently(propertyId: number, monthsOfData: number) {
+export async function getUsedRecently(facilityId: number, monthsOfData: number) {
     const data: [recentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
             spare_id,
@@ -147,26 +147,26 @@ export async function getUsedRecently(propertyId: number, monthsOfData: number) 
         FROM
             spares_used
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             record_type = 'used'
         AND
             date_used > DATE_SUB(NOW(), INTERVAL ? MONTH)
         GROUP BY
             spare_id`,
-        [propertyId, monthsOfData]
+        [facilityId, monthsOfData]
     );
     return data[0];
 }
 
-export async function getRecentTasksForSpare(propertyId: number, spareId: number, model: string) {
+export async function getRecentTasksForSpare(facilityId: number, spareId: number, model: string) {
     const data: [jobsOfRecentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
             model_id
         FROM
             spares_used
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             spare_id = ?
         AND
@@ -177,12 +177,12 @@ export async function getRecentTasksForSpare(propertyId: number, spareId: number
             date_used DESC    
         LIMIT
             5`,
-        [propertyId, spareId, model]
+        [facilityId, spareId, model]
     );
     return data[0];
 }
 
-export async function getSparesRemaining(propertyId: number) {
+export async function getSparesRemaining(facilityId: number) {
     const data: [ExtendedStock[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -193,10 +193,10 @@ export async function getSparesRemaining(propertyId: number) {
         FROM
             spares
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             deleted = 0;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -221,7 +221,7 @@ export async function getSparesRemainingToBeDelivered(deliveryId: number) {
     return data[0];
 }
 
-export async function getDeliveryInfoOfSpare(spareId: number, propertyId: number) {
+export async function getDeliveryInfoOfSpare(spareId: number, facilityId: number) {
     const data = await db.execute(
         `SELECT
             deliveries.due,
@@ -235,18 +235,18 @@ export async function getDeliveryInfoOfSpare(spareId: number, propertyId: number
         WHERE
             delivery_items.spare_id = ?
         AND
-            deliveries.property_id = ?
+            deliveries.facility_id = ?
         AND
             deliveries.arrived = 0
         ORDER BY
             deliveries.due
         LIMIT 1;`,
-        [spareId, propertyId]
+        [spareId, facilityId]
     );
     return data[0];
 }
 
-export async function getSuppliers(propertyId: number) {
+export async function getSuppliers(facilityId: number) {
     const data = await db.execute(
         `SELECT
             id,
@@ -263,10 +263,10 @@ export async function getSuppliers(propertyId: number) {
         FROM
             suppliers
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             deleted = 0;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -286,7 +286,7 @@ export async function getSupplierInfo(supplierId: number) {
     return data[0];
 }
 
-export async function getSparesNotes(propertyId: number) {
+export async function getSparesNotes(facilityId: number) {
     const data = await db.execute(
         `SELECT
             id,
@@ -296,11 +296,11 @@ export async function getSparesNotes(propertyId: number) {
         FROM
             spares_notes
         WHERE
-            property_id = ?
+            facility_id = ?
         ORDER BY
             created
         DESC;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -335,7 +335,7 @@ export async function getNote(noteId: number) {
     return data[0];
 }
 
-export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number, type: 'used' | 'missing') {
+export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
     let sql = `
     INSERT INTO
         spares_used
@@ -346,13 +346,13 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, m
             model_id,
             quantity,
             date_used,
-            property_id
+            facility_id
         )
     VALUES`;
 
     let values = [];
     for (let i = 0; i < sparesUsed.length; i++) {
-        values.push(`(${sparesUsed[i].id}, '${type}', '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+        values.push(`(${sparesUsed[i].id}, '${type}', '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${facility_id})`);
     }
     sql += values.join(',') + `;`;
 
@@ -360,7 +360,7 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, m
     return response[0];
 }
 
-export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number, type: 'used' | 'missing') {
+export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
     let insertSql = `
     INSERT INTO
         spares_used
@@ -371,14 +371,14 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string,
             model_id,
             quantity,
             date_used,
-            property_id
+            facility_id
         )
     VALUES`;
 
     let insertVals = [];
     for (let i = 0; i < sparesUsed.length; i++) {
         if (sparesUsed[i].quantity > 0) {
-            insertVals.push(`(${sparesUsed[i].id}, '${type}', '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${property_id})`);
+            insertVals.push(`(${sparesUsed[i].id}, '${type}', '${model}', ${modelId}, ${sparesUsed[i].quantity}, NOW(), ${facility_id})`);
         }
     }
     insertSql += insertVals.join(',');
@@ -389,12 +389,12 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string,
     return;
 }
 
-export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string, modelId: number, property_id: number, type: 'used' | 'missing') {
+export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
     sparesUsed.forEach(async (item) => {
         while (item.quantity > 0) {
             const data: [UsedSparesIdQuantity[], FieldPacket[]] = await db.execute(
-                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND model = ? AND model_id = ? AND property_id = ? AND record_type = ? ORDER BY date_used DESC LIMIT 1;`,
-                [item.id, model, modelId, property_id, type]
+                `SELECT id, quantity FROM spares_used WHERE spare_id = ? AND model = ? AND model_id = ? AND facility_id = ? AND record_type = ? ORDER BY date_used DESC LIMIT 1;`,
+                [item.id, model, modelId, facility_id, type]
             );
             if (data[0][0].quantity > item.quantity) {
                 await db.execute(`UPDATE spares_used SET quantity = quantity - ? WHERE id = ?;`, [item.quantity, data[0][0].id]);
@@ -407,7 +407,7 @@ export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string,
     });
 }
 
-export async function updateStock(stockArray: { id: number; property_id: number; quant_remain: number }[]) {
+export async function updateStock(stockArray: { id: number; facility_id: number; quant_remain: number }[]) {
     let errors = false;
 
     stockArray.forEach(async (item) => {
@@ -419,7 +419,7 @@ export async function updateStock(stockArray: { id: number; property_id: number;
             WHERE
                 id = ${item.id}
             AND
-                property_id = ${item.property_id};`);
+                facility_id = ${item.facility_id};`);
         if (response[0].affectedRows != 1) {
             errors = true;
         }
@@ -431,10 +431,10 @@ export async function addSupplier(s: AddEditSupplier) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             suppliers
-            (name, website, phone, prim_contact, prim_contact_phone, address, city, county, postcode, supplies, property_id)
+            (name, website, phone, prim_contact, prim_contact_phone, address, city, county, postcode, supplies, facility_id)
         VALUES
             (?,?,?,?,?,?,?,?,?,?,?);`,
-        [s.name, s.website, s.phone, s.primContact, s.primContactPhone, s.address, s.city, s.county, s.postcode, s.supplies, s.propertyId]
+        [s.name, s.website, s.phone, s.primContact, s.primContactPhone, s.address, s.city, s.county, s.postcode, s.supplies, s.facilityId]
     );
     return response[0];
 }
@@ -461,7 +461,7 @@ export async function editSupplier(s: AddEditSupplier) {
     return response[0];
 }
 
-export async function getDeliveries(propertyId: number) {
+export async function getDeliveries(facilityId: number) {
     const data: [Delivery[], FieldPacket[]] = await db.execute(
         `SELECT
             deliveries.id,
@@ -478,10 +478,10 @@ export async function getDeliveries(propertyId: number) {
             suppliers.id = deliveries.supplier
         )
         WHERE
-            deliveries.property_id = ?
+            deliveries.facility_id = ?
         AND
             deliveries.deleted = 0;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -535,10 +535,10 @@ export async function addDelivery(d: Delivery) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             deliveries
-            (name, supplier, courier, placed, due, property_id, arrived)
+            (name, supplier, courier, placed, due, facility_id, arrived)
         VALUES
             (?, ?, ?, ?, ?, ?, ?);`,
-        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, d.arrived ? 1 : 0]
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.facilityId, d.arrived ? 1 : 0]
     );
     return response[0];
 }
@@ -603,7 +603,7 @@ export async function updateDeliveryItems(deliveryId: number, items: DeliveryIte
     return true;
 }
 
-export async function getCostMapping(propertyId: number) {
+export async function getCostMapping(facilityId: number) {
     const data: [CostMapping[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -611,10 +611,10 @@ export async function getCostMapping(propertyId: number) {
         FROM
             spares
         WHERE
-            property_id = ?
+            facility_id = ?
         AND
             deleted = 0;`,
-        [propertyId]
+        [facilityId]
     );
     const map: { [key: number]: number } = {};
     data[0].forEach((item) => {
@@ -633,11 +633,11 @@ export async function editDelivery(d: Delivery) {
             courier = ?,
             placed = ?,
             due = ?,
-            property_id = ?,
+            facility_id = ?,
             arrived = ?
         WHERE
             id = ?;`,
-        [d.name, d.supplier, d.courier, d.placed, d.due, d.propertyId, d.arrived ? 1 : 0, d.id]
+        [d.name, d.supplier, d.courier, d.placed, d.due, d.facilityId, d.arrived ? 1 : 0, d.id]
     );
     return response[0];
 }
@@ -646,10 +646,10 @@ export async function addSpare(s: AddEditSpare) {
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             spares
-            (part_no, man_part_no, name, man_name, description, notes, location, quant_remain, supplier, cost, property_id)
+            (part_no, man_part_no, name, man_name, description, notes, location, quant_remain, supplier, cost, facility_id)
         VALUES
             (?,?,?,?,?,?,?,?,?,?,?);`,
-        [s.partNo, s.manPartNo, s.name, s.manName, s.description || '', s.notes || '', s.location, s.quantRemaining, s.supplier, s.cost, s.propertyId]
+        [s.partNo, s.manPartNo, s.name, s.manName, s.description || '', s.notes || '', s.location, s.quantRemaining, s.supplier, s.cost, s.facilityId]
     );
     return response[0];
 }
@@ -669,10 +669,10 @@ export async function editSpare(s: AddEditSpare) {
             quant_remain = ?,
             supplier = ?,
             cost = ?,
-            property_id = ?
+            facility_id = ?
         WHERE
             id = ?;`,
-        [s.partNo, s.manPartNo, s.name, s.manName, s.description, s.notes, s.location, s.quantRemaining, s.supplier, s.cost, s.propertyId, s.id]
+        [s.partNo, s.manPartNo, s.name, s.manName, s.description, s.notes, s.location, s.quantRemaining, s.supplier, s.cost, s.facilityId, s.id]
     );
     return response[0];
 }
@@ -690,21 +690,21 @@ export async function adjustSpareStock(id: number, newStockLevel: number) {
     return response[0];
 }
 
-export async function postSparesNote(body: { propertyId: string; title: string; note: string; noteId: number }) {
+export async function postSparesNote(body: { facilityId: string; title: string; note: string; noteId: number }) {
     let response: [ResultSetHeader, FieldPacket[]];
     if (body.noteId === 0) {
         response = await db.execute(
             `INSERT INTO
                 spares_notes
                 (
-                    property_id,
+                    facility_id,
                     title,
                     content,
                     created
                 )
             VALUES
                 (?,?,?,NOW());`,
-            [body.propertyId, body.title, body.note]
+            [body.facilityId, body.title, body.note]
         );
     } else {
         response = await db.execute(

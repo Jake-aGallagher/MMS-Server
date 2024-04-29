@@ -15,7 +15,7 @@ export interface Asset extends RowDataPacket {
 export interface AssetById extends RowDataPacket {
     id: number;
     parent_id: number;
-    property_id: number;
+    facility_id: number;
     name: string;
     revenue: number;
     notes: string;

@@ -5,7 +5,7 @@ import { Frequency } from '../types/jobs';
 
 // Templates
 
-export async function getLogTemplates(propertyId: number, LogId?: number) {
+export async function getLogTemplates(facilityId: number, LogId?: number) {
     let sql = `
         SELECT 
             log_templates.id,
@@ -30,7 +30,7 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
         LEFT JOIN logs ON
             logs.template_id = log_templates.id
         WHERE
-            log_templates.property_id = ?
+            log_templates.facility_id = ?
         `;
 
     if (LogId) {
@@ -48,7 +48,7 @@ export async function getLogTemplates(propertyId: number, LogId?: number) {
             log_templates.id
         DESC;`;
 
-    let sqlArr = [propertyId];
+    let sqlArr = [facilityId];
     if (LogId) {
         sqlArr.push(LogId);
     }
@@ -164,14 +164,14 @@ export async function getLogDates(id: number, forInsert?: boolean) {
 export async function addLogTemplate(body: any) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO log_templates (
-            property_id,
+            facility_id,
             title,
             description,
             frequency_time,
             frequency_unit,
             created
         ) VALUES (?, ?, ?, ?, ?, NOW())`,
-        [body.propertyId, body.title, body.description, body.frequencyTime, body.frequencyUnit]
+        [body.facilityId, body.title, body.description, body.frequencyTime, body.frequencyUnit]
     );
     return data[0];
 }
@@ -197,7 +197,7 @@ export async function deleteLogTemplate(id: number) {
 
 // Logs
 
-export async function getLogs(propertyId: number, incompleteOnly?: boolean) {
+export async function getLogs(facilityId: number, incompleteOnly?: boolean) {
     const data: [AllLogs[], FieldPacket[]] = await db.execute(
         `SELECT
             logs.id,
@@ -223,7 +223,7 @@ export async function getLogs(propertyId: number, incompleteOnly?: boolean) {
         ON
             log_templates.id = logs.template_id
         WHERE
-            logs.property_id = ?
+            logs.facility_id = ?
         
         ${incompleteOnly ? 'AND logs.completed = 0' : ''}
         
@@ -232,7 +232,7 @@ export async function getLogs(propertyId: number, incompleteOnly?: boolean) {
         ORDER BY
             logs.id
         DESC;`,
-        [propertyId]
+        [facilityId]
     );
     return data[0];
 }
@@ -289,15 +289,15 @@ export async function getLog(logId: number) {
     return data[0];
 }
 
-export async function addLog(templateId: number, propertyId: number, req_comp_date: string) {
+export async function addLog(templateId: number, facilityId: number, req_comp_date: string) {
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO logs (
             template_id,
-            property_id,
+            facility_id,
             created,
             required_comp_date
         ) VALUES (?, ?, NOW(), ${req_comp_date})`,
-        [templateId, propertyId]
+        [templateId, facilityId]
     );
     return data[0];
 }
