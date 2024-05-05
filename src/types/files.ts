@@ -1,14 +1,17 @@
 import { RowDataPacket } from 'mysql2';
 
 export interface FileUpload {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    destination: string;
-    filename: string;
-    path: string;
-    size: number;
+    fieldname?: string,
+    originalname: string,
+    encoding?: string,
+    mimetype: string,
+    url?: string,    
+    blobName: string,
+    etag?: string,
+    blobType?: string,
+    metadata?: {},
+    container?: string,
+    blobSize: string
 }
 
 export interface MappedFiles extends RowDataPacket {
@@ -16,9 +19,8 @@ export interface MappedFiles extends RowDataPacket {
     name: string;
 }
 
-export interface FileLocation extends RowDataPacket {
+export interface FileDetails extends RowDataPacket {
     file_name: string;
-    destination: string;
     location_name: string;
 }
 
