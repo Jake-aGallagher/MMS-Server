@@ -1,6 +1,6 @@
 import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { FileLocation, FileName, FileUpload, MappedFiles } from '../types/files';
+import { FileDetails, FileName, FileUpload, MappedFiles } from '../types/files';
 import Hashids from 'hashids';
 
 export async function getMappedFiles(modelType: string, modelId: number) {
@@ -57,11 +57,10 @@ export async function getFieldFileData(fileIds: string[], fileToFieldMap: {[key:
     return fileObj;
 }
 
-export async function getFilePath(id: number | BigInt) {
-    const data: [FileLocation[], FieldPacket[]] = await db.execute(
+export async function getFileDetails(id: number | BigInt) {
+    const data: [FileDetails[], FieldPacket[]] = await db.execute(
         `SELECT
             file_name,
-            destination,
             location_name
         FROM
             files
@@ -71,7 +70,7 @@ export async function getFilePath(id: number | BigInt) {
             deleted = 0;`,
         [id]
     );
-    return data[0];
+    return data[0][0];
 }
 
 export async function postFile(file: FileUpload) {
@@ -81,13 +80,12 @@ export async function postFile(file: FileUpload) {
             (
                 file_name,
                 mime_type,
-                destination,
                 location_name,
                 size
             )
         VALUES
-            (?,?,?,?,?);`,
-        [file.originalname, file.mimetype, file.destination, file.filename, file.size]
+            (?,?,?,?);`,
+        [file.originalname, file.mimetype, file.blobName, file.blobSize]
     );
     return response[0];
 }
