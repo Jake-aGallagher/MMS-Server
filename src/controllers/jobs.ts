@@ -12,7 +12,6 @@ import makeIdList from '../helpers/makeIdList';
 import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
 import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
 import { NewSpares } from '../types/spares';
-import { insertFiles } from '../helpers/files/insertFiles';
 import calcTotalLoggedTime from '../helpers/jobs/calcTotalLoggedTime';
 import { getFileIds } from '../helpers/files/getFileIds';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
@@ -125,9 +124,6 @@ export async function updateAndComplete(req: Request, res: Response) {
         }
         if (req.body.downtime.length > 0) {
             Downtime.setDowntimeDetails(req.body.downtime, 'job', jobId, facilityId);
-        }
-        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-            insertFiles(req.files, 'job', jobId);
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
