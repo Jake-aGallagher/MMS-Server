@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { fileUpload } from '../middleware/multer';
+import { authorised, checkAuth } from '../middleware/authentication';
 
 import * as usersController from '../controllers/users';
 import * as filesController from '../controllers/files';
@@ -18,7 +19,6 @@ import * as taskTypesController from '../controllers/jobTypes';
 import * as statusTypesController from '../controllers/statusTypes';
 import * as urgencyTypesController from '../controllers/urgencyTypes';
 import * as customFieldsController from '../controllers/customFields';
-import { authorised, checkAuth } from '../middleware/authentication';
 
 // Auth
 router.get('/check-auth', checkAuth);
@@ -27,8 +27,8 @@ router.get('/check-auth', checkAuth);
 router.get('/getfile/:fileid', filesController.getFile);
 router.get('/getimage/:imageid', filesController.getImage);
 router.get('/files/:model/:id', authorised, filesController.getFilesForModel);
-router.post('/file', authorised, fileUpload.array('files'), filesController.postFile);
-router.post('/file/field-file', authorised, fileUpload.array('files'), filesController.postFieldFile);
+router.post('/file', authorised, fileUpload.single('file'), filesController.postFile);
+router.post('/file/field-file', authorised, fileUpload.single('file'), filesController.postFieldFile);
 router.post('/file/signature', authorised, filesController.postSignature);
 router.delete('/file/:id', authorised, filesController.deleteFile);
 
@@ -75,14 +75,14 @@ router.get('/jobs/create-job', authorised, jobsController.getEnumsForCreateJob);
 router.get('/jobs/:jobid', authorised, jobsController.getJobDetails);
 router.get('/jobs/update/:facilityid/:jobid', authorised, jobsController.getJobUpdate);//
 router.post('/jobs', authorised, jobsController.postJob);
-router.put('/jobs/update', authorised, fileUpload.array('files'), jobsController.updateAndComplete);
+router.put('/jobs/update', authorised, jobsController.updateAndComplete);
 router.put('/jobs/notes', authorised, jobsController.updateNotes);
 
 // PMs
 router.get('/pms/:facilityid', authorised, PmsController.getAllPMs)
 router.get('/pms/pm/:pmid', authorised, PmsController.getPMDetails)
 router.get('/pms/edit/:facilityid/:scheduleid', authorised, PmsController.getEditPM);
-router.put('/pms/edit', authorised, fileUpload.array('files'), PmsController.editPM);
+router.put('/pms/edit', authorised, PmsController.editPM);
 
 // PM Schedules
 router.get('/pms/schedules/all-schedules/:facilityid', authorised, PmsController.getAllPMSchedules);
