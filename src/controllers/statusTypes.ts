@@ -3,7 +3,7 @@ import * as StatusTypes from '../models/statusTypes';
 
 export async function getStatusTypes(req: Request, res: Response) {
     try {
-        const statusTypes = await StatusTypes.getAllStatusTypes();
+        const statusTypes = await StatusTypes.getAllStatusTypes(req.clientId);
         res.status(200).json({ statusTypes });
     } catch (err) {
         console.log(err);
@@ -14,7 +14,7 @@ export async function getStatusTypes(req: Request, res: Response) {
 export async function getStatusTypeById(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const statusType = await StatusTypes.getStatusTypeById(id);
+        const statusType = await StatusTypes.getStatusTypeById(req.clientId, id);
         res.status(200).json({ statusType });
     } catch (err) {
         console.log(err);
@@ -27,12 +27,12 @@ export async function addEditStatusType(req: Request, res: Response) {
         const id = parseInt(req.body.id);
         let response;
         if (req.body.initialStatus == true) {
-            await StatusTypes.clearInitialStatus();// todo - this should be a transaction
+            await StatusTypes.clearInitialStatus(req.clientId); // todo - this should be a transaction
         }
         if (id > 0) {
-            response = await StatusTypes.editStatusType(req.body);
+            response = await StatusTypes.editStatusType(req.clientId, req.body);
         } else {
-            response = await StatusTypes.addStatusType(req.body);
+            response = await StatusTypes.addStatusType(req.clientId, req.body);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -48,12 +48,12 @@ export async function addEditStatusType(req: Request, res: Response) {
 export async function deleteStatusType(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const initial = await StatusTypes.getInitialStatusId();
+        const initial = await StatusTypes.getInitialStatusId(req.clientId);
         if (initial === id) {
             res.status(200).json({ deleted: false, message: 'Cannot delete the initial status' });
             return;
         }
-        const deleted = await StatusTypes.deleteStatusType(id);
+        const deleted = await StatusTypes.deleteStatusType(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {

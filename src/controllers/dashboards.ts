@@ -5,10 +5,10 @@ export async function getDashboardJobs(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
         // raised completed open
-        const raised = await Dashboard.get6MFacilityGraph(facilityId, 'raisedJobs');
-        const open = await Dashboard.getIncomplete(facilityId);
-        const completed = await Dashboard.get6MFacilityGraph(facilityId, 'completeJobs', true);
-        const breakdownVsPlanned = await Dashboard.getBreakdownVsPlanned(facilityId);
+        const raised = await Dashboard.get6MFacilityGraph(req.clientId, facilityId, 'raisedJobs');
+        const open = await Dashboard.getIncomplete(req.clientId, facilityId);
+        const completed = await Dashboard.get6MFacilityGraph(req.clientId, facilityId, 'completeJobs', true);
+        const breakdownVsPlanned = await Dashboard.getBreakdownVsPlanned(req.clientId, facilityId);
 
         res.status(200).json({ raised, open, completed, breakdownVsPlanned });
     } catch (err) {
@@ -20,9 +20,9 @@ export async function getDashboardJobs(req: Request, res: Response) {
 export async function getDashboardRevenue(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const revenue = await Dashboard.get6MFacilityGraph(facilityId, 'revenue');
-        const downtime = await Dashboard.get6MFacilityGraph(facilityId, 'downtime');
-        const assetRevenue = await Dashboard.getAssetLostRevenue(facilityId);
+        const revenue = await Dashboard.get6MFacilityGraph(req.clientId, facilityId, 'revenue');
+        const downtime = await Dashboard.get6MFacilityGraph(req.clientId, facilityId, 'downtime');
+        const assetRevenue = await Dashboard.getAssetLostRevenue(req.clientId, facilityId);
         res.status(200).json({ revenue, downtime, assetRevenue });
     } catch (err) {
         console.log(err);
@@ -33,8 +33,8 @@ export async function getDashboardRevenue(req: Request, res: Response) {
 export async function getDashboardSpares(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const sparesCost = await Dashboard.get6MFacilityGraph(facilityId, 'sparesCost');
-        const missingSpares = await Dashboard.get6MFacilityGraph(facilityId, 'sparesMissing');
+        const sparesCost = await Dashboard.get6MFacilityGraph(req.clientId, facilityId, 'sparesCost');
+        const missingSpares = await Dashboard.get6MFacilityGraph(req.clientId, facilityId, 'sparesMissing');
         res.status(200).json({ sparesCost, missingSpares });
     } catch (err) {
         console.log(err);

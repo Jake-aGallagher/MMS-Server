@@ -3,7 +3,7 @@ import * as Enums from '../models/enums';
 
 export async function getEnumsGroups(req: Request, res: Response) {
     try {
-        const enumGroups = await Enums.getEnumGroups();
+        const enumGroups = await Enums.getEnumGroups(req.clientId);
         res.status(200).json({ enumGroups });
     } catch (err) {
         console.log(err);
@@ -14,7 +14,7 @@ export async function getEnumsGroups(req: Request, res: Response) {
 export async function getEnumsGroupById(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const enumGroup = await Enums.getEnumGroupById(id);
+        const enumGroup = await Enums.getEnumGroupById(req.clientId, id);
         res.status(200).json({ enumGroup });
     } catch (err) {
         console.log(err);
@@ -25,7 +25,7 @@ export async function getEnumsGroupById(req: Request, res: Response) {
 export async function getEnumsByGroupId(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const enums = await Enums.getEnumsByGroupId(id);
+        const enums = await Enums.getEnumsByGroupId(req.clientId, id);
         res.status(200).json({ enums });
     } catch (err) {
         console.log(err);
@@ -36,7 +36,7 @@ export async function getEnumsByGroupId(req: Request, res: Response) {
 export async function getEnumValueById(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const enums = await Enums.getEnumValueById(id);
+        const enums = await Enums.getEnumValueById(req.clientId, id);
         res.status(200).json({ enums });
     } catch (err) {
         console.log(err);
@@ -49,9 +49,9 @@ export async function addEditEnumGroup(req: Request, res: Response) {
         const id = parseInt(req.body.id);
         let response;
         if (id > 0) {
-            response = await Enums.editEnumGroup(req.body);
+            response = await Enums.editEnumGroup(req.clientId, req.body);
         } else {
-            response = await Enums.addEnumGroup(req.body);
+            response = await Enums.addEnumGroup(req.clientId, req.body);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -69,9 +69,9 @@ export async function addEditEnumValue(req: Request, res: Response) {
         const id = parseInt(req.body.id);
         let response;
         if (id > 0) {
-            response = await Enums.editEnumValue(req.body);
+            response = await Enums.editEnumValue(req.clientId, req.body);
         } else {
-            response = await Enums.addEnumValue(req.body);
+            response = await Enums.addEnumValue(req.clientId, req.body);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -87,8 +87,8 @@ export async function addEditEnumValue(req: Request, res: Response) {
 export async function deleteEnumGroup(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await Enums.deleteEnumGroup(id);
-        Enums.deleteEnumValueByGroupId(id);
+        const deleted = await Enums.deleteEnumGroup(req.clientId, id);
+        Enums.deleteEnumValueByGroupId(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -103,7 +103,7 @@ export async function deleteEnumGroup(req: Request, res: Response) {
 export async function deleteEnumValue(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await Enums.deleteEnumValue(id);
+        const deleted = await Enums.deleteEnumValue(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {

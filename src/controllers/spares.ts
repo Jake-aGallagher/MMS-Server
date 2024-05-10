@@ -16,9 +16,9 @@ import { RecentPms } from '../types/PMs';
 export async function getallSpares(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const spares = await Spares.getAllSpares(facilityId);
+        const spares = await Spares.getAllSpares(req.clientId, facilityId);
         const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
-        const sparesUsed = await Spares.getUsedRecently(facilityId, monthsOfData);
+        const sparesUsed = await Spares.getUsedRecently(req.clientId, facilityId, monthsOfData);
         const sparesFullDetails = allSparesAddUsage(spares, sparesUsed, monthsOfData);
         res.status(200).json(sparesFullDetails);
     } catch (err) {
@@ -31,22 +31,22 @@ export async function getSpare(req: Request, res: Response) {
     try {
         const spareId = parseInt(req.params.spareid);
         const facilityId = parseInt(req.params.facilityid);
-        const spares = await Spares.getSpares(spareId);
+        const spares = await Spares.getSpares(req.clientId, spareId);
         let recentJobs: RecentJobs[] = [];
         let recentPms: RecentPms[] = [];
-        const recentJobNumbers = await Spares.getRecentTasksForSpare(facilityId, spareId, 'job');
-        const recentPmNumbers = await Spares.getRecentTasksForSpare(facilityId, spareId, 'pm');
-        const used6M = await DefaultGraphs.sparesUsed6M(spareId);
-        const deliveryInfo = await Spares.getDeliveryInfoOfSpare(spareId, facilityId);
+        const recentJobNumbers = await Spares.getRecentTasksForSpare(req.clientId, facilityId, spareId, 'job');
+        const recentPmNumbers = await Spares.getRecentTasksForSpare(req.clientId, facilityId, spareId, 'pm');
+        const used6M = await DefaultGraphs.sparesUsed6M(req.clientId, spareId);
+        const deliveryInfo = await Spares.getDeliveryInfoOfSpare(req.clientId, spareId, facilityId);
         if (recentJobNumbers.length > 0) {
             const jobIdList = makeIdList(recentJobNumbers, 'model_id');
-            recentJobs = await Jobs.getRecentJobsByIds(jobIdList);
+            recentJobs = await Jobs.getRecentJobsByIds(req.clientId, jobIdList);
         }
         if (recentPmNumbers.length > 0) {
             const pmIdList = makeIdList(recentPmNumbers, 'model_id');
-            recentPms = await Pms.getRecentPmsById(pmIdList);
+            recentPms = await Pms.getRecentPmsById(req.clientId, pmIdList);
         }
-        const customFields = await getCustomFieldData('spare', spareId);
+        const customFields = await getCustomFieldData(req.clientId, 'spare', spareId);
         res.status(200).json({ spares, customFields, recentJobs, recentPms, used6M, deliveryInfo });
     } catch (err) {
         console.log(err);
@@ -57,7 +57,7 @@ export async function getSpare(req: Request, res: Response) {
 export async function getNote(req: Request, res: Response) {
     try {
         const noteId = req.params.noteid;
-        const note = await Spares.getNote(parseInt(noteId));
+        const note = await Spares.getNote(req.clientId, parseInt(noteId));
         res.status(200).json(note);
     } catch (err) {
         console.log(err);
@@ -68,7 +68,7 @@ export async function getNote(req: Request, res: Response) {
 export async function getSpareStock(req: Request, res: Response) {
     try {
         const spareId = parseInt(req.params.spareid);
-        const spareStock = await Spares.getSpareStock(spareId);
+        const spareStock = await Spares.getSpareStock(req.clientId, spareId);
         res.status(200).send(spareStock);
     } catch (err) {
         console.log(err);
@@ -79,7 +79,7 @@ export async function getSpareStock(req: Request, res: Response) {
 export async function getSparesForUse(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const spares = await Spares.getAllSparesBasic(facilityId);
+        const spares = await Spares.getAllSparesBasic(req.clientId, facilityId);
         res.status(200).json({ spares });
     } catch (err) {
         console.log(err);
@@ -90,7 +90,7 @@ export async function getSparesForUse(req: Request, res: Response) {
 export async function getSparesNotes(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const sparesNotes = await Spares.getSparesNotes(facilityId);
+        const sparesNotes = await Spares.getSparesNotes(req.clientId, facilityId);
         res.status(200).json(sparesNotes);
     } catch (err) {
         console.log(err);
@@ -102,8 +102,8 @@ export async function getSparesWarnings(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
         const monthsOfData = 3; // hardcoded here but make in a way easy to use dynamicaly in future
-        const sparesUsed = await Spares.getUsedRecently(facilityId, monthsOfData);
-        const sparesCount = await Spares.getSparesRemaining(facilityId);
+        const sparesUsed = await Spares.getUsedRecently(req.clientId, facilityId, monthsOfData);
+        const sparesCount = await Spares.getSparesRemaining(req.clientId, facilityId);
         const dataArrays = sparesWarningArray(sparesCount, sparesUsed, monthsOfData);
         res.status(200).json({ outArray: dataArrays.outArray, warningsArray: dataArrays.warningsArray });
     } catch (err) {
@@ -115,7 +115,7 @@ export async function getSparesWarnings(req: Request, res: Response) {
 export async function getSuppliers(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const suppliers = await Spares.getSuppliers(facilityId);
+        const suppliers = await Spares.getSuppliers(req.clientId, facilityId);
         res.status(200).json(suppliers);
     } catch (err) {
         console.log(err);
@@ -126,7 +126,7 @@ export async function getSuppliers(req: Request, res: Response) {
 export async function getSuplierInfo(req: Request, res: Response) {
     try {
         const supplierId = parseInt(req.params.supplierid);
-        const supplierDetails = await Spares.getSupplierInfo(supplierId);
+        const supplierDetails = await Spares.getSupplierInfo(req.clientId, supplierId);
         res.status(200).json(supplierDetails);
     } catch (err) {
         console.log(err);
@@ -139,9 +139,9 @@ export async function addEditSupplier(req: Request, res: Response) {
         const supplierId = parseInt(req.body.id);
         let response;
         if (supplierId === 0) {
-            response = await Spares.addSupplier(req.body);
+            response = await Spares.addSupplier(req.clientId, req.body);
         } else {
-            response = await Spares.editSupplier(req.body);
+            response = await Spares.editSupplier(req.clientId, req.body);
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
@@ -160,9 +160,9 @@ export async function getDeliveries(req: Request, res: Response) {
         const deliveryToFind = parseInt(req.params.deliveryid);
         let deliveries;
         if (deliveryToFind > 0) {
-            deliveries = await Spares.getDeliveryById(deliveryToFind);
+            deliveries = await Spares.getDeliveryById(req.clientId, deliveryToFind);
         } else {
-            deliveries = await Spares.getDeliveries(facilityId);
+            deliveries = await Spares.getDeliveries(req.clientId, facilityId);
         }
         if (deliveries.length === 0) {
             res.status(200).json({deliveries: []});
@@ -171,10 +171,10 @@ export async function getDeliveries(req: Request, res: Response) {
             const deliveryMap = data.deliveryMap;
             const deliveryIds = data.deliveryIds;
             const deliveriesWithContentsArr = data.deliveries;
-            const deliveryItems = await Spares.getDeliveryItems(deliveryIds);
+            const deliveryItems = await Spares.getDeliveryItems(req.clientId, deliveryIds);
             const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap);
             if (deliveryToFind > 0) {
-                const suppliers = await Spares.getSuppliers(facilityId);
+                const suppliers = await Spares.getSuppliers(req.clientId, facilityId);
                 res.status(200).json({ deliveries: deliverywithContents, suppliers });
             } else {
                 res.status(200).json({deliveries: deliverywithContents});
@@ -190,22 +190,22 @@ export async function addEditDelivery(req: Request, res: Response) {
     try {
         const deliveryId = parseInt(req.body.id);
         const facilityId = parseInt(req.body.facilityId);
-        const costMap = await Spares.getCostMapping(facilityId);
+        const costMap = await Spares.getCostMapping(req.clientId, facilityId);
         let response;
         if (deliveryId === 0) {
-            response = await Spares.addDelivery(req.body);
-            await Spares.addDeliveryItems(response.insertId, req.body.contents, costMap);
+            response = await Spares.addDelivery(req.clientId, req.body);
+            await Spares.addDeliveryItems(req.clientId, response.insertId, req.body.contents, costMap);
         } else {
-            response = await Spares.editDelivery(req.body);
+            response = await Spares.editDelivery(req.clientId, req.body);
             // update deliveryItems
-            await Spares.updateDeliveryItems(deliveryId, req.body.contents, costMap);
+            await Spares.updateDeliveryItems(req.clientId, deliveryId, req.body.contents, costMap);
         }
         if (req.body.arrived) {
             // add the items to stock
-            const oldStockLevels = await Spares.getSparesRemainingToBeDelivered(deliveryId); // get delivery contents by using the delivery id
-            const justArrivedStock = await Spares.getDeliveryItems([deliveryId]);
+            const oldStockLevels = await Spares.getSparesRemainingToBeDelivered(req.clientId, deliveryId); // get delivery contents by using the delivery id
+            const justArrivedStock = await Spares.getDeliveryItems(req.clientId, [deliveryId]);
             const updatedStock = deliveryArrivedUpdateStock(oldStockLevels, justArrivedStock);
-            updatedStock.forEach((item) => Spares.adjustSpareStock(item.id, item.quant_remain));
+            updatedStock.forEach((item) => Spares.adjustSpareStock(req.clientId, item.id, item.quant_remain));
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
@@ -223,11 +223,11 @@ export async function addEditSpare(req: Request, res: Response) {
         const spareId = parseInt(req.body.id);
         let response;
         if (spareId === 0) {
-            response = await Spares.addSpare(req.body);
-            await updateFieldData(response.insertId, req.body.fieldData);
+            response = await Spares.addSpare(req.clientId, req.body);
+            await updateFieldData(req.clientId, response.insertId, req.body.fieldData);
         } else {
-            response = await Spares.editSpare(req.body);
-            await updateFieldData(spareId, req.body.fieldData);
+            response = await Spares.editSpare(req.clientId, req.body);
+            await updateFieldData(req.clientId, spareId, req.body.fieldData);
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
@@ -244,7 +244,7 @@ export async function adjustSpareStock(req: Request, res: Response) {
     try {
         const spareId = parseInt(req.body.id);
         const newStockLevel = parseInt(req.body.newStock);
-        const response = await Spares.adjustSpareStock(spareId, newStockLevel);
+        const response = await Spares.adjustSpareStock(req.clientId, spareId, newStockLevel);
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
@@ -258,7 +258,7 @@ export async function adjustSpareStock(req: Request, res: Response) {
 
 export async function postNote(req: Request, res: Response) {
     try {
-        const response = await Spares.postSparesNote(req.body);
+        const response = await Spares.postSparesNote(req.clientId, req.body);
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {
@@ -273,7 +273,7 @@ export async function postNote(req: Request, res: Response) {
 export async function deleteSupplier(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await Spares.deleteSupplier(id);
+        const deleted = await Spares.deleteSupplier(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -288,8 +288,8 @@ export async function deleteSupplier(req: Request, res: Response) {
 export async function deleteSparesItem(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await Spares.deleteSparesItem(id);
-        Spares.deleteSparesUsed(id);
+        const deleted = await Spares.deleteSparesItem(req.clientId, id);
+        Spares.deleteSparesUsed(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -304,8 +304,8 @@ export async function deleteSparesItem(req: Request, res: Response) {
 export async function deleteDelivery(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await Spares.deleteDelivery(id);
-        Spares.deleteDeliveryContents(id);
+        const deleted = await Spares.deleteDelivery(req.clientId, id);
+        Spares.deleteDeliveryContents(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
@@ -320,7 +320,7 @@ export async function deleteDelivery(req: Request, res: Response) {
 export async function deleteNote(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await Spares.deleteNote(id);
+        const deleted = await Spares.deleteNote(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {

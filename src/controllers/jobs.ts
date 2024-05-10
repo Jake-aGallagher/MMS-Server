@@ -19,7 +19,7 @@ import { getCustomFieldData, updateFieldData } from '../models/customFields';
 export async function getAllJobs(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
-        const allJobs = await Jobs.getAllJobs(facilityId);
+        const allJobs = await Jobs.getAllJobs(req.clientId, facilityId);
         res.status(200).json(allJobs);
     } catch (err) {
         console.log(err);
@@ -30,20 +30,20 @@ export async function getAllJobs(req: Request, res: Response) {
 export async function getJobDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
-        const jobDetails = await Jobs.getJobDetails(id);
-        const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
-        const files = await getFileIds('job', id);
-        const usedSpares = await Spares.getUsedSpares('job', id, 'used');
-        const missingSpares = await Spares.getUsedSpares('job', id, 'missing');
-        const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
-        const downtime = await Downtime.getDowntimeDetails('job', id);
+        const jobDetails = await Jobs.getJobDetails(req.clientId, id);
+        const customFields = await getCustomFieldData(req.clientId, 'job', id, jobDetails[0].type_id);
+        const files = await getFileIds(req.clientId, 'job', id);
+        const usedSpares = await Spares.getUsedSpares(req.clientId, 'job', id, 'used');
+        const missingSpares = await Spares.getUsedSpares(req.clientId, 'job', id, 'missing');
+        const timeDetails = await LoggedTime.getLoggedTimeDetails(req.clientId, 'job', id);
+        const downtime = await Downtime.getDowntimeDetails(req.clientId, 'job', id);
         if (timeDetails.length > 0) {
             const userIds = makeIdList(timeDetails, 'id');
-            const users = await Users.getUsersByIds(userIds);
+            const users = await Users.getUsersByIds(req.clientId, userIds);
             const timeDetailsFull = timeDetailsArray(timeDetails, users);
             res.status(200).json({ jobDetails, customFields, files, timeDetails: timeDetailsFull, usedSpares, missingSpares, downtime });
         } else {
-            res.status(200).json({ jobDetails, customFields, files, usedSpares, missingSpares, downtime});
+            res.status(200).json({ jobDetails, customFields, files, usedSpares, missingSpares, downtime });
         }
     } catch (err) {
         console.log(err);
@@ -53,8 +53,8 @@ export async function getJobDetails(req: Request, res: Response) {
 
 export async function getEnumsForCreateJob(req: Request, res: Response) {
     try {
-        const urgency = await UrgencyEnums.getAllUrgencyTypes();
-        const types = await TypeEnums.getAllJobTypes();
+        const urgency = await UrgencyEnums.getAllUrgencyTypes(req.clientId);
+        const types = await TypeEnums.getAllJobTypes(req.clientId);
         res.status(200).json({ types, urgency });
     } catch (err) {
         console.log(err);
@@ -66,15 +66,15 @@ export async function getJobUpdate(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const facilityId = parseInt(req.params.facilityid);
-        const statusOptions = await StatusEnums.getAllStatusTypes();
+        const statusOptions = await StatusEnums.getAllStatusTypes(req.clientId);
         const completableStatus = statusOptions.filter((item) => item.can_complete).map((item) => item.id);
-        const jobDetails = await Jobs.getJobDetails(id);
-        const customFields = await getCustomFieldData('job', id, jobDetails[0].type_id);
-        const users = await Facilities.getAssignedUsers(facilityId);
-        const timeDetails = await LoggedTime.getLoggedTimeDetails('job', id);
-        const usedSpares = await Spares.getUsedSpares('job', id, 'used');
-        const missingSpares = await Spares.getUsedSpares('job', id, 'missing');
-        const downtime = await Downtime.getDowntimeDetails('job', id);
+        const jobDetails = await Jobs.getJobDetails(req.clientId, id);
+        const customFields = await getCustomFieldData(req.clientId, 'job', id, jobDetails[0].type_id);
+        const users = await Facilities.getAssignedUsers(req.clientId, facilityId);
+        const timeDetails = await LoggedTime.getLoggedTimeDetails(req.clientId, 'job', id);
+        const usedSpares = await Spares.getUsedSpares(req.clientId, 'job', id, 'used');
+        const missingSpares = await Spares.getUsedSpares(req.clientId, 'job', id, 'missing');
+        const downtime = await Downtime.getDowntimeDetails(req.clientId, 'job', id);
         if (timeDetails.length > 0) {
             res.status(200).json({ statusOptions, jobDetails, customFields, users, usedSpares, missingSpares, downtime, completableStatus, timeDetails });
         } else {
@@ -89,9 +89,9 @@ export async function getJobUpdate(req: Request, res: Response) {
 export async function postJob(req: Request, res: Response) {
     try {
         const urgencyReq = req.body.urgency;
-        const urgency = await UrgencyEnums.getUrgencyPayload(urgencyReq);
-        const response = await Jobs.postJob(req.body, urgency);
-        await updateFieldData(response.insertId, req.body.fieldData);
+        const urgency = await UrgencyEnums.getUrgencyPayload(req.clientId, urgencyReq);
+        const response = await Jobs.postJob(req.clientId, req.body, urgency);
+        await updateFieldData(req.clientId, response.insertId, req.body.fieldData);
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true, jobId: response.insertId });
         } else {
@@ -105,25 +105,24 @@ export async function postJob(req: Request, res: Response) {
 
 export async function updateAndComplete(req: Request, res: Response) {
     try {
-        req.body = JSON.parse(req.body.data);
         const jobId = parseInt(req.body.id);
         const facilityId = parseInt(req.body.facilityId);
         const totalTime = calcTotalLoggedTime(req.body.logged_time_details);
-        const response = await Jobs.updateAndComplete(req.body, totalTime);
-        await updateFieldData(req.body.id, req.body.fieldData);
+        const response = await Jobs.updateAndComplete(req.clientId, req.body, totalTime);
+        await updateFieldData(req.clientId, req.body.id, req.body.fieldData);
         const newSpares = <NewSpares[]>req.body.sparesUsed;
         if (newSpares.length > 0) {
-            updateSparesForJob(jobId, facilityId, newSpares, 'job', 'used');
+            updateSparesForJob(req.clientId, jobId, facilityId, newSpares, 'job', 'used');
         }
         const missingSpares = <NewSpares[]>req.body.sparesMissing;
         if (missingSpares.length > 0) {
-            updateSparesForJob(jobId, facilityId, missingSpares, 'job', 'missing');
+            updateSparesForJob(req.clientId, jobId, facilityId, missingSpares, 'job', 'missing');
         }
         if (req.body.logged_time_details.length > 0) {
-            LoggedTime.setTimeDetails(req.body.logged_time_details, 'job', jobId);
+            LoggedTime.setTimeDetails(req.clientId, req.body.logged_time_details, 'job', jobId);
         }
         if (req.body.downtime.length > 0) {
-            Downtime.setDowntimeDetails(req.body.downtime, 'job', jobId, facilityId);
+            Downtime.setDowntimeDetails(req.clientId, req.body.downtime, 'job', jobId, facilityId);
         }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
@@ -138,7 +137,7 @@ export async function updateAndComplete(req: Request, res: Response) {
 
 export async function updateNotes(req: Request, res: Response) {
     try {
-        const response = await Jobs.updateNotes(req.body);
+        const response = await Jobs.updateNotes(req.clientId, req.body);
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true });
         } else {

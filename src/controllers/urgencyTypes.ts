@@ -3,7 +3,7 @@ import * as UrgencyTypes from '../models/urgencyTypes';
 
 export async function getUrgencyTypes(req: Request, res: Response) {
     try {
-        const urgencyTypes = await UrgencyTypes.getAllUrgencyTypes();
+        const urgencyTypes = await UrgencyTypes.getAllUrgencyTypes(req.clientId);
         res.status(200).json({ urgencyTypes });
     } catch (err) {
         console.log(err);
@@ -14,7 +14,7 @@ export async function getUrgencyTypes(req: Request, res: Response) {
 export async function getUrgencyTypeById(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const urgencyType = await UrgencyTypes.getUrgencyTypeById(id);
+        const urgencyType = await UrgencyTypes.getUrgencyTypeById(req.clientId, id);
         res.status(200).json({ urgencyType });
     } catch (err) {
         console.log(err);
@@ -27,9 +27,9 @@ export async function addEditUrgencyType(req: Request, res: Response) {
         const id = parseInt(req.body.id);
         let response;
         if (id > 0) {
-            response = await UrgencyTypes.editUrgencyType(req.body);
+            response = await UrgencyTypes.editUrgencyType(req.clientId, req.body);
         } else {
-            response = await UrgencyTypes.addUrgencyType(req.body);
+            response = await UrgencyTypes.addUrgencyType(req.clientId, req.body);
         }
         if (response.affectedRows === 1) {
             res.status(201).json({ created: true });
@@ -45,7 +45,7 @@ export async function addEditUrgencyType(req: Request, res: Response) {
 export async function deleteUrgencyType(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.id);
-        const deleted = await UrgencyTypes.deleteUrgencyType(id);
+        const deleted = await UrgencyTypes.deleteUrgencyType(req.clientId, id);
         if (deleted.affectedRows > 0) {
             res.status(200).json({ deleted: true });
         } else {
