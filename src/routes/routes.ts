@@ -24,8 +24,8 @@ import * as customFieldsController from '../controllers/customFields';
 router.get('/check-auth', checkAuth);
 
 // Files
-router.get('/getfile/:fileid', filesController.getFile);
-router.get('/getimage/:imageid', filesController.getImage);
+router.get('/getfile/:clientid/:fileid', filesController.getFile);
+router.get('/getimage/:clientid/:imageid', filesController.getImage);
 router.get('/files/:model/:id', authorised, filesController.getFilesForModel);
 router.post('/file', authorised, fileUpload.single('file'), filesController.postFile);
 router.post('/file/field-file', authorised, fileUpload.single('file'), filesController.postFieldFile);
@@ -66,7 +66,7 @@ router.put('/facilities', authorised, facilitiesController.addEditFacility);
 router.get('/facilities/users-for-assigning/:facilityid', authorised, facilitiesController.getUsersForAssign);
 router.put('/facilities/assign-users', authorised, facilitiesController.setAssignedUsers);
 //// Last Facility
-router.get('/facilities/last-facility/:userid', facilitiesController.getLastFacility);
+router.get('/facilities/last-facility/:userid', authorised, facilitiesController.getLastFacility);
 router.put('/facilities/Last-facility', authorised, facilitiesController.setLastFacility);
 
 // Jobs
