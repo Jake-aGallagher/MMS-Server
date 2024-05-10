@@ -1,8 +1,9 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetRelationBasic } from '../types/assets';
-import db from '../database/database';
 
-export async function insertChild(assetId: number, facilityId: number, assetParentId: number) {
+export async function insertChild(client: string, assetId: number, facilityId: number, assetParentId: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
@@ -28,7 +29,8 @@ export async function insertChild(assetId: number, facilityId: number, assetPare
     return data[0];
 }
 
-export async function insertRoot(assetId: number, facilityId: number) {
+export async function insertRoot(client: string, assetId: number, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
@@ -50,7 +52,8 @@ export async function insertRoot(assetId: number, facilityId: number) {
     return data[0];
 }
 
-export async function insertSelf(assetId: number, facilityId: number) {
+export async function insertSelf(client: string, assetId: number, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             assets_relations
@@ -72,7 +75,8 @@ export async function insertSelf(assetId: number, facilityId: number) {
     return data[0];
 }
 
-export async function getChildren(ancestor_id: number) {
+export async function getChildren(client: string, ancestor_id: number) {
+    const db = await getConnection('client_' + client);
     const data: [AssetRelationBasic[], FieldPacket[]] = await db.execute(
         `SELECT
             descendant_id
@@ -85,7 +89,8 @@ export async function getChildren(ancestor_id: number) {
     return data[0];
 }
 
-export async function deleteAssetRelations(assetIds: number[]) {
+export async function deleteAssetRelations(client: string, assetIds: number[]) {
+    const db = await getConnection('client_' + client);
     if (assetIds.length == 0) {
         return;
     }

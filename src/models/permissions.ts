@@ -1,8 +1,9 @@
-import db from '../database/database';
+import getConnection from '../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
 import { AllPermissions, GroupPermissions, GroupPermObj } from '../types/permissions';
 
-export async function getAllPermissions() {
+export async function getAllPermissions(client: string, ) {
+    const db = await getConnection('client_' + client);
     const data: [AllPermissions[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
@@ -15,7 +16,8 @@ export async function getAllPermissions() {
     return data[0];
 }
 
-export async function getPermissionsForGroup(id: number) {
+export async function getPermissionsForGroup(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [GroupPermissions[], FieldPacket[]] = await db.execute(
         `SELECT
              permission_id AS id
@@ -28,7 +30,8 @@ export async function getPermissionsForGroup(id: number) {
     return data[0];
 }
 
-export async function getPermissionObj(id: number) {
+export async function getPermissionObj(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [GroupPermObj[], FieldPacket[]] = await db.execute(
         `SELECT
              permissions.area,
@@ -53,7 +56,8 @@ export async function getPermissionObj(id: number) {
     return permObj;
 }
 
-export async function setPermissionsForGroup(userGroupId: number, permissions: string[]) {
+export async function setPermissionsForGroup(client: string, userGroupId: number, permissions: string[]) {
+    const db = await getConnection('client_' + client);
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();

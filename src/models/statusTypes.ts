@@ -1,8 +1,9 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 import { InitialStatusId, StatusTypes } from '../types/enums';
 
-export async function getAllStatusTypes() {
+export async function getAllStatusTypes(client: string) {
+    const db = await getConnection('client_' + client);
     const data: [StatusTypes[], FieldPacket[]] = await db.execute(
         `SELECT
             *
@@ -16,7 +17,8 @@ export async function getAllStatusTypes() {
     return data[0];
 }
 
-export async function getStatusTypeById(id: number) {
+export async function getStatusTypeById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -31,7 +33,8 @@ export async function getStatusTypeById(id: number) {
     return data[0];
 }
 
-export async function getInitialStatusId() {
+export async function getInitialStatusId(client: string) {
+    const db = await getConnection('client_' + client);
     const data: [InitialStatusId[], FieldPacket[]] = await db.execute(
         `SELECT
             id
@@ -45,7 +48,8 @@ export async function getInitialStatusId() {
     return data[0][0].id;
 }
 
-export async function addStatusType(body: { value: string; listPriority: number; canComplete: number; initialStatus: boolean }) {
+export async function addStatusType(client: string, body: { value: string; listPriority: number; canComplete: number; initialStatus: boolean }) {
+    const db = await getConnection('client_' + client);
     let initial_status = body.initialStatus ? 1 : 0;
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
@@ -63,7 +67,8 @@ export async function addStatusType(body: { value: string; listPriority: number;
     return response[0];
 }
 
-export async function editStatusType(body: { id: number; value: string; listPriority: number; canComplete: number; initialStatus: boolean }) {
+export async function editStatusType(client: string, body: { id: number; value: string; listPriority: number; canComplete: number; initialStatus: boolean }) {
+    const db = await getConnection('client_' + client);
     let initial_status = body.initialStatus ? 1 : 0;
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
@@ -80,12 +85,14 @@ export async function editStatusType(body: { id: number; value: string; listPrio
     return response[0];
 }
 
-export async function clearInitialStatus() {
+export async function clearInitialStatus(client: string) {
+    const db = await getConnection('client_' + client);
     await db.execute(`UPDATE status_types SET initial_status = 0;`);
     return;
 }
 
-export async function deleteStatusType(id: number) {
+export async function deleteStatusType(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE status_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }

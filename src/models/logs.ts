@@ -1,11 +1,12 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 import { AllLogs, Log, LogDates, LogForEdit, LogTemplate, LogTemplateId, LogTemplateTitle } from '../types/logs';
 import { Frequency } from '../types/jobs';
 
 // Templates
 
-export async function getLogTemplates(facilityId: number, LogId?: number) {
+export async function getLogTemplates(client: string, facilityId: number, LogId?: number) {
+    const db = await getConnection('client_' + client);
     let sql = `
         SELECT 
             log_templates.id,
@@ -57,7 +58,8 @@ export async function getLogTemplates(facilityId: number, LogId?: number) {
     return data[0];
 }
 
-export async function getLogTemplateTitle(id: number, logOrTemplate?: string) {
+export async function getLogTemplateTitle(client: string, id: number, logOrTemplate?: string) {
+    const db = await getConnection('client_' + client);
     const data: [LogTemplateTitle[], FieldPacket[]] = await db.execute(
         `SELECT
             log_templates.title,
@@ -79,7 +81,8 @@ export async function getLogTemplateTitle(id: number, logOrTemplate?: string) {
     return data[0][0];
 }
 
-export async function getLogTemplateForEdit(logTemplateId: number) {
+export async function getLogTemplateForEdit(client: string, logTemplateId: number) {
+    const db = await getConnection('client_' + client);
     const data: [LogForEdit[], FieldPacket[]] = await db.execute(
         `SELECT
             log_templates.id,
@@ -96,7 +99,8 @@ export async function getLogTemplateForEdit(logTemplateId: number) {
     return data[0][0];
 }
 
-export async function getTemplateOfLog(logId: number) {
+export async function getTemplateOfLog(client: string, logId: number) {
+    const db = await getConnection('client_' + client);
     const data: [LogForEdit[], FieldPacket[]] = await db.execute(
         `SELECT
             log_templates.id,
@@ -115,7 +119,8 @@ export async function getTemplateOfLog(logId: number) {
     return data[0][0];
 }
 
-export async function getTemplateId(logId: number) {
+export async function getTemplateId(client: string, logId: number) {
+    const db = await getConnection('client_' + client);
     const data: [LogTemplateId[], FieldPacket[]] = await db.execute(
         `SELECT
             template_id
@@ -130,7 +135,8 @@ export async function getTemplateId(logId: number) {
     return data[0][0].template_id;
 }
 
-export async function getLogDates(id: number, forInsert?: boolean) {
+export async function getLogDates(client: string, id: number, forInsert?: boolean) {
+    const db = await getConnection('client_' + client);
     const frequency: [Frequency[], FieldPacket[]] = await db.execute(
         `SELECT
             log_templates.frequency_time,
@@ -161,7 +167,8 @@ export async function getLogDates(id: number, forInsert?: boolean) {
     return data[0];
 }
 
-export async function addLogTemplate(body: any) {
+export async function addLogTemplate(client: string, body: any) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO log_templates (
             facility_id,
@@ -176,7 +183,8 @@ export async function addLogTemplate(body: any) {
     return data[0];
 }
 
-export async function editLogTemplate(body: any) {
+export async function editLogTemplate(client: string, body: any) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE log_templates SET
             title = ?,
@@ -190,14 +198,16 @@ export async function editLogTemplate(body: any) {
     return data[0];
 }
 
-export async function deleteLogTemplate(id: number) {
+export async function deleteLogTemplate(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE log_templates SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return data[0];
 }
 
 // Logs
 
-export async function getLogs(facilityId: number, incompleteOnly?: boolean) {
+export async function getLogs(client: string, facilityId: number, incompleteOnly?: boolean) {
+    const db = await getConnection('client_' + client);
     const data: [AllLogs[], FieldPacket[]] = await db.execute(
         `SELECT
             logs.id,
@@ -237,7 +247,8 @@ export async function getLogs(facilityId: number, incompleteOnly?: boolean) {
     return data[0];
 }
 
-export async function getLogsByTemplate(templateId: number) {
+export async function getLogsByTemplate(client: string, templateId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             logs.id,
@@ -254,7 +265,8 @@ export async function getLogsByTemplate(templateId: number) {
     return data[0];
 }
 
-export async function getLog(logId: number) {
+export async function getLog(client: string, logId: number) {
+    const db = await getConnection('client_' + client);
     const data: [Log[], FieldPacket[]] = await db.execute(
         `SELECT
             logs.id,
@@ -289,7 +301,8 @@ export async function getLog(logId: number) {
     return data[0];
 }
 
-export async function addLog(templateId: number, facilityId: number, req_comp_date: string) {
+export async function addLog(client: string, templateId: number, facilityId: number, req_comp_date: string) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO logs (
             template_id,
@@ -302,7 +315,8 @@ export async function addLog(templateId: number, facilityId: number, req_comp_da
     return data[0];
 }
 
-export async function updateLog(body: any) {
+export async function updateLog(client: string, body: any) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE logs SET
             completed = ?,

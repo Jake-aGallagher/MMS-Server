@@ -1,9 +1,10 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { UserIdOnly } from '../types/users';
 import { FacilityId, FacilityBasics, Facility, AssignedBasic, Assigned } from '../types/facilities';
-import db from '../database/database';
 
-export async function getAllFacilityIds() {
+export async function getAllFacilityIds(client: string) {
+    const db = await getConnection('client_' + client);
     const data: [FacilityId[], FieldPacket[]] = await db.execute(
         `SELECT
              id
@@ -15,7 +16,8 @@ export async function getAllFacilityIds() {
     return data[0];
 }
 
-export async function getAllFacilities() {
+export async function getAllFacilities(client: string) {
+    const db = await getConnection('client_' + client);
     const response: [Facility[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
@@ -34,7 +36,8 @@ export async function getAllFacilities() {
     return response[0];
 }
 
-export async function getAllFacilitiesForUser(userId: number) {
+export async function getAllFacilitiesForUser(client: string, userId: number) {
+    const db = await getConnection('client_' + client);
     const data: [FacilityBasics[], FieldPacket[]] = await db.execute(
         `SELECT 
             facilities.id,
@@ -55,7 +58,8 @@ export async function getAllFacilitiesForUser(userId: number) {
     return data[0];
 }
 
-export async function getLastFacilityForUser(userId: number) {
+export async function getLastFacilityForUser(client: string, userId: number) {
+    const db = await getConnection('client_' + client);
     const data: [FacilityBasics[], FieldPacket[]] = await db.execute(
         `SELECT 
             facility_id
@@ -74,7 +78,8 @@ export async function getLastFacilityForUser(userId: number) {
     return data[0];
 }
 
-export async function getFacilityDetails(facilityId: number) {
+export async function getFacilityDetails(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT 
             id,
@@ -94,7 +99,8 @@ export async function getFacilityDetails(facilityId: number) {
     return data[0];
 }
 
-export async function getAssignedUsers(facilityId: number) {
+export async function getAssignedUsers(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute<Assigned[]>(
         `SELECT 
             users.id AS id,
@@ -131,7 +137,8 @@ export async function getAssignedUsers(facilityId: number) {
     return data[0];
 }
 
-export async function getAssignedUserIds(facilityId: number) {
+export async function getAssignedUserIds(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute<AssignedBasic[]>(
         `SELECT 
             users.id AS id
@@ -159,7 +166,8 @@ export async function getAssignedUserIds(facilityId: number) {
     return data[0];
 }
 
-export async function postFacility(body: { name: string; address: string; city: string; county: string; postcode: string }) {
+export async function postFacility(client: string, body: { name: string; address: string; city: string; county: string; postcode: string }) {
+    const db = await getConnection('client_' + client);
     const name = body.name;
     const address = body.address;
     const city = body.city;
@@ -183,7 +191,8 @@ export async function postFacility(body: { name: string; address: string; city: 
     return response[0];
 }
 
-export async function editFacility(body: { id: string; name: string; address: string; city: string; county: string; postcode: string }) {
+export async function editFacility(client: string, body: { id: string; name: string; address: string; city: string; county: string; postcode: string }) {
+    const db = await getConnection('client_' + client);
     const id = parseInt(body.id);
     const name = body.name;
     const address = body.address;
@@ -207,7 +216,8 @@ export async function editFacility(body: { id: string; name: string; address: st
     return response[0];
 }
 
-export async function setAssignedUsers(facilityNo: number, userIds: UserIdOnly[]) {
+export async function setAssignedUsers(client: string, facilityNo: number, userIds: UserIdOnly[]) {
+    const db = await getConnection('client_' + client);
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();
@@ -224,7 +234,7 @@ export async function setAssignedUsers(facilityNo: number, userIds: UserIdOnly[]
                 facility_id = ?
             AND
                 users.user_group_id != '1';`,
-                [facilityNo]
+            [facilityNo]
         );
         if (userIds.length > 0) {
             let sql = `
@@ -252,7 +262,8 @@ export async function setAssignedUsers(facilityNo: number, userIds: UserIdOnly[]
     return true;
 }
 
-export async function postLastFacility(body: { userId: string; facilityId: string }) {
+export async function postLastFacility(client: string, body: { userId: string; facilityId: string }) {
+    const db = await getConnection('client_' + client);
     const userId = body.userId;
     const facilityId = body.facilityId;
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
@@ -271,7 +282,8 @@ export async function postLastFacility(body: { userId: string; facilityId: strin
     return response[0];
 }
 
-export async function postAdminAssignments(userId: number, facilityIds: { id: number }[]) {
+export async function postAdminAssignments(client: string, userId: number, facilityIds: { id: number }[]) {
+    const db = await getConnection('client_' + client);
     let sql = `
         INSERT INTO
             facility_users
@@ -291,7 +303,8 @@ export async function postAdminAssignments(userId: number, facilityIds: { id: nu
     return response[0];
 }
 
-export async function deleteAssignments(userId: number) {
+export async function deleteAssignments(client: string, userId: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `DELETE FROM
             facility_users

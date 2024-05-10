@@ -1,9 +1,10 @@
-import db from '../database/database';
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { FileDetails, FileName, FileUpload, MappedFiles } from '../types/files';
 import Hashids from 'hashids';
 
-export async function getMappedFiles(modelType: string, modelId: number) {
+export async function getMappedFiles(client: string, modelType: string, modelId: number) {
+    const db = await getConnection('client_' + client);
     const data: [MappedFiles[], FieldPacket[]] = await db.execute(
         `SELECT
             files.id,
@@ -27,7 +28,8 @@ export async function getMappedFiles(modelType: string, modelId: number) {
     return data[0];
 }
 
-export async function getFieldFileData(fileIds: string[], fileToFieldMap: {[key:string]: number}) {
+export async function getFieldFileData(client: string, fileIds: string[], fileToFieldMap: {[key:string]: number}) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             id,
@@ -57,7 +59,8 @@ export async function getFieldFileData(fileIds: string[], fileToFieldMap: {[key:
     return fileObj;
 }
 
-export async function getFileDetails(id: number | BigInt) {
+export async function getFileDetails(client: string, id: number | BigInt) {
+    const db = await getConnection('client_' + client);
     const data: [FileDetails[], FieldPacket[]] = await db.execute(
         `SELECT
             file_name,
@@ -73,7 +76,8 @@ export async function getFileDetails(id: number | BigInt) {
     return data[0][0];
 }
 
-export async function postFile(file: FileUpload) {
+export async function postFile(client: string, file: FileUpload) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             files
@@ -90,7 +94,8 @@ export async function postFile(file: FileUpload) {
     return response[0];
 }
 
-export async function postFileMappings(fromType: string, fromIds: number[], toType: string, toId: number) {
+export async function postFileMappings(client: string, fromType: string, fromIds: number[], toType: string, toId: number) {
+    const db = await getConnection('client_' + client);
     let sql = `
         INSERT INTO
             file_mappings
@@ -112,7 +117,8 @@ export async function postFileMappings(fromType: string, fromIds: number[], toTy
     return response[0];
 }
 
-export async function deleteFile(id: number | BigInt) {
+export async function deleteFile(client: string, id: number | BigInt) {
+    const db = await getConnection('client_' + client);
     await db.execute(`UPDATE files SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     await db.execute(`UPDATE file_mappings SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return;

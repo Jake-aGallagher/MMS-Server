@@ -1,8 +1,9 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 import { PayloadBasics } from '../types/enums';
 
-export async function getAllUrgencyTypes() {
+export async function getAllUrgencyTypes(client: string, ) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -16,7 +17,8 @@ export async function getAllUrgencyTypes() {
     return data[0];
 }
 
-export async function getUrgencyTypeById(id: number) {
+export async function getUrgencyTypeById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -31,7 +33,8 @@ export async function getUrgencyTypeById(id: number) {
     return data[0];
 }
 
-export async function getUrgencyPayload(id: number) {
+export async function getUrgencyPayload(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [PayloadBasics[], FieldPacket[]] = await db.execute(
         `SELECT
             urgency_number AS number,
@@ -47,7 +50,8 @@ export async function getUrgencyPayload(id: number) {
     return data[0];
 }
 
-export async function addUrgencyType(body: { value: string; listPriority: number; urgencyNumber: number; urgencyPeriod: string }) {
+export async function addUrgencyType(client: string, body: { value: string; listPriority: number; urgencyNumber: number; urgencyPeriod: string }) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             urgency_types
@@ -64,7 +68,8 @@ export async function addUrgencyType(body: { value: string; listPriority: number
     return response[0];
 }
 
-export async function editUrgencyType(body: { id: number; value: string; listPriority: number; urgencyNumber: number; urgencyPeriod: string }) {
+export async function editUrgencyType(client: string, body: { id: number; value: string; listPriority: number; urgencyNumber: number; urgencyPeriod: string }) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             urgency_types
@@ -80,7 +85,8 @@ export async function editUrgencyType(body: { id: number; value: string; listPri
     return response[0];
 }
 
-export async function deleteUrgencyType(id: number) {
+export async function deleteUrgencyType(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE urgency_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }

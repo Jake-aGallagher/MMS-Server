@@ -1,4 +1,4 @@
-import db from '../../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
 import { DefaultGraph6M, IncompleteJobs, MonthData, MonthDataNumber, NameValue, StringGraph } from '../../types/defaultGraphs';
 import { monthsLooped } from './monthsLooped';
@@ -31,7 +31,8 @@ function makeUnionReturnObj(startNum: number, a: MonthDataNumber, b: MonthDataNu
     ];
 }
 
-export async function getIncompleteJobs(facilityId: number) {
+export async function getIncompleteJobs(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
@@ -59,7 +60,8 @@ export async function getIncompleteJobs(facilityId: number) {
     return data[0];
 }
 
-export async function getJobsRaised6M(facilityId: number) {
+export async function getJobsRaised6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
@@ -98,7 +100,8 @@ export async function getJobsRaised6M(facilityId: number) {
     return makeUnionReturnObj(startNum, data[0][0], data[0][1]);
 }
 
-export async function getJobsCompleted6M(facilityId: number) {
+export async function getJobsCompleted6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [DefaultGraph6M[], FieldPacket[]] = await db.execute(
@@ -137,7 +140,8 @@ export async function getJobsCompleted6M(facilityId: number) {
     return makeUnionReturnObj(startNum, data[0][0], data[0][1]);
 }
 
-export async function getSparesUsed6M(facilityId: number) {
+export async function getSparesUsed6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -160,7 +164,8 @@ export async function getSparesUsed6M(facilityId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function mostUsedSpares6M(facilityId: number) {
+export async function mostUsedSpares6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(spares_used.quantity) as value,
@@ -188,7 +193,8 @@ export async function mostUsedSpares6M(facilityId: number) {
     return data[0];
 }
 
-export async function sparesCost6M(facilityId: number) {
+export async function sparesCost6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -215,7 +221,8 @@ export async function sparesCost6M(facilityId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function sparesDeliveredCost6M(facilityId: number) {
+export async function sparesDeliveredCost6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -240,7 +247,8 @@ export async function sparesDeliveredCost6M(facilityId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function jobsOfComponents6M(assetIds: number[]) {
+export async function jobsOfComponents6M(client: string, assetIds: number[]) {
+    const db = await getConnection('client_' + client);
     const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(*) as value,
@@ -265,7 +273,8 @@ export async function jobsOfComponents6M(assetIds: number[]) {
     return data[0];
 }
 
-export async function incompleteForAsset(assetIds: number[]) {
+export async function incompleteForAsset(client: string, assetIds: number[]) {
+    const db = await getConnection('client_' + client);
     const data: [IncompleteJobs[], FieldPacket[]] = await db.execute(
         `SELECT
             COUNT(IF(completed = 0 AND required_comp_date > CURDATE(), 1, NULL)) AS incomplete,
@@ -292,7 +301,8 @@ export async function incompleteForAsset(assetIds: number[]) {
     return data[0];
 }
 
-export async function sparesUsed6M(spareId: number) {
+export async function sparesUsed6M(client: string, spareId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -315,7 +325,8 @@ export async function sparesUsed6M(spareId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function sparesMisssing6M(facilityId: number) {
+export async function sparesMisssing6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -338,7 +349,8 @@ export async function sparesMisssing6M(facilityId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function downtime6M(facilityId: number) {
+export async function downtime6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -359,7 +371,8 @@ export async function downtime6M(facilityId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function lostRevenue6M(facilityId: number) {
+export async function lostRevenue6M(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     let startNum = makeStartNum();
 
     const data: [StringGraph[], FieldPacket[]] = await db.execute(
@@ -382,7 +395,8 @@ export async function lostRevenue6M(facilityId: number) {
     return makeReturnObj(startNum, data[0][0]);
 }
 
-export async function lostRevenueByAsset(facilityId: number) {
+export async function lostRevenueByAsset(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [NameValue[], FieldPacket[]] = await db.execute(
         `SELECT
             SUM(downtime.time * assets.revenue) as value,

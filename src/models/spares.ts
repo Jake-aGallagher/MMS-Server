@@ -1,3 +1,4 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import {
     CurrentStock,
@@ -15,9 +16,9 @@ import {
     UsedSparesIdQuantity,
     CostMapping,
 } from '../types/spares';
-import db from '../database/database';
 
-export async function getAllSpares(facilityId: number) {
+export async function getAllSpares(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [SparesDetails[], FieldPacket[]] = await db.execute(
         `SELECT 
             id,
@@ -44,7 +45,8 @@ export async function getAllSpares(facilityId: number) {
     return data[0];
 }
 
-export async function getAllSparesBasic(facilityId: number) {
+export async function getAllSparesBasic(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT 
             id,
@@ -64,7 +66,8 @@ export async function getAllSparesBasic(facilityId: number) {
     return data[0];
 }
 
-export async function getSpares(id: number) {
+export async function getSpares(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT 
             id,
@@ -92,7 +95,8 @@ export async function getSpares(id: number) {
     return data[0];
 }
 
-export async function getCurrentSpecificStock(stockChangeIds: number[], facilityId: number) {
+export async function getCurrentSpecificStock(client: string, stockChangeIds: number[], facilityId: number) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             id,
@@ -111,7 +115,8 @@ export async function getCurrentSpecificStock(stockChangeIds: number[], facility
     return data[0];
 }
 
-export async function getUsedSpares(model: string, modelId: number, type: 'used' | 'missing') {
+export async function getUsedSpares(client: string, model: string, modelId: number, type: 'used' | 'missing') {
+    const db = await getConnection('client_' + client);
     const data: [UsedSpares[], FieldPacket[]] = await db.execute(
         `SELECT 
             spares.id,
@@ -139,7 +144,8 @@ export async function getUsedSpares(model: string, modelId: number, type: 'used'
     return data[0];
 }
 
-export async function getUsedRecently(facilityId: number, monthsOfData: number) {
+export async function getUsedRecently(client: string, facilityId: number, monthsOfData: number) {
+    const db = await getConnection('client_' + client);
     const data: [recentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
             spare_id,
@@ -159,7 +165,8 @@ export async function getUsedRecently(facilityId: number, monthsOfData: number) 
     return data[0];
 }
 
-export async function getRecentTasksForSpare(facilityId: number, spareId: number, model: string) {
+export async function getRecentTasksForSpare(client: string, facilityId: number, spareId: number, model: string) {
+    const db = await getConnection('client_' + client);
     const data: [jobsOfRecentlyUsed[], FieldPacket[]] = await db.execute(
         `SELECT
             model_id
@@ -182,7 +189,8 @@ export async function getRecentTasksForSpare(facilityId: number, spareId: number
     return data[0];
 }
 
-export async function getSparesRemaining(facilityId: number) {
+export async function getSparesRemaining(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [ExtendedStock[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -201,7 +209,8 @@ export async function getSparesRemaining(facilityId: number) {
     return data[0];
 }
 
-export async function getSparesRemainingToBeDelivered(deliveryId: number) {
+export async function getSparesRemainingToBeDelivered(client: string, deliveryId: number) {
+    const db = await getConnection('client_' + client);
     const data: [CurrentStock[], FieldPacket[]] = await db.execute(
         `SELECT
             spares.id,
@@ -221,7 +230,8 @@ export async function getSparesRemainingToBeDelivered(deliveryId: number) {
     return data[0];
 }
 
-export async function getDeliveryInfoOfSpare(spareId: number, facilityId: number) {
+export async function getDeliveryInfoOfSpare(client: string, spareId: number, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             deliveries.due,
@@ -246,7 +256,8 @@ export async function getDeliveryInfoOfSpare(spareId: number, facilityId: number
     return data[0];
 }
 
-export async function getSuppliers(facilityId: number) {
+export async function getSuppliers(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             id,
@@ -271,7 +282,8 @@ export async function getSuppliers(facilityId: number) {
     return data[0];
 }
 
-export async function getSupplierInfo(supplierId: number) {
+export async function getSupplierInfo(client: string, supplierId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -286,7 +298,8 @@ export async function getSupplierInfo(supplierId: number) {
     return data[0];
 }
 
-export async function getSparesNotes(facilityId: number) {
+export async function getSparesNotes(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             id,
@@ -305,7 +318,8 @@ export async function getSparesNotes(facilityId: number) {
     return data[0];
 }
 
-export async function getSpareStock(spareId: number) {
+export async function getSpareStock(client: string, spareId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             quant_remain
@@ -320,7 +334,8 @@ export async function getSpareStock(spareId: number) {
     return data[0];
 }
 
-export async function getNote(noteId: number) {
+export async function getNote(client: string, noteId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             id,
@@ -335,7 +350,8 @@ export async function getNote(noteId: number) {
     return data[0];
 }
 
-export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
+export async function insertUsedSpares(client: string, sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
+    const db = await getConnection('client_' + client);
     let sql = `
     INSERT INTO
         spares_used
@@ -360,7 +376,8 @@ export async function insertUsedSpares(sparesUsed: NewSpares[], model: string, m
     return response[0];
 }
 
-export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
+export async function updateUsedSparesPositive(client: string, sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
+    const db = await getConnection('client_' + client);
     let insertSql = `
     INSERT INTO
         spares_used
@@ -389,7 +406,8 @@ export function updateUsedSparesPositive(sparesUsed: NewSpares[], model: string,
     return;
 }
 
-export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
+export async function updateUsedSparesNegative(client: string, sparesUsed: NewSpares[], model: string, modelId: number, facility_id: number, type: 'used' | 'missing') {
+    const db = await getConnection('client_' + client);
     sparesUsed.forEach(async (item) => {
         while (item.quantity > 0) {
             const data: [UsedSparesIdQuantity[], FieldPacket[]] = await db.execute(
@@ -407,7 +425,8 @@ export function updateUsedSparesNegative(sparesUsed: NewSpares[], model: string,
     });
 }
 
-export async function updateStock(stockArray: { id: number; facility_id: number; quant_remain: number }[]) {
+export async function updateStock(client: string, stockArray: { id: number; facility_id: number; quant_remain: number }[]) {
+    const db = await getConnection('client_' + client);
     let errors = false;
 
     stockArray.forEach(async (item) => {
@@ -427,7 +446,8 @@ export async function updateStock(stockArray: { id: number; facility_id: number;
     return errors;
 }
 
-export async function addSupplier(s: AddEditSupplier) {
+export async function addSupplier(client: string, s: AddEditSupplier) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             suppliers
@@ -439,7 +459,8 @@ export async function addSupplier(s: AddEditSupplier) {
     return response[0];
 }
 
-export async function editSupplier(s: AddEditSupplier) {
+export async function editSupplier(client: string, s: AddEditSupplier) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             suppliers
@@ -461,19 +482,20 @@ export async function editSupplier(s: AddEditSupplier) {
     return response[0];
 }
 
-export async function getDeliveries(facilityId: number) {
+export async function getDeliveries(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [Delivery[], FieldPacket[]] = await db.execute(
         `SELECT
             deliveries.id,
             deliveries.name,
-            suppliers.name AS supplier,
+            IF(suppliers.name, suppliers.name, 'None') AS supplier,
             deliveries.courier,
             DATE_FORMAT(deliveries.placed, "%d/%m/%y") AS placed,
             DATE_FORMAT(deliveries.due, "%d/%m/%y") AS due,
             deliveries.arrived
         FROM
             deliveries
-        INNER JOIN suppliers ON
+        LEFT JOIN suppliers ON
         (
             suppliers.id = deliveries.supplier
         )
@@ -486,7 +508,8 @@ export async function getDeliveries(facilityId: number) {
     return data[0];
 }
 
-export async function getDeliveryById(deliveryId: number) {
+export async function getDeliveryById(client: string, deliveryId: number) {
+    const db = await getConnection('client_' + client);
     const data: [Delivery[], FieldPacket[]] = await db.execute(
         `SELECT
             deliveries.id,
@@ -507,7 +530,8 @@ export async function getDeliveryById(deliveryId: number) {
     return data[0];
 }
 
-export async function getDeliveryItems(deliveryIds: number[]) {
+export async function getDeliveryItems(client: string, deliveryIds: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             delivery_items.delivery_id,
@@ -531,7 +555,8 @@ export async function getDeliveryItems(deliveryIds: number[]) {
     return data[0];
 }
 
-export async function addDelivery(d: Delivery) {
+export async function addDelivery(client: string, d: Delivery) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             deliveries
@@ -543,7 +568,8 @@ export async function addDelivery(d: Delivery) {
     return response[0];
 }
 
-export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: { [key: number]: number }) {
+export async function addDeliveryItems(client: string, deliveryId: number, items: DeliveryItems[], costMap: { [key: number]: number }) {
+    const db = await getConnection('client_' + client);
     let sql = `
     INSERT INTO
         delivery_items
@@ -565,7 +591,8 @@ export async function addDeliveryItems(deliveryId: number, items: DeliveryItems[
     return response[0];
 }
 
-export async function updateDeliveryItems(deliveryId: number, items: DeliveryItems[], costMap: { [key: number]: number }) {
+export async function updateDeliveryItems(client: string, deliveryId: number, items: DeliveryItems[], costMap: { [key: number]: number }) {
+    const db = await getConnection('client_' + client);
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();
@@ -603,7 +630,8 @@ export async function updateDeliveryItems(deliveryId: number, items: DeliveryIte
     return true;
 }
 
-export async function getCostMapping(facilityId: number) {
+export async function getCostMapping(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [CostMapping[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -623,7 +651,8 @@ export async function getCostMapping(facilityId: number) {
     return map;
 }
 
-export async function editDelivery(d: Delivery) {
+export async function editDelivery(client: string, d: Delivery) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             deliveries
@@ -642,7 +671,8 @@ export async function editDelivery(d: Delivery) {
     return response[0];
 }
 
-export async function addSpare(s: AddEditSpare) {
+export async function addSpare(client: string, s: AddEditSpare) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             spares
@@ -654,7 +684,8 @@ export async function addSpare(s: AddEditSpare) {
     return response[0];
 }
 
-export async function editSpare(s: AddEditSpare) {
+export async function editSpare(client: string, s: AddEditSpare) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             spares
@@ -677,7 +708,8 @@ export async function editSpare(s: AddEditSpare) {
     return response[0];
 }
 
-export async function adjustSpareStock(id: number, newStockLevel: number) {
+export async function adjustSpareStock(client: string, id: number, newStockLevel: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             spares
@@ -690,7 +722,8 @@ export async function adjustSpareStock(id: number, newStockLevel: number) {
     return response[0];
 }
 
-export async function postSparesNote(body: { facilityId: string; title: string; note: string; noteId: number }) {
+export async function postSparesNote(client: string, body: { facilityId: string; title: string; note: string; noteId: number }) {
+    const db = await getConnection('client_' + client);
     let response: [ResultSetHeader, FieldPacket[]];
     if (body.noteId === 0) {
         response = await db.execute(
@@ -723,32 +756,38 @@ export async function postSparesNote(body: { facilityId: string; title: string; 
     return response[0];
 }
 
-export async function deleteSupplier(id: number) {
+export async function deleteSupplier(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE suppliers SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
 
-export async function deleteSparesItem(id: number) {
+export async function deleteSparesItem(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE spares SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
 
-export async function deleteSparesUsed(id: number) {
+export async function deleteSparesUsed(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     db.execute(`DELETE FROM spares_used WHERE spare_id = ?;`, [id]);
     return;
 }
 
-export async function deleteDelivery(deliveryId: number) {
+export async function deleteDelivery(client: string, deliveryId: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE deliveries SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [deliveryId]);
     return response[0];
 }
 
-export async function deleteDeliveryContents(deliveryId: number) {
+export async function deleteDeliveryContents(client: string, deliveryId: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`DELETE FROM delivery_items WHERE delivery_id = ?;`, [deliveryId]);
     return response[0];
 }
 
-export async function deleteNote(id: number) {
+export async function deleteNote(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`DELETE FROM spares_notes WHERE id = ?;`, [id]);
     return response[0];
 }

@@ -1,7 +1,8 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 
-export async function getAllJobTypes() {
+export async function getAllJobTypes(client: string, ) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -15,7 +16,8 @@ export async function getAllJobTypes() {
     return data[0];
 }
 
-export async function getJobTypeById(id: number) {
+export async function getJobTypeById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -30,7 +32,8 @@ export async function getJobTypeById(id: number) {
     return data[0];
 }
 
-export async function addJobType(body: { value: string; listPriority: number }) {
+export async function addJobType(client: string, body: { value: string; listPriority: number }) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             task_types
@@ -45,7 +48,8 @@ export async function addJobType(body: { value: string; listPriority: number }) 
     return response[0];
 }
 
-export async function editJobType(body: { id: number; value: string; listPriority: number }) {
+export async function editJobType(client: string, body: { id: number; value: string; listPriority: number }) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             task_types
@@ -59,7 +63,8 @@ export async function editJobType(body: { id: number; value: string; listPriorit
     return response[0];
 }
 
-export async function deleteJobType(id: number) {
+export async function deleteJobType(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE task_types SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }

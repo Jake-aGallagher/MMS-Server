@@ -1,8 +1,9 @@
-import db from '../database/database';
+import getConnection from '../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
 import { TimeDetails } from '../types/jobs';
 
-export async function getLoggedTimeDetails(model: string, modelId: number) {
+export async function getLoggedTimeDetails(client: string, model: string, modelId: number) {
+    const db = await getConnection('client_' + client);
     const data: [TimeDetails[], FieldPacket[]] = await db.execute(
         `SELECT
             logged_time.user_id AS id,
@@ -23,7 +24,8 @@ export async function getLoggedTimeDetails(model: string, modelId: number) {
     return data[0];
 }
 
-export async function setTimeDetails(details: [{ id: number; time: number }], model: string, modelId: number) {
+export async function setTimeDetails(client: string, details: [{ id: number; time: number }], model: string, modelId: number) {
+    const db = await getConnection('client_' + client);
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();

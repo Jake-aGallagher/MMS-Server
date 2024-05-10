@@ -1,11 +1,12 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 import { PMDetails, PMStatusNotesType, RecentPms, ScheduleDates, ScheduleId } from '../types/PMs';
 import { Frequency, InitialStatus } from '../types/jobs';
 
 // --------------- PMs ---------------
 
-export async function getPMs(facilityId: number) {
+export async function getPMs(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             pms.id,
@@ -41,7 +42,8 @@ export async function getPMs(facilityId: number) {
     return data[0];
 }
 
-export async function getPMsBySchedule(scheduleId: number) {
+export async function getPMsBySchedule(client: string, scheduleId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             pms.id,
@@ -63,7 +65,8 @@ export async function getPMsBySchedule(scheduleId: number) {
     return data[0];
 }
 
-export async function getPMDetails(id: number) {
+export async function getPMDetails(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [PMDetails[], FieldPacket[]] = await db.execute(
         `SELECT
             pms.id,
@@ -97,7 +100,8 @@ export async function getPMDetails(id: number) {
     return data[0];
 }
 
-export async function getRecentPmsForAsset(idsForAssets: number[]) {
+export async function getRecentPmsForAsset(client: string, idsForAssets: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             pms.id,
@@ -139,7 +143,8 @@ export async function getRecentPmsForAsset(idsForAssets: number[]) {
     return data[0];
 }
 
-export async function getRecentPmsById(ids: number[]) {
+export async function getRecentPmsById(client: string, ids: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             pms.id,
@@ -181,7 +186,8 @@ export async function getRecentPmsById(ids: number[]) {
     return data[0];
 }
 
-export async function getPMforEdit(id: number) {
+export async function getPMforEdit(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [PMStatusNotesType[], FieldPacket[]] = await db.execute(
         `SELECT
             pms.status,
@@ -198,7 +204,8 @@ export async function getPMforEdit(id: number) {
     return data[0];
 }
 
-export async function addPM(scheduleId: number, required_comp_date: string) {
+export async function addPM(client: string, scheduleId: number, required_comp_date: string) {
+    const db = await getConnection('client_' + client);
     const initialStatus: [InitialStatus[], FieldPacket[]] = await db.execute("SELECT id FROM status_types WHERE initial_status = '1' LIMIT 1");
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO pms (
@@ -214,7 +221,8 @@ export async function addPM(scheduleId: number, required_comp_date: string) {
     return data[0];
 }
 
-export async function editPM(body: any, completed: boolean, logged_time: number) {
+export async function editPM(client: string, body: any, completed: boolean, logged_time: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             pms
@@ -231,7 +239,8 @@ export async function editPM(body: any, completed: boolean, logged_time: number)
     return data[0];
 }
 
-export async function editPMdueDate(scheduleId: number, dueDate: string) {
+export async function editPMdueDate(client: string, scheduleId: number, dueDate: string) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             pms
@@ -248,7 +257,8 @@ export async function editPMdueDate(scheduleId: number, dueDate: string) {
 
 // --------------- Schedules ---------------
 
-export async function getPMSchedules(facilityId: number, scheduleId?: number) {
+export async function getPMSchedules(client: string, facilityId: number, scheduleId?: number) {
+    const db = await getConnection('client_' + client);
     let sql = `
         SELECT 
             pm_schedules.id,
@@ -306,7 +316,8 @@ export async function getPMSchedules(facilityId: number, scheduleId?: number) {
     return data[0];
 }
 
-export async function getScheduleDates(id: number, forInsert?: boolean) {
+export async function getScheduleDates(client: string, id: number, forInsert?: boolean) {
+    const db = await getConnection('client_' + client);
     const frequency: [Frequency[], FieldPacket[]] = await db.execute(
         `SELECT
             pm_schedules.frequency_time,
@@ -337,7 +348,8 @@ export async function getScheduleDates(id: number, forInsert?: boolean) {
     return data[0];
 }
 
-export async function getScheduleId(PMId: number) {
+export async function getScheduleId(client: string, PMId: number) {
+    const db = await getConnection('client_' + client);
     const data: [ScheduleId[], FieldPacket[]] = await db.execute(
         `SELECT
             schedule_id
@@ -352,7 +364,8 @@ export async function getScheduleId(PMId: number) {
     return data[0][0].schedule_id;
 }
 
-export async function getPMScheduleForEdit(id: number) {
+export async function getPMScheduleForEdit(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             type,
@@ -369,7 +382,8 @@ export async function getPMScheduleForEdit(id: number) {
     return data[0];
 }
 
-export async function addPMSchedule(body: any) {
+export async function addPMSchedule(client: string, body: any) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO pm_schedules (
             facility_id,
@@ -386,7 +400,8 @@ export async function addPMSchedule(body: any) {
     return data[0];
 }
 
-export async function editPMSchedule(body: any) {
+export async function editPMSchedule(client: string, body: any) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             pm_schedules
@@ -403,7 +418,8 @@ export async function editPMSchedule(body: any) {
     return data[0];
 }
 
-export async function deletePMSchedule(id: number) {
+export async function deletePMSchedule(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE pm_schedules SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return data[0];
 }

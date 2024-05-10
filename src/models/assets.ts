@@ -1,8 +1,9 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import { AssetById, Asset, AssetId, AssetRevenues } from '../types/assets';
-import db from '../database/database';
 
-export async function getAssetTree(facilityId: number, rootId: number) {
+export async function getAssetTree(client: string, facilityId: number, rootId: number) {
+    const db = await getConnection('client_' + client);
     const data: [Asset[], FieldPacket[]] = await db.execute(
         `SELECT
             assets.id,
@@ -48,7 +49,8 @@ export async function getAssetTree(facilityId: number, rootId: number) {
     return data[0];
 }
 
-export async function getAssetRoot(facilityId: number) {
+export async function getAssetRoot(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [AssetId[], FieldPacket[]] = await db.execute(
         `SELECT
             id
@@ -65,7 +67,8 @@ export async function getAssetRoot(facilityId: number) {
     return data[0];
 }
 
-export async function getAssetById(id: number) {
+export async function getAssetById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [AssetById[], FieldPacket[]] = await db.execute(
         `SELECT
             assets.id AS id,
@@ -93,7 +96,8 @@ export async function getAssetById(id: number) {
     return data[0];
 }
 
-export async function getAssetsWithRevenues(facilityId: number) {
+export async function getAssetsWithRevenues(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [AssetRevenues[], FieldPacket[]] = await db.execute(
         `SELECT
             assets.id,
@@ -113,7 +117,8 @@ export async function getAssetsWithRevenues(facilityId: number) {
 
 }
 
-export async function insertAsset(parentId: number, facilityId: number, name: string, note: string, revenue: number | null) {
+export async function insertAsset(client: string, parentId: number, facilityId: number, name: string, note: string, revenue: number | null) {
+    const db = await getConnection('client_' + client);
     const revenuePerMin = revenue && revenue > 0 ? revenue : null;
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
@@ -132,7 +137,8 @@ export async function insertAsset(parentId: number, facilityId: number, name: st
     return data[0];
 }
 
-export async function editAsset(id: number, name: string, note: string, revenue: number | null) {
+export async function editAsset(client: string, id: number, name: string, note: string, revenue: number | null) {
+    const db = await getConnection('client_' + client);
     const revenuePerMin = revenue && revenue > 0 ? revenue : null;
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
@@ -148,7 +154,8 @@ export async function editAsset(id: number, name: string, note: string, revenue:
     return data[0];
 }
 
-export async function renameRootAsset(name: string, facilityId: number) {
+export async function renameRootAsset(client: string, name: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             assets
@@ -163,7 +170,8 @@ export async function renameRootAsset(name: string, facilityId: number) {
     return data[0];
 }
 
-export async function deleteAsset(assetIds: number[]) {
+export async function deleteAsset(client: string, assetIds: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(`UPDATE assets SET deleted = 1, deleted_date = NOW() WHERE id IN (?);`, [assetIds]);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return data[0];

@@ -1,8 +1,9 @@
-import db from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { UserGroupOnly, UserLongName, UserShortName, UserPassword } from '../types/users';
+import getConnection from '../database/database';
 
-export async function getAllUsers() {
+export async function getAllUsers(client: string) {
+    const db = await getConnection('client_' + client);
     const data: [UserLongName[], FieldPacket[]] = await db.execute(
         `SELECT
             users.id,
@@ -23,7 +24,8 @@ export async function getAllUsers() {
     return data[0];
 }
 
-export async function findByUsername(username: string) {
+export async function findByUsername(client: string, username: string) {
+    const db = await getConnection('client_' + client);
     const data: [UserPassword[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
@@ -43,7 +45,8 @@ export async function findByUsername(username: string) {
     return data[0];
 }
 
-export async function findById(id: number) {
+export async function findById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [UserShortName[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
@@ -62,7 +65,8 @@ export async function findById(id: number) {
     return data[0];
 }
 
-export async function getUsersByIds(userIds: number[]) {
+export async function getUsersByIds(client: string, userIds: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
              id,
@@ -82,7 +86,8 @@ export async function getUsersByIds(userIds: number[]) {
     return data[0];
 }
 
-export async function getAllUserGroups() {
+export async function getAllUserGroups(client: string) {
+    const db = await getConnection('client_' + client);
     const data: [UserLongName[], FieldPacket[]] = await db.execute(
         `SELECT
              id,
@@ -97,7 +102,8 @@ export async function getAllUserGroups() {
     return data[0];
 }
 
-export async function postUser(body: { username: string; first: string; last: string; user_group_id: number }, hashedPassword: string) {
+export async function postUser(client: string, body: { username: string; first: string; last: string; user_group_id: number }, hashedPassword: string) {
+    const db = await getConnection('client_' + client);
     const username = body.username;
     const first = body.first;
     const last = body.last;
@@ -121,7 +127,8 @@ export async function postUser(body: { username: string; first: string; last: st
     return response[0];
 }
 
-export async function editUser(body: { id: string; username: string; first: string; last: string; user_group_id: number }) {
+export async function editUser(client: string, body: { id: string; username: string; first: string; last: string; user_group_id: number }) {
+    const db = await getConnection('client_' + client);
     const id = parseInt(body.id);
     const username = body.username;
     const first = body.first;
@@ -143,7 +150,8 @@ export async function editUser(body: { id: string; username: string; first: stri
     return response[0];
 }
 
-export async function postUserGroup(body: { name: string }) {
+export async function postUserGroup(client: string, body: { name: string }) {
+    const db = await getConnection('client_' + client);
     const name = body.name;
 
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
@@ -159,7 +167,8 @@ export async function postUserGroup(body: { name: string }) {
     return response[0];
 }
 
-export async function editUserGroup(body: { id: string; name: string }) {
+export async function editUserGroup(client: string, body: { id: string; name: string }) {
+    const db = await getConnection('client_' + client);
     const id = parseInt(body.id);
     const name = body.name;
 
@@ -175,7 +184,8 @@ export async function editUserGroup(body: { id: string; name: string }) {
     return response[0];
 }
 
-export async function getUserLevel(userId: number) {
+export async function getUserLevel(client: string, userId: number) {
+    const db = await getConnection('client_' + client);
     const response: [UserGroupOnly[], FieldPacket[]] = await db.execute(
         `SELECT
             user_group_id
@@ -190,12 +200,14 @@ export async function getUserLevel(userId: number) {
     return response[0][0].user_group_id;
 }
 
-export async function deleteUser(id: number) {
+export async function deleteUser(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE users SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }
 
-export async function deleteUserGroup(id: number) {
+export async function deleteUserGroup(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE user_groups SET deleted = 1, deleted_date = NOW() WHERE id = ?;`, [id]);
     return response[0];
 }

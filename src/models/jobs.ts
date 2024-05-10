@@ -1,9 +1,10 @@
-import db from '../database/database';
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
 import { UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus, JobDetails } from '../types/jobs';
 import { UrgObj } from '../types/enums';
 
-export async function getAllJobs(facilityId: number) {
+export async function getAllJobs(client: string, facilityId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT 
                 jobs.id,
@@ -42,7 +43,8 @@ export async function getAllJobs(facilityId: number) {
     return data[0];
 }
 
-export async function getJobDetails(id: number) {
+export async function getJobDetails(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [JobDetails[], FieldPacket[]] = await db.execute(
         `SELECT 
             jobs.id,
@@ -85,7 +87,8 @@ export async function getJobDetails(id: number) {
     return data[0];
 }
 
-export async function getRecentJobs(idsForAssets: number[]) {
+export async function getRecentJobs(client: string, idsForAssets: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             jobs.id,
@@ -115,7 +118,8 @@ export async function getRecentJobs(idsForAssets: number[]) {
     return data[0];
 }
 
-export async function getRecentJobsByIds(ids: number[]) {
+export async function getRecentJobsByIds(client: string, ids: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             jobs.id,
@@ -144,7 +148,8 @@ export async function getRecentJobsByIds(ids: number[]) {
     return data[0];
 }
 
-export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
+export async function postJob(client: string, body: PostJob, urgencyObj: UrgObj[]) {
+    const db = await getConnection('client_' + client);
     const facility_id = body.facilityNumber;
     const asset = body.assetNumber;
     const type = body.type;
@@ -177,7 +182,8 @@ export async function postJob(body: PostJob, urgencyObj: UrgObj[]) {
     return response[0];
 }
 
-export async function updateAndComplete(body: UpdateAndComplete, totalTime: number) {
+export async function updateAndComplete(client: string, body: UpdateAndComplete, totalTime: number) {
+    const db = await getConnection('client_' + client);
     const id = body.id;
     const status = body.status;
     const description = body.description;
@@ -202,7 +208,8 @@ export async function updateAndComplete(body: UpdateAndComplete, totalTime: numb
     return response[0];
 }
 
-export async function updateNotes(body: UpdateNotes) {
+export async function updateNotes(client: string, body: UpdateNotes) {
+    const db = await getConnection('client_' + client);
     const id = body.id;
     const notes = body.notes;
 
@@ -218,7 +225,8 @@ export async function updateNotes(body: UpdateNotes) {
     return response[0];
 }
 
-export async function deleteJobs(idsForDelete: number[]) {
+export async function deleteJobs(client: string, idsForDelete: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(`UPDATE jobs SET deleted = 1, deleted_date = NOW() WHERE asset IN (?);`, [idsForDelete]);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(sql);
     return response[0];

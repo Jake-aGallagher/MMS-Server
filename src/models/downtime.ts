@@ -1,8 +1,9 @@
-import db from '../database/database';
+import getConnection from '../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
 import { Downtime } from '../types/jobs';
 
-export async function getDowntimeDetails(model: string, modelId: number) {
+export async function getDowntimeDetails(client: string, model: string, modelId: number) {
+    const db = await getConnection('client_' + client);
     const data: [Downtime[], FieldPacket[]] = await db.execute(
         `SELECT
             downtime.asset AS id,
@@ -23,7 +24,8 @@ export async function getDowntimeDetails(model: string, modelId: number) {
     return data[0];
 }
 
-export async function setDowntimeDetails(details: [{ id: number; time: number }], model: string, modelId: number, facilityId: number) {
+export async function setDowntimeDetails(client: string, details: [{ id: number; time: number }], model: string, modelId: number, facilityId: number) {
+    const db = await getConnection('client_' + client);
     try {
         const conn = await db.getConnection();
         await conn.beginTransaction();

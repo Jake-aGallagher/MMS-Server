@@ -1,8 +1,9 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 import { EnumGroups, ValuesByGroupIds } from '../types/enums';
 
-export async function getEnumGroups() {
+export async function getEnumGroups(client: string) {
+    const db = await getConnection('client_' + client);
     const data: [EnumGroups[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -17,7 +18,8 @@ export async function getEnumGroups() {
     return data[0];
 }
 
-export async function getEnumGroupById(groupId: number) {
+export async function getEnumGroupById(client: string, groupId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             value
@@ -32,7 +34,8 @@ export async function getEnumGroupById(groupId: number) {
     return data[0];
 }
 
-export async function getEnumsByGroupId(enumGroupId: number) {
+export async function getEnumsByGroupId(client: string, enumGroupId: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             enum_values.id,
@@ -51,7 +54,8 @@ export async function getEnumsByGroupId(enumGroupId: number) {
     return data[0];
 }
 
-export async function getEnumsByGroupIds(enumGroupIds: number[]) {
+export async function getEnumsByGroupIds(client: string, enumGroupIds: number[]) {
+    const db = await getConnection('client_' + client);
     const sql = db.format(
         `SELECT
             enum_values.enum_group_id,
@@ -72,7 +76,8 @@ export async function getEnumsByGroupIds(enumGroupIds: number[]) {
     return data[0];
 }
 
-export async function getEnumValueById(id: number) {
+export async function getEnumValueById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
             *
@@ -87,7 +92,8 @@ export async function getEnumValueById(id: number) {
     return data[0];
 }
 
-export async function addEnumGroup(body: { value: string }) {
+export async function addEnumGroup(client: string, body: { value: string }) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             enum_groups
@@ -101,7 +107,8 @@ export async function addEnumGroup(body: { value: string }) {
     return response[0];
 }
 
-export async function editEnumGroup(body: { id: string; value: string }) {
+export async function editEnumGroup(client: string, body: { id: string; value: string }) {
+    const db = await getConnection('client_' + client);
     const id = parseInt(body.id);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
@@ -115,7 +122,8 @@ export async function editEnumGroup(body: { id: string; value: string }) {
     return response[0];
 }
 
-export async function addEnumValue(body: { value: string; enumGroupId: number; listPriority: number }) {
+export async function addEnumValue(client: string, body: { value: string; enumGroupId: number; listPriority: number }) {
+    const db = await getConnection('client_' + client);
     const value = body.value;
     const enumGroupId = body.enumGroupId;
     const listPriority = body.listPriority;
@@ -135,7 +143,8 @@ export async function addEnumValue(body: { value: string; enumGroupId: number; l
     return response[0];
 }
 
-export async function editEnumValue(body: { id: string; value: string; enumGroupId: number; listPriority: number }) {
+export async function editEnumValue(client: string, body: { id: string; value: string; enumGroupId: number; listPriority: number }) {
+    const db = await getConnection('client_' + client);
     const id = parseInt(body.id);
     const value = body.value;
     const enumGroupId = body.enumGroupId;
@@ -155,7 +164,8 @@ export async function editEnumValue(body: { id: string; value: string; enumGroup
     return response[0];
 }
 
-export async function deleteEnumGroup(id: number) {
+export async function deleteEnumGroup(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             enum_groups
@@ -169,7 +179,8 @@ export async function deleteEnumGroup(id: number) {
     return response[0];
 }
 
-export async function deleteEnumValue(id: number) {
+export async function deleteEnumValue(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             enum_values
@@ -183,7 +194,8 @@ export async function deleteEnumValue(id: number) {
     return response[0];
 }
 
-export async function deleteEnumValueByGroupId(id: number) {
+export async function deleteEnumValueByGroupId(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             enum_values

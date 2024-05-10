@@ -6,14 +6,14 @@ import makeIdList from '../makeIdList';
 import { NewSpares } from '../../types/spares';
 
 
-export async function updateSparesForJob(modelId: number, facilityId: number, newSpares: NewSpares[], model: 'job' | 'pm', type: 'used' | 'missing') {
+export async function updateSparesForJob(client: string, modelId: number, facilityId: number, newSpares: NewSpares[], model: 'job' | 'pm', type: 'used' | 'missing') {
     let diffArray = <NewSpares[]>[];
     let negativeDiffArray = <NewSpares[]>[];
     let stockChangesArray = <{ id: number; used: number }[]>[];
 
-    const prevSpares = await Spares.getUsedSpares(model, modelId, type);
+    const prevSpares = await Spares.getUsedSpares(client, model, modelId, type);
     if (prevSpares.length === 0) {
-        await Spares.insertUsedSpares(newSpares, model, modelId, facilityId, type); // table: spares_used
+        await Spares.insertUsedSpares(client, newSpares, model, modelId, facilityId, type); // table: spares_used
         stockChangesArray = smallStockArray(newSpares);
     } else {
         // compare difference
@@ -24,20 +24,20 @@ export async function updateSparesForJob(modelId: number, facilityId: number, ne
 
         // insert the diff array (Update replace) table: spares_used
         if (diffArray.length > 0) {
-            Spares.updateUsedSparesPositive(diffArray, model, modelId, facilityId, type);
+            Spares.updateUsedSparesPositive(client, diffArray, model, modelId, facilityId, type);
         }
         if (negativeDiffArray.length > 0) {
-            Spares.updateUsedSparesNegative(negativeDiffArray, model, modelId, facilityId, type);
+            Spares.updateUsedSparesNegative(client, negativeDiffArray, model, modelId, facilityId, type);
         }
     }
     
     // insert stock array changes
     if (stockChangesArray.length > 0 && type === 'used') {
         const stockChangeIds = makeIdList(stockChangesArray, 'id');
-        const currStock = await Spares.getCurrentSpecificStock(stockChangeIds, facilityId);
+        const currStock = await Spares.getCurrentSpecificStock(client, stockChangeIds, facilityId);
         const newStock = newStockArray(stockChangesArray, currStock, facilityId);
         if (newStock.length > 0) {
-            await Spares.updateStock(newStock); // table: spares
+            await Spares.updateStock(client, newStock); // table: spares
         }
     }
 }

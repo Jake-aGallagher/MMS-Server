@@ -1,5 +1,5 @@
+import getConnection from '../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import db from '../database/database';
 import { AddField, EditField, FieldValue, GetFields } from '../types/customFields';
 import { getFieldFileData } from './files';
 import { getEnumsByGroupIds } from './enums';
@@ -7,12 +7,12 @@ import { enumObjForSelect } from '../helpers/enums/enumObjForSelect';
 import { FileTypes } from '../helpers/constants';
 import { isInteger } from '../helpers/isInteger';
 
-export async function getCustomFieldData(model: string, modelId: number, modelTypeId?: number) {
-    const fields = await getFieldsForRecord(model, modelId, modelTypeId);
+export async function getCustomFieldData(client: string, model: string, modelId: number, modelTypeId?: number) {
+    const fields = await getFieldsForRecord(client, model, modelId, modelTypeId);
     const enumGroupIds: number[] = fields.flatMap((field: FieldValue) => (field.enumGroupId !== null && field.enumGroupId > 0 ? field.enumGroupId : []));
     let enumGroups = {};
     if (enumGroupIds.length > 0) {
-        const enumGroupsRaw = await getEnumsByGroupIds(enumGroupIds);
+        const enumGroupsRaw = await getEnumsByGroupIds(client, enumGroupIds);
         if (enumGroupsRaw.length > 0) {
             enumGroups = enumObjForSelect(enumGroupsRaw);
         }
@@ -28,12 +28,13 @@ export async function getCustomFieldData(model: string, modelId: number, modelTy
     });
     let fileData: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
     if (fileIds.length > 0) {
-        fileData = await getFieldFileData(fileIds, fileIdToFieldIdMap);
+        fileData = await getFieldFileData(client, fileIds, fileIdToFieldIdMap);
     }
     return { fields, enumGroups, fileData };
 }
 
-export async function updateFieldData(modelId: number, fieldData: { [key: string]: string | number | boolean | undefined }) {
+export async function updateFieldData(client: string, modelId: number, fieldData: { [key: string]: string | number | boolean | undefined }) {
+    const db = await getConnection('client_' + client);
     const fieldKeys = Object.keys(fieldData).filter((key) => isInteger(key));
     const valuesString = fieldKeys
         .map((fieldKey) => {
@@ -66,7 +67,8 @@ export async function updateFieldData(modelId: number, fieldData: { [key: string
     }
 }
 
-export async function getFieldsForRecord(model: string, modelId: number, modelTypeId?: number) {
+export async function getFieldsForRecord(client: string, model: string, modelId: number, modelTypeId?: number) {
+    const db = await getConnection('client_' + client);
     let sql = `
         SELECT
             fields.id,
@@ -102,7 +104,8 @@ export async function getFieldsForRecord(model: string, modelId: number, modelTy
     return data[0];
 }
 
-export async function getFieldsForModel(model: string) {
+export async function getFieldsForModel(client: string, model: string) {
+    const db = await getConnection('client_' + client);
     const data: [GetFields[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -124,7 +127,8 @@ export async function getFieldsForModel(model: string) {
     return data[0];
 }
 
-export async function getFieldById(id: number) {
+export async function getFieldById(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [GetFields[], FieldPacket[]] = await db.execute(
         `SELECT
             id,
@@ -142,7 +146,8 @@ export async function getFieldById(id: number) {
     return data[0][0];
 }
 
-export async function addField(field: AddField) {
+export async function addField(client: string, field: AddField) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO fields (
             model,
@@ -161,7 +166,8 @@ export async function addField(field: AddField) {
     return data[0].insertId;
 }
 
-export async function editField(id: number, field: EditField) {
+export async function editField(client: string, id: number, field: EditField) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `UPDATE
             fields
@@ -178,7 +184,8 @@ export async function editField(id: number, field: EditField) {
     return data[0].affectedRows;
 }
 
-export async function deleteField(id: number) {
+export async function deleteField(client: string, id: number) {
+    const db = await getConnection('client_' + client);
     const data: [ResultSetHeader, FieldPacket[]] = await db.execute(`UPDATE fields SET deleted = 1, deleted_date = NOW() WHERE id = ?`, [id]);
     return data[0].affectedRows;
 }
