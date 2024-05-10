@@ -3,9 +3,14 @@ import mysql from 'mysql2';
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
-    database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     multipleStatements: true,
-});
-
-export default pool.promise();
+  });
+  
+  async function getConnection(database: string) {
+    const connection = await pool.promise();
+    await connection.query(`USE ${database}`);
+    return connection;
+  }
+  
+  export default getConnection;
