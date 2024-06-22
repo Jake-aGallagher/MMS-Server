@@ -3,6 +3,7 @@ import sparesWarningArray from '../helpers/spares/sparesWarningArray';
 import deliveryMaps from '../helpers/spares/deliveryMaps';
 import deliveryContents from '../helpers/spares/deliveryContents';
 import * as Spares from '../models/spares';
+import * as Suppliers from '../models/suppliers';
 import * as Jobs from '../models/jobs';
 import * as Pms from '../models/pms';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
@@ -112,48 +113,6 @@ export async function getSparesWarnings(req: Request, res: Response) {
     }
 }
 
-export async function getSuppliers(req: Request, res: Response) {
-    try {
-        const facilityId = parseInt(req.params.facilityid);
-        const suppliers = await Spares.getSuppliers(req.clientId, facilityId);
-        res.status(200).json(suppliers);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Request failed' });
-    }
-}
-
-export async function getSuplierInfo(req: Request, res: Response) {
-    try {
-        const supplierId = parseInt(req.params.supplierid);
-        const supplierDetails = await Spares.getSupplierInfo(req.clientId, supplierId);
-        res.status(200).json(supplierDetails);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Request failed' });
-    }
-}
-
-export async function addEditSupplier(req: Request, res: Response) {
-    try {
-        const supplierId = parseInt(req.body.id);
-        let response;
-        if (supplierId === 0) {
-            response = await Spares.addSupplier(req.clientId, req.body);
-        } else {
-            response = await Spares.editSupplier(req.clientId, req.body);
-        }
-        if (response.affectedRows == 1) {
-            res.status(201).json({ created: true });
-        } else {
-            res.status(500).json({ created: false });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ created: false });
-    }
-}
-
 export async function getDeliveries(req: Request, res: Response) {
     try {
         const facilityId = parseInt(req.params.facilityid);
@@ -174,7 +133,7 @@ export async function getDeliveries(req: Request, res: Response) {
             const deliveryItems = await Spares.getDeliveryItems(req.clientId, deliveryIds);
             const deliverywithContents = deliveryContents(deliveryItems, deliveriesWithContentsArr, deliveryMap);
             if (deliveryToFind > 0) {
-                const suppliers = await Spares.getSuppliers(req.clientId, facilityId);
+                const suppliers = await Suppliers.getSuppliers(req.clientId, facilityId);
                 res.status(200).json({ deliveries: deliverywithContents, suppliers });
             } else {
                 res.status(200).json({deliveries: deliverywithContents});
@@ -267,21 +226,6 @@ export async function postNote(req: Request, res: Response) {
     } catch (err) {
         console.log(err);
         res.status(500).json({ created: false });
-    }
-}
-
-export async function deleteSupplier(req: Request, res: Response) {
-    try {
-        const id = parseInt(req.params.id);
-        const deleted = await Spares.deleteSupplier(req.clientId, id);
-        if (deleted.affectedRows > 0) {
-            res.status(200).json({ deleted: true });
-        } else {
-            res.status(500).json({ deleted: false });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ deleted: false });
     }
 }
 

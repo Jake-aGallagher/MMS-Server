@@ -13,6 +13,7 @@ import * as PmsController from '../controllers/pms';
 import * as logsController from '../controllers/logs';
 import * as assetsController from '../controllers/assets';
 import * as sparesController from '../controllers/spares';
+import * as suppliersController from '../controllers/suppliers';
 import * as enumsController from '../controllers/enums';
 import * as permissionsController from '../controllers/permissions';
 import * as taskTypesController from '../controllers/jobTypes';
@@ -119,11 +120,6 @@ router.get('/spares/instock/:spareid', authorised, sparesController.getSpareStoc
 router.put('/spares/add-edit', authorised, sparesController.addEditSpare);
 router.put('/spares/adjust-stock', authorised, sparesController.adjustSpareStock);
 router.delete('/spares/item/:id', authorised, sparesController.deleteSparesItem);
-//// Spares Suppliers
-router.get('/spares/suppliers/:facilityid', authorised, sparesController.getSuppliers);
-router.get('/spares/supplier/:supplierid', authorised, sparesController.getSuplierInfo);
-router.put('/spares/supplier', authorised, sparesController.addEditSupplier);
-router.delete('/spares/supplier/:id', authorised, sparesController.deleteSupplier);
 //// Spares Deliveries
 router.get('/spares/deliveries/:facilityid/:deliveryid', authorised, sparesController.getDeliveries);
 router.put('/spares/delivery/add-edit', authorised, sparesController.addEditDelivery);
@@ -135,6 +131,12 @@ router.get('/spares/notes/:facilityid', authorised, sparesController.getSparesNo
 router.get('/spares/note/:noteid', authorised, sparesController.getNote);
 router.put('/spares/notes', authorised, sparesController.postNote);
 router.delete('/spares/note/:id', authorised, sparesController.deleteNote);
+
+//// Suppliers
+router.get('/suppliers/:facilityid', authorised, suppliersController.getSuppliers);
+router.get('/supplier/:supplierid', authorised, suppliersController.getSuplierInfo);
+router.put('/supplier', authorised, suppliersController.addEditSupplier);
+router.delete('/supplier/:id', authorised, suppliersController.deleteSupplier);
 
 // Enums
 router.get('/enumgroups', authorised, enumsController.getEnumsGroups);
