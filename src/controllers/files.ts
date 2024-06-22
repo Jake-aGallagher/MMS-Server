@@ -94,7 +94,7 @@ export async function postSignature(req: Request, res: Response) {
         const data = req.body.signature;
         const splitDataURL = data.split(',');
         const decodedData = Buffer.from(splitDataURL[1], 'base64');
-        const client_id = 'MMBG/';
+        const client_id = req.clientId.toUpperCase() + '/';
         const fileName = client_id + uuidv4() + '__signature.jpg';
         const { blockBlobClient } = await getBlockBlobClient(fileName);
         await blockBlobClient.upload(decodedData, decodedData.length);
