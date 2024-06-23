@@ -1,4 +1,4 @@
-import { TimeDetails, TimeDetailsFull } from "../../types/jobs";
+import { TimeDetails, TimeDetailsFull } from "../../types/maintenance/jobs";
 import { UserShortName } from "../../types/users";
 
 export default function timeDetailsArray(timeDetails: TimeDetails[], users: UserShortName[]) {

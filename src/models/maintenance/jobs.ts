@@ -1,7 +1,7 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2/typings/mysql';
-import { UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus, JobDetails } from '../types/jobs';
-import { UrgObj } from '../types/enums';
+import { UpdateNotes, UpdateAndComplete, PostJob, RecentJobs, InitialStatus, JobDetails } from '../../types/maintenance/jobs';
+import { UrgObj } from '../../types/enums';
 
 export async function getAllJobs(client: string, facilityId: number) {
     const db = await getConnection('client_' + client);

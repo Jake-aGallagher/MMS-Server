@@ -1,7 +1,7 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { AllLogs, Log, LogDates, LogForEdit, LogTemplate, LogTemplateId, LogTemplateTitle } from '../types/logs';
-import { Frequency } from '../types/jobs';
+import { AllLogs, Log, LogDates, LogForEdit, LogTemplate, LogTemplateId, LogTemplateTitle } from '../../types/maintenance/logs';
+import { Frequency } from '../../types/maintenance/jobs';
 
 // Templates
 

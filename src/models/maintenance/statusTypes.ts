@@ -1,6 +1,6 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { InitialStatusId, StatusTypes } from '../types/enums';
+import { InitialStatusId, StatusTypes } from '../../types/enums';
 
 export async function getAllStatusTypes(client: string) {
     const db = await getConnection('client_' + client);

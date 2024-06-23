@@ -1,6 +1,6 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { AssetById, Asset, AssetId, AssetRevenues } from '../types/assets';
+import { AssetById, Asset, AssetId, AssetRevenues } from '../../types/maintenance/assets';
 
 export async function getAssetTree(client: string, facilityId: number, rootId: number) {
     const db = await getConnection('client_' + client);

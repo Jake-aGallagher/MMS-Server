@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as StatusTypes from '../models/statusTypes';
+import * as StatusTypes from '../../models/maintenance/statusTypes';
 
 export async function getStatusTypes(req: Request, res: Response) {
     try {

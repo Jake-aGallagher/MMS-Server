@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import * as Facilities from '../models/facilities';
 import * as Users from '../models/users';
-import * as Assets from '../models/assets';
-import * as AssetRelations from '../models/assetRelations';
-import * as Jobs from '../models/jobs';
+import * as Assets from '../models/maintenance/assets';
+import * as AssetRelations from '../models/maintenance/assetRelations';
+import * as Jobs from '../models/maintenance/jobs';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import assignedUsersList from '../helpers/assignedIdsList';
 import facilityUsersList from '../helpers/facilities/facilityUsersList';
 import lastFacilityMapping from '../helpers/facilities/lastFacilityMapping';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
-import { RecentJobs } from '../types/jobs';
+import { RecentJobs } from '../types/maintenance/jobs';
 
 export async function getFacilitiesForUser(req: Request, res: Response) {
     try {

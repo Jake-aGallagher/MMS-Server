@@ -1,4 +1,4 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 
 export async function getAllJobTypes(client: string, ) {

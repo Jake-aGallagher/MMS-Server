@@ -1,6 +1,6 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket } from 'mysql2/typings/mysql';
-import { TimeDetails } from '../types/jobs';
+import { TimeDetails } from '../../types/maintenance/jobs';
 
 export async function getLoggedTimeDetails(client: string, model: string, modelId: number) {
     const db = await getConnection('client_' + client);

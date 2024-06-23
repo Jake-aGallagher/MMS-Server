@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
-import * as Assets from '../models/assets';
-import * as AssetRelations from '../models/assetRelations';
-import * as Jobs from '../models/jobs';
-import * as Pms from '../models/pms';
-import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
-import makeAssetTree from '../helpers/assets/makeAssetTree';
-import makeIdList from '../helpers/makeIdList';
-import { getCustomFieldData, updateFieldData } from '../models/customFields';
-import { RecentJobs } from '../types/jobs';
-import { RecentPms } from '../types/PMs';
+import * as Assets from '../../models/maintenance/assets';
+import * as AssetRelations from '../../models/maintenance/assetRelations';
+import * as Jobs from '../../models/maintenance/jobs';
+import * as Pms from '../../models/maintenance/pms';
+import * as DefaultGraphs from '../../helpers/graphs/defaultGraphs';
+import makeAssetTree from '../../helpers/assets/makeAssetTree';
+import makeIdList from '../../helpers/makeIdList';
+import { getCustomFieldData, updateFieldData } from '../../models/customFields';
+import { RecentJobs } from '../../types/maintenance/jobs';
+import { RecentPms } from '../../types/maintenance/PMs';
 
 export async function getAssetTree(req: Request, res: Response) {
     try {

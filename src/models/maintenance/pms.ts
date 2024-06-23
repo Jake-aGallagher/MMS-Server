@@ -1,7 +1,7 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { PMDetails, PMStatusNotesType, RecentPms, ScheduleDates, ScheduleId } from '../types/PMs';
-import { Frequency, InitialStatus } from '../types/jobs';
+import { PMDetails, PMStatusNotesType, RecentPms, ScheduleDates, ScheduleId } from '../../types/maintenance/PMs';
+import { Frequency, InitialStatus } from '../../types/maintenance/jobs';
 
 // --------------- PMs ---------------
 

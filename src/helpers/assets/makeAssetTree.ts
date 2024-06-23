@@ -1,4 +1,4 @@
-import { Asset } from "../../types/assets";
+import { Asset } from "../../types/maintenance/assets";
 
 export default function makeAssetTree(list: Asset[], parentAssetId = 0) {
     let map: { [key: number]: number } = {},

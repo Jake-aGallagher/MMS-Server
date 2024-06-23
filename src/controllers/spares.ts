@@ -4,15 +4,15 @@ import deliveryMaps from '../helpers/spares/deliveryMaps';
 import deliveryContents from '../helpers/spares/deliveryContents';
 import * as Spares from '../models/spares';
 import * as Suppliers from '../models/suppliers';
-import * as Jobs from '../models/jobs';
-import * as Pms from '../models/pms';
+import * as Jobs from '../models/maintenance/jobs';
+import * as Pms from '../models/maintenance/pms';
 import * as DefaultGraphs from '../helpers/graphs/defaultGraphs';
 import allSparesAddUsage from '../helpers/spares/allSparesAddUsage';
 import deliveryArrivedUpdateStock from '../helpers/spares/deliveryArrivedUpdateStock';
 import makeIdList from '../helpers/makeIdList';
 import { getCustomFieldData, updateFieldData } from '../models/customFields';
-import { RecentJobs } from '../types/jobs';
-import { RecentPms } from '../types/PMs';
+import { RecentJobs } from '../types/maintenance/jobs';
+import { RecentPms } from '../types/maintenance/PMs';
 
 export async function getallSpares(req: Request, res: Response) {
     try {

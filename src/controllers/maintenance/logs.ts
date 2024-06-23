@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as Logs from '../models/logs';
+import * as Logs from '../../models/maintenance/logs';
 import { ResultSetHeader } from 'mysql2';
-import { getCustomFieldData, updateFieldData } from '../models/customFields';
+import { getCustomFieldData, updateFieldData } from '../../models/customFields';
 
 // Templates
 

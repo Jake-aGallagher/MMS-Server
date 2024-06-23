@@ -1,20 +1,20 @@
 import { Request, Response } from 'express';
-import * as Jobs from '../models/jobs';
-import * as Facilities from '../models/facilities';
-import * as Users from '../models/users';
-import * as Spares from '../models/spares';
-import * as TypeEnums from '../models/taskTypes';
-import * as StatusEnums from '../models/statusTypes';
-import * as UrgencyEnums from '../models/urgencyTypes';
-import * as LoggedTime from '../models/loggedTime';
-import * as Downtime from '../models/downtime';
-import makeIdList from '../helpers/makeIdList';
-import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
-import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
-import { NewSpares } from '../types/spares';
-import calcTotalLoggedTime from '../helpers/jobs/calcTotalLoggedTime';
-import { getFileIds } from '../helpers/files/getFileIds';
-import { getCustomFieldData, updateFieldData } from '../models/customFields';
+import * as Jobs from '../../models/maintenance/jobs';
+import * as Facilities from '../../models/facilities';
+import * as Users from '../../models/users';
+import * as Spares from '../../models/spares';
+import * as TypeEnums from '../../models/maintenance/taskTypes';
+import * as StatusEnums from '../../models/maintenance/statusTypes';
+import * as UrgencyEnums from '../../models/maintenance/urgencyTypes';
+import * as LoggedTime from '../../models/maintenance/loggedTime';
+import * as Downtime from '../../models/maintenance/downtime';
+import makeIdList from '../../helpers/makeIdList';
+import timeDetailsArray from '../../helpers/jobs/timeDetailsArray';
+import { updateSparesForJob } from '../../helpers/jobs/updateSparesForJob';
+import { NewSpares } from '../../types/spares';
+import calcTotalLoggedTime from '../../helpers/jobs/calcTotalLoggedTime';
+import { getFileIds } from '../../helpers/files/getFileIds';
+import { getCustomFieldData, updateFieldData } from '../../models/customFields';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {

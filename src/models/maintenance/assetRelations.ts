@@ -1,6 +1,6 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { AssetRelationBasic } from '../types/assets';
+import { AssetRelationBasic } from '../../types/maintenance/assets';
 
 export async function insertChild(client: string, assetId: number, facilityId: number, assetParentId: number) {
     const db = await getConnection('client_' + client);

@@ -1,6 +1,6 @@
-import getConnection from '../database/database';
+import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
-import { PayloadBasics } from '../types/enums';
+import { PayloadBasics } from '../../types/enums';
 
 export async function getAllUrgencyTypes(client: string, ) {
     const db = await getConnection('client_' + client);

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as Assets from '../models/assets';
+import * as Assets from '../models/maintenance/assets';
 
 export async function getFacilityRevenue(req: Request, res: Response) {
     try {

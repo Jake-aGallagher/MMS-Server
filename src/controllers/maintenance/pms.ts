@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
-import * as PMs from '../models/pms';
-import * as Users from '../models/users';
-import * as Spares from '../models/spares';
-import * as LoggedTime from '../models/loggedTime';
-import * as StatusEnums from '../models/statusTypes';
-import * as Facilities from '../models/facilities';
-import * as TypeEnums from '../models/taskTypes';
-import makeIdList from '../helpers/makeIdList';
-import timeDetailsArray from '../helpers/jobs/timeDetailsArray';
-import calcTotalLoggedTime from '../helpers/jobs/calcTotalLoggedTime';
-import { NewSpares } from '../types/spares';
-import { updateSparesForJob } from '../helpers/jobs/updateSparesForJob';
-import { getCustomFieldData, updateFieldData } from '../models/customFields';
+import * as PMs from '../../models/maintenance/pms';
+import * as Users from '../../models/users';
+import * as Spares from '../../models/spares';
+import * as LoggedTime from '../../models/maintenance/loggedTime';
+import * as StatusEnums from '../../models/maintenance/statusTypes';
+import * as Facilities from '../../models/facilities';
+import * as TypeEnums from '../../models/maintenance/taskTypes';
+import makeIdList from '../../helpers/makeIdList';
+import timeDetailsArray from '../../helpers/jobs/timeDetailsArray';
+import calcTotalLoggedTime from '../../helpers/jobs/calcTotalLoggedTime';
+import { NewSpares } from '../../types/spares';
+import { updateSparesForJob } from '../../helpers/jobs/updateSparesForJob';
+import { getCustomFieldData, updateFieldData } from '../../models/customFields';
 
 // --------------- PMs ---------------
 
