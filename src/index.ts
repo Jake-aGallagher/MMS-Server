@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import routes from './routes/routes';
 import MaintenanceRoutes from './routes/maintenanceRoutes';
+import AuditRoutes from './routes/auditRoutes';
 const port = process.env.PORT || 3001;
 
 const app = express();
@@ -26,6 +27,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(routes);
 app.use('/maintenance', MaintenanceRoutes)
+app.use('/audit', AuditRoutes)
 
 app.listen(port, () => {
     console.log('server is running on port ' + port);
