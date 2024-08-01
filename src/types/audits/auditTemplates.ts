@@ -8,4 +8,5 @@ export interface AuditTemplateVersion extends RowDataPacket {
     id: number;
     title: string;
     version: number;
+    published: number;
 }

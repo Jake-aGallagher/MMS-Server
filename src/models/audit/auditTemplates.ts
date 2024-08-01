@@ -12,7 +12,6 @@ export async function getAuditTemplates(client: string) {
         FROM
             audit_templates;`
     );
-    console.log(data[0]);
     return data[0];
 }
 
@@ -41,7 +40,8 @@ export async function getAuditVersion(client: string, templateId: number, versio
         `SELECT
             id,
             title,
-            version
+            version,
+            published
         FROM
             audit_versions
         WHERE
@@ -91,10 +91,11 @@ export async function addAuditTemplate(client: string, title: string) {
             (
                 template_id,
                 version,
-                title
+                title,
+                published
             )
         VALUES
-            (?, 1, ?);`,
+            (?, 1, ?, 0);`,
         [auditTemplateId, title]
     );
 
@@ -130,10 +131,11 @@ export async function updateAuditTemplate(client: string, templateId: number, ti
             (
                 template_id,
                 version,
-                title
+                title,
+                published
             )
         VALUES
-            (?, ?, ?);`,
+            (?, ?, ?, 0);`,
         [templateId, version, title]
     );
 
