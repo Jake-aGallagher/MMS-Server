@@ -6,6 +6,9 @@ import makeIdList from '../../helpers/makeIdList';
 import { AuditQuestion } from '../../types/audits/auditQuestions';
 import { formatQuestionOptions } from '../../helpers/audits/formatQuestionOptions';
 import { formatTopicQuestions } from '../../helpers/audits/formatTopicQuestions';
+import { copyTopics } from '../../helpers/audits/copyTopics';
+import { copyQuestions } from '../../helpers/audits/copyQuestions';
+import { copyOptions } from '../../helpers/audits/copyOptions';
 
 export async function getAuditTemplates(req: Request, res: Response) {
     try {
@@ -53,10 +56,45 @@ export async function getAuditTemplate(req: Request, res: Response) {
     }
 }
 
+export async function getAuditTemplateLatestDetails(req: Request, res: Response) {
+    try {
+        const templateId = parseInt(req.params.templateid);
+        const template = await AuditTemplates.getLatestDetails(req.clientId, templateId);
+        res.status(200).json({ template });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
 export async function addAuditTemplate(req: Request, res: Response) {
     try {
         const response = await AuditTemplates.addAuditTemplate(req.clientId, req.body.title);
         if (response) {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function addAuditVersion(req: Request, res: Response) {
+    try {
+        const templateId = parseInt(req.body.id);
+        const template = await AuditTemplates.getLatestDetails(req.clientId, templateId);
+        const prevVersionId = template.latest_version;
+        const newVersionId = await AuditTemplates.addAuditVersion(req.clientId, req.body.title, templateId, prevVersionId + 1);
+        const topicIds = await copyTopics(req.clientId, prevVersionId, newVersionId);
+        if (topicIds.length > 0) {
+            const questionIds = await copyQuestions(req.clientId, topicIds);
+            if (questionIds.length > 0) {
+                await copyOptions(req.clientId, questionIds);
+            }
+        }
+        if (newVersionId) {
             res.status(201).json({ created: true });
         } else {
             res.status(500).json({ created: false });

@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from "mysql2";
 import getConnection from "../../database/database";
-import { AuditTemplateVersion, AuditVersion } from "../../types/audits/auditTemplates";
+import { AuditTemplateVersion, AuditVersion, LatestDetails } from "../../types/audits/auditTemplates";
 
 export async function getAuditTemplates(client: string) {
     const db = await getConnection('client_' + client);
@@ -19,11 +19,17 @@ export async function getTemplateVersions(client: string, templateId: number) {
     const db = await getConnection('client_' + client);
     const data = await db.execute(
         `SELECT
-            id,
-            title,
-            version
+            audit_versions.id,
+            audit_versions.title,
+            audit_versions.version,
+            audit_versions.published,
+            IF(audit_versions.version = audit_templates.latest_version, 1, 0) AS latest
         FROM
             audit_versions
+        INNER JOIN audit_templates ON
+        (
+            audit_versions.template_id = audit_templates.id
+        )
         WHERE
             template_id = ?
         ORDER BY
@@ -49,6 +55,21 @@ export async function getAuditVersion(client: string, templateId: number, versio
         AND
             version = ?;`,
         [templateId, version]
+    );
+    return data[0][0];
+}
+
+export async function getLatestDetails(client: string, templateId: number) {
+    const db = await getConnection('client_' + client);
+    const data: [LatestDetails[], FieldPacket[]] = await db.execute(
+        `SELECT
+            title,
+            latest_version
+        FROM
+            audit_templates
+        WHERE
+            id = ?;`,
+        [templateId]
     );
     return data[0][0];
 }
@@ -102,30 +123,11 @@ export async function addAuditTemplate(client: string, title: string) {
     return auditTemplateId;
 }
 
-export async function updateAuditTemplate(client: string, templateId: number, title: string) {
+export async function addAuditVersion(client: string, title: string, templateId: number, version: number) {
     const db = await getConnection('client_' + client);
-    await db.execute(
-        `UPDATE
-            audit_templates
-        SET
-            latest_version = latest_version + 1
-        WHERE
-            audit_template_id = ?;`,
-        [templateId]
-    );
+    await db.execute(`UPDATE audit_templates SET title = ?, latest_version = ? WHERE id = ?;`, [title, version, templateId]);
 
-    const data: [AuditVersion[], FieldPacket[]] = await db.execute(
-        `SELECT
-            latest_version
-        FROM
-            audit_templates
-        WHERE
-            id = ?;`,
-        [templateId]
-    );
-    const version = data[0][0].latest_version;
-
-    await db.execute(
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
         `INSERT INTO
             audit_versions
             (
@@ -139,4 +141,5 @@ export async function updateAuditTemplate(client: string, templateId: number, ti
         [templateId, version, title]
     );
 
+    return response[0].insertId;
 }
