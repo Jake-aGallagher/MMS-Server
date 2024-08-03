@@ -8,9 +8,11 @@ import * as auditQuestionsController from '../controllers/audit/auditQuestions';
 
 router.get('/templates', authorised, auditTemplatesController.getAuditTemplates);
 router.get('/template/:templateid/version/:version', authorised, auditTemplatesController.getAuditTemplate);
+router.get('/template/:templateid', authorised, auditTemplatesController.getAuditTemplateLatestDetails);
 router.post('/template', authorised, auditTemplatesController.addAuditTemplate);
 
 router.get('/versions/:id', authorised, auditTemplatesController.getTemplateVersions);
+router.put('/version', authorised, auditTemplatesController.addAuditVersion);
 
 router.get('/topic/:topicid', authorised, auditTopicsController.getAuditTopic);
 router.put('/topic', authorised, auditTopicsController.addEditAuditTopic);
