@@ -18,4 +18,5 @@ export interface AuditOption extends RowDataPacket {
     id: number;
     question_id: number;
     title: string;
+    sort_order: number;
 }

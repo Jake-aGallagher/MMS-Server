@@ -6,3 +6,7 @@ export interface AuditTopic extends RowDataPacket {
     version_id: number;
     sort_order: number;
 }
+
+export interface AuditTopicId extends RowDataPacket {
+    id: number;
+}
