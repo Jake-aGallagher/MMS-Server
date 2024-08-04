@@ -104,3 +104,20 @@ export async function addAuditVersion(req: Request, res: Response) {
         res.status(500).json({ message: 'Request failed' });
     }
 }
+
+export async function publishVersion(req: Request, res: Response) {
+    try {
+        const templateId = parseInt(req.body.templateId);
+        const version = parseInt(req.body.version);
+        const response = await AuditTemplates.publishVersion(req.clientId, templateId, version);
+        // todo logic for updating audit template assignments
+        if (response) {
+            res.status(201).json({ created: true });
+        } else {
+            res.status(500).json({ created: false });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}

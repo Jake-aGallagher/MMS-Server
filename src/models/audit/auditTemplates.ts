@@ -143,3 +143,20 @@ export async function addAuditVersion(client: string, title: string, templateId:
 
     return response[0].insertId;
 }
+
+export async function publishVersion(client: string, templateId: number, version: number) {
+    const db = await getConnection('client_' + client);
+    const response: [ResultSetHeader, FieldPacket[]] = await db.execute(
+        `UPDATE
+            audit_versions
+        SET
+            published = 1
+        WHERE
+            template_id = ?
+        AND
+            version = ?;`,
+        [templateId, version]
+    );
+
+    return response[0].affectedRows > 0;
+}

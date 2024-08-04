@@ -12,6 +12,7 @@ router.get('/template/:templateid', authorised, auditTemplatesController.getAudi
 router.post('/template', authorised, auditTemplatesController.addAuditTemplate);
 
 router.get('/versions/:id', authorised, auditTemplatesController.getTemplateVersions);
+router.post('/version/publish', authorised, auditTemplatesController.publishVersion);
 router.put('/version', authorised, auditTemplatesController.addAuditVersion);
 
 router.get('/topic/:topicid', authorised, auditTopicsController.getAuditTopic);
