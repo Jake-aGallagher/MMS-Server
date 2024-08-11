@@ -10,6 +10,12 @@ export interface UrgObj {
     duration: string;
 }
 
+export interface TaskType extends RowDataPacket {
+    id: number;
+    value: string;
+    list_priority: number;
+}
+
 export interface StatusTypes extends RowDataPacket {
     id: number;
     value: string;
