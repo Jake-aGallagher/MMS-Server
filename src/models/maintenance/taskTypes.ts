@@ -1,9 +1,10 @@
 import getConnection from '../../database/database';
 import { FieldPacket, ResultSetHeader } from 'mysql2';
+import { TaskType } from '../../types/enums';
 
 export async function getAllJobTypes(client: string, ) {
     const db = await getConnection('client_' + client);
-    const data = await db.execute(
+    const data: [TaskType[], FieldPacket[]] = await db.execute(
         `SELECT
             *
         FROM 
