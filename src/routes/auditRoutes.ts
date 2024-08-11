@@ -27,6 +27,6 @@ router.get('/option/:optionid', authorised, auditQuestionsController.getAuditOpt
 router.put('/option', authorised, auditQuestionsController.addEditAuditOption);
 router.delete('/option/:id', authorised, auditQuestionsController.deleteAuditOption);
 
-
+router.get('/assignments/:assignmenttype', authorised, auditTemplatesController.getAssignments);
 
 export default router;

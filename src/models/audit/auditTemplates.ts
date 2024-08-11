@@ -1,6 +1,6 @@
-import { FieldPacket, ResultSetHeader } from "mysql2";
-import getConnection from "../../database/database";
-import { AuditTemplateVersion, AuditVersion, LatestDetails } from "../../types/audits/auditTemplates";
+import { FieldPacket, ResultSetHeader } from 'mysql2';
+import getConnection from '../../database/database';
+import { AuditAssignments, AuditTemplateVersion, AuditVersion, LatestDetails } from '../../types/audits/auditTemplates';
 
 export async function getAuditTemplates(client: string) {
     const db = await getConnection('client_' + client);
@@ -97,15 +97,16 @@ export async function addAuditTemplate(client: string, title: string) {
             audit_templates
             (
                 title,
-                latest_version
+                latest_version,
+                latest_published_version
             )
         VALUES
-            (?, 1);`,
+            (?, 1, 0);`,
         [title]
     );
 
     const auditTemplateId = response[0].insertId;
-    
+
     await db.execute(
         `INSERT INTO
             audit_versions
@@ -158,5 +159,42 @@ export async function publishVersion(client: string, templateId: number, version
         [templateId, version]
     );
 
+    await db.execute(
+        `UPDATE
+            audit_templates
+        SET
+            latest_published_version = ?
+        WHERE
+            template_id = ?;`,
+        [version, templateId]
+    );
+
     return response[0].affectedRows > 0;
+}
+
+export async function getAssignments(client: string, assignmentType: string) {
+    const db = await getConnection('client_' + client);
+    const data: [AuditAssignments[], FieldPacket[]] = await db.execute(
+        `SELECT
+            audit_assignments.id AS assignment_id,
+            audit_assignments.event_subtype,
+            audit_versions.id AS version_id,
+            audit_versions.title
+        FROM
+            audit_assignments
+        INNER JOIN audit_templates ON
+        (
+            audit_assignments.template_id = audit_templates.id
+        )
+        INNER JOIN audit_versions ON
+        (
+            audit_templates.id = audit_versions.template_id
+            AND
+            audit_templates.latest_published_version = audit_versions.version
+        )
+        WHERE
+            audit_assignments.event_type = ?;`,
+        [assignmentType]
+    );
+    return data[0];
 }

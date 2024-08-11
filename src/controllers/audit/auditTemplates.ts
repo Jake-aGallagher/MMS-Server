@@ -9,6 +9,7 @@ import { formatTopicQuestions } from '../../helpers/audits/formatTopicQuestions'
 import { copyTopics } from '../../helpers/audits/copyTopics';
 import { copyQuestions } from '../../helpers/audits/copyQuestions';
 import { copyOptions } from '../../helpers/audits/copyOptions';
+import { formatSubtypes } from '../../helpers/audits/formatSubtypes';
 
 export async function getAuditTemplates(req: Request, res: Response) {
     try {
@@ -116,6 +117,18 @@ export async function publishVersion(req: Request, res: Response) {
         } else {
             res.status(500).json({ created: false });
         }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getAssignments(req: Request, res: Response) {
+    try {
+        const assignmentType = req.params.assignmenttype;
+        const assignments = await AuditTemplates.getAssignments(req.clientId, assignmentType);
+        const assignmentsWithSubtypes = await formatSubtypes(req.clientId, assignmentType, assignments);
+        res.status(200).json({ assignments: assignmentsWithSubtypes });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
