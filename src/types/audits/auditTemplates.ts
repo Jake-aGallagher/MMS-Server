@@ -21,3 +21,8 @@ export interface AuditAssignments extends RowDataPacket {
     event_subtype: number;
     title: string;
 }
+
+export interface CheckForAssignment extends RowDataPacket {
+    template_id: number;
+    version_id: number;
+}

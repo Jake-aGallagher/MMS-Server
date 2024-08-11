@@ -1,6 +1,6 @@
 import { FieldPacket, ResultSetHeader } from 'mysql2';
 import getConnection from '../../database/database';
-import { AuditAssignments, AuditTemplateVersion, AuditVersion, LatestDetails } from '../../types/audits/auditTemplates';
+import { AuditAssignments, AuditTemplateVersion, AuditVersion, CheckForAssignment, LatestDetails } from '../../types/audits/auditTemplates';
 
 export async function getAuditTemplates(client: string) {
     const db = await getConnection('client_' + client);
@@ -197,4 +197,25 @@ export async function getAssignments(client: string, assignmentType: string) {
         [assignmentType]
     );
     return data[0];
+}
+
+export async function getAuditAssignment(client: string, eventType: string, eventSubtype: number) {
+    const db = await getConnection('client_' + client);
+    const data: [CheckForAssignment[], FieldPacket[]] = await db.execute(
+        `SELECT
+            audit_assignments.template_id,
+            audit_templates.latest_published_version AS version_id
+        FROM
+            audit_assignments
+        INNER JOIN audit_templates ON
+        (
+            audit_templates.id = audit_assignments.template_id
+        )
+        WHERE
+            audit_assignments.event_type = ?
+        AND
+            audit_assignments.event_subtype = ?;`,
+        [eventType, eventSubtype]
+    );
+    return data[0][0];
 }

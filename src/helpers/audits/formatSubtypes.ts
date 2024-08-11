@@ -3,10 +3,10 @@ import { getAllJobTypes } from "../../models/maintenance/taskTypes";
 export const formatSubtypes = async (client: string, type: string, assignments: { assignment_id: number; version_id: number; title: string; event_subtype: number }[]) => {
     let subtypes: { id: number; title: string }[] = [];
     switch (type) {
-        case 'jobs':
+        case 'job':
             subtypes = await jobTypes(client);
             break;
-        case 'suppliers':
+        case 'supplier':
             subtypes = [
                 { id: 1, title: 'Pre-Signup Verification' },
                 { id: 2, title: 'Performance Check' },

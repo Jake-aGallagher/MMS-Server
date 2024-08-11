@@ -15,6 +15,8 @@ import { NewSpares } from '../../types/spares';
 import calcTotalLoggedTime from '../../helpers/jobs/calcTotalLoggedTime';
 import { getFileIds } from '../../helpers/files/getFileIds';
 import { getCustomFieldData, updateFieldData } from '../../models/customFields';
+import { getAuditAssignment } from '../../models/audit/auditTemplates';
+import { addAudit } from '../../models/audit/audits';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {
@@ -92,6 +94,10 @@ export async function postJob(req: Request, res: Response) {
         const urgency = await UrgencyEnums.getUrgencyPayload(req.clientId, urgencyReq);
         const response = await Jobs.postJob(req.clientId, req.body, urgency);
         await updateFieldData(req.clientId, response.insertId, req.body.fieldData);
+        const audit_template = await getAuditAssignment(req.clientId, 'job', req.body.type);
+        if (audit_template.version_id) {
+            await addAudit(req.clientId, 'job', response.insertId, audit_template.version_id);
+        }
         if (response.affectedRows == 1) {
             res.status(201).json({ created: true, jobId: response.insertId });
         } else {
