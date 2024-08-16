@@ -16,7 +16,9 @@ export async function getAuditQuestions(client: string, topicIds: number[]) {
     WHERE
         topic_id IN (?)
     AND
-        deleted = 0;`,
+        deleted = 0
+    ORDER BY
+        sort_order;`,
         [topicIds]
     );
     const data: [AuditQuestion[], FieldPacket[]] = await db.execute(sql);
@@ -55,7 +57,9 @@ export async function getQuestionOptions(client: string, questionIds: number[]) 
     WHERE
         question_id IN (?)
     AND
-        deleted = 0;`,
+        deleted = 0
+    ORDER BY
+        sort_order;`,
         [questionIds]
     );
     const data: [AuditQuestionOption[], FieldPacket[]] = await db.execute(sql);
