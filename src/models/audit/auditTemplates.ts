@@ -165,7 +165,7 @@ export async function publishVersion(client: string, templateId: number, version
         SET
             latest_published_version = ?
         WHERE
-            template_id = ?;`,
+            id = ?;`,
         [version, templateId]
     );
 
@@ -204,12 +204,18 @@ export async function getAuditAssignment(client: string, eventType: string, even
     const data: [CheckForAssignment[], FieldPacket[]] = await db.execute(
         `SELECT
             audit_assignments.template_id,
-            audit_templates.latest_published_version AS version_id
+            audit_versions.id AS version_id
         FROM
             audit_assignments
         INNER JOIN audit_templates ON
         (
             audit_templates.id = audit_assignments.template_id
+        )
+        INNER JOIN audit_versions ON
+        (
+            audit_versions.template_id = audit_templates.id
+            AND
+            audit_versions.version = audit_templates.latest_published_version
         )
         WHERE
             audit_assignments.event_type = ?
