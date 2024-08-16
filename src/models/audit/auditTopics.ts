@@ -14,7 +14,9 @@ export async function getTopicsForAudit(client: string, templateVersionId: numbe
         WHERE
             version_id = ?
         AND
-            deleted = 0;`,
+            deleted = 0
+        ORDER BY
+            sort_order;`,
         [templateVersionId]
     );
     return data[0];
