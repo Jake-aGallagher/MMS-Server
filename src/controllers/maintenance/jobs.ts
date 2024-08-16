@@ -16,7 +16,9 @@ import calcTotalLoggedTime from '../../helpers/jobs/calcTotalLoggedTime';
 import { getFileIds } from '../../helpers/files/getFileIds';
 import { getCustomFieldData, updateFieldData } from '../../models/customFields';
 import { getAuditAssignment } from '../../models/audit/auditTemplates';
-import { addAudit } from '../../models/audit/audits';
+import { addAudit, getAuditData } from '../../models/audit/audits';
+import { buildAuditView } from '../../helpers/audits/buildAuditView';
+import { AuditTopic } from '../../types/audits/auditTopics';
 
 export async function getAllJobs(req: Request, res: Response) {
     try {
@@ -33,6 +35,14 @@ export async function getJobDetails(req: Request, res: Response) {
     try {
         const id = parseInt(req.params.jobid);
         const jobDetails = await Jobs.getJobDetails(req.clientId, id);
+        const auditData = await getAuditData(req.clientId, 'job', id);
+        let audit: AuditTopic[] = [];
+        let auditFiles: { [key: string]: { id: string; encodedId: string; name: string }[] } = {};
+        if (auditData.id > 0 && auditData.version_id > 0) {
+            const formattedAudit = await buildAuditView(req.clientId, auditData.version_id, auditData.id);
+            audit = formattedAudit.topics;
+            auditFiles = formattedAudit.fileData;
+        }
         const customFields = await getCustomFieldData(req.clientId, 'job', id, jobDetails[0].type_id);
         const files = await getFileIds(req.clientId, 'job', id);
         const usedSpares = await Spares.getUsedSpares(req.clientId, 'job', id, 'used');
@@ -43,9 +53,9 @@ export async function getJobDetails(req: Request, res: Response) {
             const userIds = makeIdList(timeDetails, 'id');
             const users = await Users.getUsersByIds(req.clientId, userIds);
             const timeDetailsFull = timeDetailsArray(timeDetails, users);
-            res.status(200).json({ jobDetails, customFields, files, timeDetails: timeDetailsFull, usedSpares, missingSpares, downtime });
+            res.status(200).json({ jobDetails, audit, auditFiles, customFields, files, timeDetails: timeDetailsFull, usedSpares, missingSpares, downtime });
         } else {
-            res.status(200).json({ jobDetails, customFields, files, usedSpares, missingSpares, downtime });
+            res.status(200).json({ jobDetails, audit, auditFiles, customFields, files, usedSpares, missingSpares, downtime });
         }
     } catch (err) {
         console.log(err);
