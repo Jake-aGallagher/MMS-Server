@@ -10,6 +10,9 @@ import { copyTopics } from '../../helpers/audits/copyTopics';
 import { copyQuestions } from '../../helpers/audits/copyQuestions';
 import { copyOptions } from '../../helpers/audits/copyOptions';
 import { formatSubtypes } from '../../helpers/audits/formatSubtypes';
+import { AuditTopic } from '../../types/audits/auditTopics';
+import { buildAuditView } from '../../helpers/audits/buildAuditView';
+import { getAuditData } from '../../models/audit/audits';
 
 export async function getAuditTemplates(req: Request, res: Response) {
     try {
@@ -26,6 +29,23 @@ export async function getTemplateVersions(req: Request, res: Response) {
         const templateId = parseInt(req.params.id);
         const templateVersions = await AuditTemplates.getTemplateVersions(req.clientId, templateId);
         res.status(200).json({ templateVersions });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Request failed' });
+    }
+}
+
+export async function getAuditForWizard(req: Request, res: Response) {
+    try {
+        const eventType = req.params.eventtype;
+        const eventId = parseInt(req.params.eventid);
+        const auditData = await getAuditData(req.clientId, eventType, eventId);
+        let audit: AuditTopic[] = [];
+        if (auditData.id > 0 && auditData.version_id > 0) {
+            const formattedAudit = await buildAuditView(req.clientId, auditData.version_id, auditData.id);
+            audit = formattedAudit.topics;
+        }
+        res.status(200).json({ audit });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: 'Request failed' });
@@ -86,8 +106,9 @@ export async function addAuditVersion(req: Request, res: Response) {
     try {
         const templateId = parseInt(req.body.id);
         const template = await AuditTemplates.getLatestDetails(req.clientId, templateId);
-        const prevVersionId = template.latest_version;
-        const newVersionId = await AuditTemplates.addAuditVersion(req.clientId, req.body.title, templateId, prevVersionId + 1);
+        const prevVersionNumber = template.latest_version;
+        const prevVersionId = await AuditTemplates.getVersionId(req.clientId, templateId, prevVersionNumber);
+        const newVersionId = await AuditTemplates.addAuditVersion(req.clientId, req.body.title, templateId, prevVersionNumber + 1);
         const topicIds = await copyTopics(req.clientId, prevVersionId, newVersionId);
         if (topicIds.length > 0) {
             const questionIds = await copyQuestions(req.clientId, topicIds);
