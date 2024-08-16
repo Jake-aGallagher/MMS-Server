@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 import { authorised } from '../middleware/authentication';
 
+import * as auditsController from '../controllers/audit/audits';
 import * as auditTemplatesController from '../controllers/audit/auditTemplates';
 import * as auditTopicsController from '../controllers/audit/auditTopics';
 import * as auditQuestionsController from '../controllers/audit/auditQuestions';
@@ -28,5 +29,8 @@ router.put('/option', authorised, auditQuestionsController.addEditAuditOption);
 router.delete('/option/:id', authorised, auditQuestionsController.deleteAuditOption);
 
 router.get('/assignments/:assignmenttype', authorised, auditTemplatesController.getAssignments);
+
+router.get('/wizard/:eventtype/:eventid', authorised, auditsController.getAudit);
+router.put('/wizard', authorised, auditsController.editAudit);
 
 export default router;
