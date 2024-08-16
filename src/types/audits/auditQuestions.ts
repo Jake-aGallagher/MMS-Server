@@ -6,6 +6,7 @@ export interface AuditQuestion extends RowDataPacket {
     topic_id: number;
     question_type: string;
     sort_order: number;
+    options?: AuditQuestionOption[];
 }
 
 export interface AuditQuestionOption extends RowDataPacket {
